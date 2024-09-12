@@ -1,6 +1,5 @@
 package DataManager.controller;
 
-import DataManager.dto.DeviceDataMetadataDTO;
 import DataManager.dto.UnregisteredDeviceDTO;
 import DataManager.dto.asset.*;
 import DataManager.dto.auth.UserDTO;
@@ -12,7 +11,6 @@ import DataManager.repository.AssetRepository;
 import DataManager.repository.InfluxRepository;
 import DataManager.repository.UserRepository;
 import DataManager.service.DataManagerService;
-import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -121,6 +119,19 @@ public class DataManagerController {
         return ResponseEntity.ok(id);
     }
 
+    @PostMapping(value = "/registerDevice")
+    public ResponseEntity<Void> registerDevice(@RequestParam String assetId, @RequestBody AddDeviceDTO addDeviceDTO){
+        log.info("RegisterDevice endpoint called");
+        assetRepository.registerDevice(assetId, addDeviceDTO.getPlace(), addDeviceDTO.getType(), addDeviceDTO.getStatus(), LocalDate.now().toString(),
+                addDeviceDTO.getLevel1(), addDeviceDTO.getLevel2(), addDeviceDTO.getLevel3());
+        assetRepository.setPendingSend(assetId, false);
+        assetRepository.setPendingData(assetId, false);
+        assetRepository.setPendingRetrieve(assetId, false);
+        assetRepository.setCurrentModel(assetId, null);
+        assetRepository.setPendingModel(assetId, null);
+        return ResponseEntity.ok().build();
+    }
+
     /*
 
     @PostMapping(value = "/addMonitoringTarget")
@@ -132,13 +143,13 @@ public class DataManagerController {
      */
 
     @PostMapping(value = "/addAsset")
-    public ResponseEntity<Void> addAsset(@RequestParam String name, @RequestParam String label) {
+    public ResponseEntity<Void> addAsset(@RequestBody AddAssetDTO addAssetDTO) {
         log.info("InsertAsset endpoint called");
-        if (label.equals("Device")) {
+        if (addAssetDTO.getLabel().equals("Device")) {
             return ResponseEntity.badRequest().build();
         }
-        String query = "CREATE (d:"+label+" {name:$name}) SET d.isRegistered = true";
-        assetRepository.addAsset(query, name);
+        String query = "CREATE (d:"+addAssetDTO.getLabel()+" {name:$name}) SET d.isRegistered = true, d.level1 = $level1, d.level2 = $level2, d.level3 = $level3";
+        assetRepository.addAsset(query, addAssetDTO.getName(), addAssetDTO.getLevel1(), addAssetDTO.getLevel2(), addAssetDTO.getLevel3());
         return ResponseEntity.ok().build();
     }
 
@@ -182,17 +193,6 @@ public class DataManagerController {
         return ResponseEntity.ok(assetRepository.getAllRegisteredDevices());
     }
 
-    @PostMapping(value = "/registerDevice")
-    public ResponseEntity<Void> registerDevice(@RequestParam String assetId, @RequestBody DeviceDTO deviceDTO){
-        log.info("RegisterDevice endpoint called");
-        assetRepository.registerDevice(assetId, deviceDTO.getPlace(), deviceDTO.getType(), deviceDTO.getStatus(), LocalDate.now().toString());
-        assetRepository.setPendingSend(assetId, false);
-        assetRepository.setPendingData(assetId, false);
-        assetRepository.setPendingRetrieve(assetId, false);
-        assetRepository.setCurrentModel(assetId, null);
-        assetRepository.setPendingModel(assetId, null);
-        return ResponseEntity.ok().build();
-    }
 
     @PostMapping(value = "/addAttributes")
     public ResponseEntity<Void> addAttributes(@RequestParam String assetId, @RequestBody AttributesDTO attributesDTO){
@@ -351,6 +351,26 @@ public class DataManagerController {
         }
 
     }
+
+
+    @GetMapping(value = "/getLevel1")
+    public ResponseEntity<List<String>> getLevel1(){
+        log.info("RetrieveLevel1 endpoint called");
+        return ResponseEntity.ok(assetRepository.retrieveLevel1());
+    }
+
+    @GetMapping(value = "/getLevel2")
+    public ResponseEntity<List<String>> getLevel2(@RequestParam String level1){
+        log.info("RetrieveLevel2 endpoint called");
+        return ResponseEntity.ok(assetRepository.retrieveLevel2(level1));
+    }
+
+    @GetMapping(value = "/getLevel3")
+    public ResponseEntity<List<String>> getLevel3(@RequestParam String level1, @RequestParam String level2){
+        log.info("RetrieveLevel3 endpoint called");
+        return ResponseEntity.ok(assetRepository.retrieveLevel3(level1, level2));
+    }
+
 
 
     //------- USER MANAGEMENT -------//

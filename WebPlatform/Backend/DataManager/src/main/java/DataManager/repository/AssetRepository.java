@@ -22,8 +22,8 @@ public interface AssetRepository extends Neo4jRepository<Device, String>{
 
      */
 
-    @Query("CALL apoc.cypher.doIt($query, {name: $name})")
-    void addAsset(@Param("query") String query, @Param("name") String name);
+    @Query("CALL apoc.cypher.doIt($query, {name: $name, level1: $level1, level2: $level2, level3: $level3})")
+    void addAsset(@Param("query") String query, @Param("name") String name, @Param("level1") String level1, @Param("level2") String level2, @Param("level3") String level3);
 
     @Query("MATCH (d) WHERE elementId(d) = $id DELETE d")
     void deleteAsset(@Param("id") String id);
@@ -44,8 +44,8 @@ public interface AssetRepository extends Neo4jRepository<Device, String>{
     @Query("MATCH (d) WHERE elementId(d) = $id RETURN labels(d)[0] as labels")
     String getNodeLabelById(String id);
 
-    @Query("MATCH (d:Device) WHERE elementId(d) = $id SET d.isRegistered = true, d.place = $place, d.type = $type, d.status = $status, d.registrationDate = $registrationDate")
-    void registerDevice(String id, String place, String type, String status, String registrationDate);
+    @Query("MATCH (d:Device) WHERE elementId(d) = $id SET d.isRegistered = true, d.place = $place, d.type = $type, d.status = $status, d.registrationDate = $registrationDate, d.level1 = $level1, d.level2 = $level2, d.level3 = $level3")
+    void registerDevice(String id, String place, String type, String status, String registrationDate, String level1, String level2, String level3);
 
     /*
     @Query("MATCH (d:Device) WHERE elementId(d) = $id SET d += $value")
@@ -104,4 +104,14 @@ public interface AssetRepository extends Neo4jRepository<Device, String>{
 
      @Query("MATCH (d:Device) WHERE elementId(d) = $assetId RETURN apoc.convert.toJson({data: d.pendingData, retrieve: d.pendingRetrieve, send: d.pendingSend})")
      String getDevicePendings(@Param("assetId") String assetId);
+
+
+     @Query("MATCH (n) RETURN DISTINCT n.level1")
+     List<String> retrieveLevel1();
+
+     @Query("MATCH (n) WHERE n.level1 = $level1 RETURN DISTINCT n.level2")
+     List<String> retrieveLevel2(@Param("level1") String level1);
+
+     @Query("MATCH (n) WHERE n.level1 = $level1 AND n.level2 = $level2 RETURN DISTINCT n.level3")
+     List<String> retrieveLevel3(@Param("level1") String level1, @Param("level2") String level2);
 }

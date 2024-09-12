@@ -4,9 +4,8 @@ import ApplicationGateway.dto.AsyncControllerDTO.DeviceDataDTO;
 import ApplicationGateway.dto.SecurityResponse;
 import ApplicationGateway.dto.assetManDTO.*;
 import ApplicationGateway.dto.auth_AuthDTO.*;
-import ApplicationGateway.dto.dataManagerDTO.UserInfoDTO;
+import ApplicationGateway.dto.dataManagerDTO.AddAssetDTO;
 import ApplicationGateway.dto.frontend.CompactUserDTO;
-import ApplicationGateway.dto.frontend.DeviceDataMetadataDTO;
 import ApplicationGateway.dto.frontend.ModelDTO;
 import ApplicationGateway.dto.frontend.UserDTO;
 import ApplicationGateway.service.ApplicationGatewayService;
@@ -101,8 +100,7 @@ public class ApplicationGatewayController {
     @PostMapping(value = "/addAsset")
     public ResponseEntity<Void> addAsset(
             @CookieValue (value = "token", defaultValue = "") String accessToken,
-            @RequestParam String name,
-            @RequestParam String label){
+            @RequestBody AddAssetDTO addAssetDTO){
         log.info("InsertAsset endpoint called");
         ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize( new AuthorizationRequest(accessToken) );
         if( !authorization.getBody().getIsAuthorized()) {
@@ -110,7 +108,7 @@ public class ApplicationGatewayController {
             return ResponseEntity.status(401).build();
         }
         log.info("User authorized");
-        return applicationGatewayService.addAsset(name, label);
+        return applicationGatewayService.addAsset(addAssetDTO);
     }
 
     @PostMapping(value = "/deleteAsset")
@@ -200,7 +198,7 @@ public class ApplicationGatewayController {
     public ResponseEntity<Void> registerDevice(
             @CookieValue (value = "token", defaultValue = "") String accessToken,
             @RequestParam String id,
-            @RequestBody DeviceDTO deviceDTO){
+            @RequestBody AddDeviceDTO addDeviceDTO){
         log.info("RegisterDevice endpoint called");
         ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize( new AuthorizationRequest(accessToken) );
         if( !authorization.getBody().getIsAuthorized()) {
@@ -208,7 +206,7 @@ public class ApplicationGatewayController {
             return ResponseEntity.status(401).build();
         }
         log.info("User authorized");
-        return applicationGatewayService.registerDevice(id,deviceDTO);
+        return applicationGatewayService.registerDevice(id, addDeviceDTO);
     }
 
     @PostMapping(value = "/addRelationships")
@@ -402,6 +400,47 @@ public class ApplicationGatewayController {
         log.info("User authorized");
         return applicationGatewayService.downloadDeviceData(deviceId);
     }
+
+
+    @GetMapping(value = "/getLevel1")
+    public ResponseEntity<List<String>> getLevel1(
+            @CookieValue(value = "token", defaultValue = "") String accessToken){
+        log.info("GetLevel1 endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize(new AuthorizationRequest(accessToken));
+        if (!authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(applicationGatewayService.getLevel1());
+
+    }
+
+    @GetMapping(value = "/getLevel2")
+    public ResponseEntity<List<String>> getLevel2(
+            @CookieValue(value = "token", defaultValue = "") String accessToken,
+            @RequestParam String level1){
+        log.info("GetLevel2 endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize(new AuthorizationRequest(accessToken));
+        if (!authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(applicationGatewayService.getLevel2(level1));
+    }
+
+    @GetMapping(value = "/getLevel3")
+    public ResponseEntity<List<String>> getLevel3(
+            @CookieValue(value = "token", defaultValue = "") String accessToken,
+            @RequestParam String level1, @RequestParam String level2){
+        log.info("GetLevel3 endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize(new AuthorizationRequest(accessToken));
+        if (!authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(applicationGatewayService.getLevel3(level1, level2));
+    }
+
 
 
 

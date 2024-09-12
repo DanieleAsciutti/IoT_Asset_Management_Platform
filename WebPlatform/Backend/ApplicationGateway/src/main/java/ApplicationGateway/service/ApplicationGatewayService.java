@@ -4,6 +4,7 @@ import ApplicationGateway.dto.AsyncControllerDTO.AsyncModelDTO;
 import ApplicationGateway.dto.AsyncControllerDTO.DeviceDataDTO;
 import ApplicationGateway.dto.assetManDTO.*;
 import ApplicationGateway.dto.auth_AuthDTO.*;
+import ApplicationGateway.dto.dataManagerDTO.AddAssetDTO;
 import ApplicationGateway.dto.dataManagerDTO.UserInfoDTO;
 import ApplicationGateway.dto.frontend.CompactUserDTO;
 import ApplicationGateway.dto.frontend.ModelDTO;
@@ -17,12 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -133,13 +131,14 @@ public class ApplicationGatewayService {
                 .block();
     }
 
-    public ResponseEntity<Void> addAsset(String name, String label)
+    public ResponseEntity<Void> addAsset(AddAssetDTO addAssetDTO)
     {
-        String url = String.format("http://%s:%d/addAsset?",assetManagerAddress,assetManagerPort)+"name="+name+"&label="+label;
+        String url = String.format("http://%s:%d/addAsset",dataManagerAddress, dataManagerPort);
         return webClient
                 .post()
                 .uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(addAssetDTO)
                 .retrieve()
                 .toEntity(Void.class)
                 .block();
@@ -221,13 +220,13 @@ public class ApplicationGatewayService {
         else return Collections.emptyList();
     }
 
-    public ResponseEntity<Void> registerDevice(String id, DeviceDTO deviceDTO)
+    public ResponseEntity<Void> registerDevice(String id, AddDeviceDTO addDeviceDTO)
     {
-        String url = String.format("http://%s:%d/registerDevice?",assetManagerAddress,assetManagerPort)+"id="+id;
+        String url = String.format("http://%s:%d/registerDevice?",dataManagerAddress, dataManagerPort)+"assetId="+id;
         return webClient
                 .post()
                 .uri(url).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .bodyValue(deviceDTO)
+                .bodyValue(addDeviceDTO)
                 .retrieve()
                 .toEntity(Void.class)
                 .block();
@@ -494,6 +493,43 @@ public class ApplicationGatewayService {
                 .header("X-Accel-Buffering", "no")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
+    }
+
+    public  List<String> getLevel1(){
+        String url = String.format("http://%s:%d/getLevel1", dataManagerAddress, dataManagerPort);
+        ResponseEntity<List<String>> response = webClient.get()
+                .uri(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntityList(String.class)
+                .block();
+
+        if (Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() && response.getBody() != null) return response.getBody();
+        else return Collections.emptyList();
+    }
+
+    public List<String> getLevel2(String level1){
+        String url = String.format("http://%s:%d/getLevel2?", dataManagerAddress, dataManagerPort) + "level1=" + level1;
+        ResponseEntity<List<String>> response = webClient.get()
+                .uri(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntityList(String.class)
+                .block();
+        if (Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() && response.getBody() != null) return response.getBody();
+        else return Collections.emptyList();
+    }
+
+    public List<String> getLevel3(String level1, String level2){
+        String url = String.format("http://%s:%d/getLevel3?", dataManagerAddress, dataManagerPort) + "level1=" + level1 + "&level2=" + level2;
+        ResponseEntity<List<String>> response = webClient.get()
+                .uri(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntityList(String.class)
+                .block();
+        if (Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() && response.getBody() != null) return response.getBody();
+        else return Collections.emptyList();
     }
 
 }

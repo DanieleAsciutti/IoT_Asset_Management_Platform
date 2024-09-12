@@ -8,12 +8,18 @@ import lombok.*;
 @Builder
 @ToString
 @Getter
-public class DeviceDTO {
+public class AddDeviceDTO {
 
     private String place;
 
     private String type;
 
     private String status;
+
+    private String level1;
+
+    private String level2;
+
+    private String level3;
 
 }

@@ -193,6 +193,7 @@ public class MiddlewareController {
     public ResponseEntity<Void> ser_RetrieveData(@RequestParam String deviceId){
         log.info("Retrieve data called");
         String name = middlewareService.findNameById(deviceId);
+        //System.out.println("name riga 196 di MiddlewareController: " + name);
         middlewareService.addPendingRequest(new Request(name, Response.RETRIEVE_DATA));
         return ResponseEntity.ok().build();
     }

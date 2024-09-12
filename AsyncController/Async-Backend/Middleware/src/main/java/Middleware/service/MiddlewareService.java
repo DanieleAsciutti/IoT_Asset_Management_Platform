@@ -163,6 +163,7 @@ public class MiddlewareService {
 
     public String checkPendingRequests(String deviceName){
         for(Request request : pendingRequests){
+            //System.out.println(request.getDeviceName() + " " + request.getResponse());
             if(request.getDeviceName().equals(deviceName)){
                 return request.getResponse().toString();
             }
@@ -195,6 +196,7 @@ public class MiddlewareService {
     }
 
     public void addPendingRequest(Request request){
+        //System.out.println("Adding request"); //TODO remove
         pendingRequests.add(request);
     }
 
