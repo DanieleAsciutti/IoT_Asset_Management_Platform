@@ -267,6 +267,16 @@ public class ApplicationGatewayService {
                 .block();
     }
 
+    public ResponseEntity<String> getFilteredNetwork(String l1, String l2, String l3){
+        String url = String.format("http://%s:%d/getFilteredNetwork", dataManagerAddress, dataManagerPort) + "?l1=" + l1 + "&l2=" + l2 + "&l3=" + l3;
+        return webClient.get()  // Using GET to fetch data
+                .uri(url)
+                .accept(MediaType.APPLICATION_JSON)  // Setting Accept header as application/json
+                .retrieve()
+                .toEntity(String.class)
+                .block();
+    }
+
     public ResponseEntity<Void> addUser(UserDTO userDTO){
         String url = String.format("http://%s:%d/addUser", dataManagerAddress, dataManagerPort);
         return webClient.post()

@@ -64,7 +64,10 @@ public interface AssetRepository extends Neo4jRepository<Device, String>{
 
     //"MATCH (d:"+assetLabel+"), (t:"+targetLabel+") WHERE elementId(d) = $deviceId AND elementId(t) = $targetId CREATE (d)-[r:"+relationship+"]->(t)"
      @Query("CALL apoc.cypher.doIt($query, {deviceId: $deviceId, targetId: $targetId})")
-    void addRelationship(@Param("deviceId") String deviceId, @Param("targetId") String targetId, @Param("query") String query);
+     void addRelationship(@Param("deviceId") String deviceId, @Param("targetId") String targetId, @Param("query") String query);
+
+     @Query("MATCH (d) WHERE elementId(d) = $id RETURN apoc.convert.toJson({l1: d.level1, l2: d.level2, l3: d.level3})")
+     String getLevels(@Param("id") String id);
 
      @Query("MATCH (d)-[r]-(t) WHERE elementId(r) = $relationshipId DELETE r")
      void removeRelationship(String relationshipId);
@@ -77,6 +80,12 @@ public interface AssetRepository extends Neo4jRepository<Device, String>{
 
      @Query("MATCH (d)-[r]-(t) RETURN apoc.convert.toJson({relId: elementId(r), label: type(r), source: elementId(d), target: elementId(t)})")
      List<String> getRelationsForNetwork();
+
+     @Query("MATCH (d) WHERE d.level1 = $l1 AND d.level2 = $l2 AND d.level3 = $l3 AND (labels(d)[0] <> 'Device' OR  d.isRegistered = true) RETURN apoc.convert.toJson({id: elementId(d), label: labels(d)[0], name: d.name, type: d.type, place: d.place})")
+     List<String> getFilteredAssetsForNetwork(@Param("l1") String l1, @Param("l2") String l2, @Param("l3") String l3);
+
+     @Query("MATCH (d)-[r]-(t) WHERE d.level1 = $l1 AND d.level2 = $l2 AND d.level3 = $l3 AND t.level1 = $l1 AND t.level2 = $l2 AND t.level3 = $l3 RETURN apoc.convert.toJson({relId: elementId(r), label: type(r), source: elementId(d), target: elementId(t)})")
+     List<String> getFilteredRelationsForNetwork(@Param("l1") String l1, @Param("l2") String l2, @Param("l3") String l3);
 
      @Query("MATCH (d) WHERE elementId(d) = $assetId RETURN d.modelPath")
      String retrieveModelPath(@Param("assetId") String assetId);

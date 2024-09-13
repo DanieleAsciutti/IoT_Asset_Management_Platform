@@ -3,6 +3,7 @@ package DataManager.service;
 import DataManager.repository.AssetRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -25,6 +26,17 @@ import java.util.stream.Stream;
 public class DataManagerService {
 
     private final AssetRepository assetRepository;
+
+
+    public Boolean checkNewRelationship(String assetId, String targetId){
+        JSONObject assetJson = new JSONObject(assetRepository.getLevels(assetId));
+        JSONObject targetJson = new JSONObject(assetRepository.getLevels(targetId));
+
+        return assetJson.getString("l1").equals(targetJson.getString("l1")) &&
+                assetJson.getString("l2").equals(targetJson.getString("l2")) &&
+                assetJson.getString("l3").equals(targetJson.getString("l3"));
+
+    }
 
     public void createFolder(String folderPath, String folderName){
         File directory = new File(folderPath);

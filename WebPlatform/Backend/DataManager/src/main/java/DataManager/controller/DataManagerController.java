@@ -221,11 +221,14 @@ public class DataManagerController {
         //The map is: <targetId, relationshipLabel>
         log.info("AddRelationships endpoint called");
         for(Map.Entry<String, String> entry : relationshipsDTO.getRelationships().entrySet()){
-            String assetLabel = assetRepository.getNodeLabelById(assetId);
-            String targetLabel = assetRepository.getNodeLabelById(entry.getKey());
-            String relationship = entry.getValue();
-            String query = "MATCH (d:"+assetLabel+"), (t:"+targetLabel+") WHERE elementId(d) = $deviceId AND elementId(t) = $targetId CREATE (d)-[r:"+relationship+"]->(t)";
-            assetRepository.addRelationship(assetId, entry.getKey(), query);
+            if(dataManagerService.checkNewRelationship(assetId, entry.getKey())) {
+                String assetLabel = assetRepository.getNodeLabelById(assetId);
+                String targetLabel = assetRepository.getNodeLabelById(entry.getKey());
+                String relationship = entry.getValue();
+                String query = "MATCH (d:" + assetLabel + "), (t:" + targetLabel + ") WHERE elementId(d) = $deviceId AND elementId(t) = $targetId CREATE (d)-[r:" + relationship + "]->(t)";
+                assetRepository.addRelationship(assetId, entry.getKey(), query);
+            }
+            //TODO: si deve mettere un else che dia un errore dicendo quali relazioni non sono creabili
         }
         return ResponseEntity.ok().build();
     }
@@ -246,6 +249,16 @@ public class DataManagerController {
         List<String> relationships = assetRepository.getRelationsForNetwork();
         String toReturn = "{\"nodes\":"+assets.toString()+", \"links\":"+relationships.toString()+"}";
         return ResponseEntity.ok(toReturn);
+    }
+
+    @GetMapping(value = "/getFilteredNetwork")
+    public ResponseEntity<String> getFilteredNetwork(@RequestParam String l1, @RequestParam String l2, @RequestParam String l3){
+        log.info("GetFilteredNetwork endpoint called");
+        List<String> assets = assetRepository.getFilteredAssetsForNetwork(l1, l2, l3);
+        List<String> relationships = assetRepository.getFilteredRelationsForNetwork(l1, l2, l3);
+        String toReturn = "{\"nodes\":"+assets.toString()+", \"links\":"+relationships.toString()+"}";
+        return ResponseEntity.ok(toReturn);
+
     }
 
     @PostMapping(value = "/addNewModel")
