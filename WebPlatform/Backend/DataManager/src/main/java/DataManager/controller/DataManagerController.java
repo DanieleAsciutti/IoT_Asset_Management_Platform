@@ -381,6 +381,9 @@ public class DataManagerController {
     @GetMapping(value = "/getLevel3")
     public ResponseEntity<List<String>> getLevel3(@RequestParam String level1, @RequestParam String level2){
         log.info("RetrieveLevel3 endpoint called");
+        System.out.println(level1 + " " + level2);
+        List<String> result = assetRepository.retrieveLevel3(level1, level2);
+        System.out.println(result.toString());
         return ResponseEntity.ok(assetRepository.retrieveLevel3(level1, level2));
     }
 

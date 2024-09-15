@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Graph from "../components/Graph";
-import { CssBaseline, Box, Toolbar, MenuItem, Fab, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select } from '@mui/material';
+import { CssBaseline, Box, Toolbar, MenuItem, Fab, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select, InputLabel, FormControl } from '@mui/material';
 import AddIcon from "@mui/icons-material/Add";
 import CustomThemeProvider from '../components/ThemeProvider';
 import AppBarComponent from '../components/AppBarComponent';
@@ -11,7 +11,7 @@ function Assets() {
     const userDataString = sessionStorage.getItem('userData');
     const userData = JSON.parse(userDataString);
 
-    // Check if user data exists in session storage
+    //Check if user data exists in session storage
     if (!userData) {
         // Redirect to sign-in page if user data is not present
         window.location.href = '/';
@@ -24,6 +24,13 @@ function Assets() {
     const [addOpen, setAddOpen] = useState(false);
     const [name, setName] = useState('');
     const [label, setLabel] = useState('MonitoringTarget'); // Default label
+    const [level1, setLevel1] = useState('');
+    const [level2, setLevel2] = useState('');
+    const [level3, setLevel3] = useState('');
+    const [level1Options, setLevel1Options] = useState([]);
+    const [level2Options, setLevel2Options] = useState([]);
+    const [level3Options, setLevel3Options] = useState([]);
+    const [currentFilter, setCurrentFilter] = useState('l1');
 
     const toggleDrawer = () => {
         setOpen(!open); // Toggle the value of `open`
@@ -38,8 +45,117 @@ function Assets() {
     };
 
     useEffect(() => {
-        fetchData();
+        //fetchData();
+        getLevel1Options();
     }, []);
+
+    const updateLevel = (value) => {
+        if (currentFilter === 'l1') {
+            setLevel1(value);
+        } else if (currentFilter === 'l2') {
+            setLevel2(value);
+        } else if (currentFilter === 'l3') {
+            setLevel3(value);
+        }
+    };
+
+    const handleLevel1Change = (e) => {
+        const selectedLevel1 = e.target.value;
+        setLevel1(selectedLevel1);
+
+        setLevel2Options([]); // Reset level2 options
+        setLevel3Options([]); // Reset level3 options
+        setLevel2('');
+        setLevel3('');
+        getLevel2Options(selectedLevel1);
+    };
+
+    const handleLevel2Change = (e) => {
+        const selectedLevel2 = e.target.value;
+        setLevel2(selectedLevel2);
+
+        setLevel3Options([]); // Reset level3 options
+        setLevel3('');
+        getLevel3Options(level1, selectedLevel2);
+    };
+
+    const handleLevel3Change = (e) => {
+        setLevel3(e.target.value);
+    };
+
+    const getLevel1Options = async () => {
+        try {
+            // const response = await fetch('/api/getLevel1', {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
+            const response = await fetch('http://localhost:9093/getLevel1', {
+                method: 'GET',
+                credentials: 'include',
+                mode: 'cors',
+            });
+
+            if (response.ok) {
+                const options = await response.json(); // Parse JSON response
+                setLevel1Options(options); // Assuming options is an array of strings
+            } else {
+                console.error('Failed to fetch Level 1 options');
+            }
+        } catch (error) {
+            console.error('Error fetching Level 1 options:', error);
+        }
+    };
+
+    const getLevel2Options = async (level1) => {
+        try {
+            // const response = await fetch('/api/getLevel2?level1=${level1}', {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
+            const response = await fetch(`http://localhost:9093/getLevel2?level1=${level1}`, {
+                method: 'GET',
+                credentials: 'include',
+                mode: 'cors',
+            });
+
+            if (response.ok) {
+                const options = await response.json(); // Parse JSON response
+                setLevel2Options(options);
+            } else {
+                console.error('Failed to fetch Level 1 options');
+            }
+        } catch (error) {
+            console.error('Error fetching Level 1 options:', error);
+        }
+    };
+
+    const getLevel3Options = async (level1, level2) => {
+        try {
+            // const response = await fetch('/api/getLevel3?level1=${level1}&level2=${level2}', {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
+            const response = await fetch(`http://localhost:9093/getLevel3?level1=${level1}&level2=${level2}`, {
+                method: 'GET',
+                credentials: 'include',
+                mode: 'cors',
+            });
+
+            if (response.ok) {
+                const options = await response.json(); // Parse JSON response
+                setLevel3Options(options);
+                console.log('Level 3 options:', options)
+            } else {
+                console.error('Failed to fetch Level 1 options');
+            }
+        } catch (error) {
+            console.error('Error fetching Level 1 options:', error);
+        }
+    };
+
 
     const fetchData = async () => {
         const response = await fetch('/api/getNetwork', {
@@ -191,12 +307,62 @@ function Assets() {
                 />
                 <div style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%'}}>
                     {nodes.length > 0 ? (
-                        <Graph nodes={nodes} links={links} deleteNode={deleteNode} deleteLink={deleteLink} addRelationship={addRelationship} style={{width: '100%', height: '100%'}}/>
+                        <Graph nodes={nodes} links={links} deleteNode={deleteNode} deleteLink={deleteLink} addRelationship={addRelationship}
+                               updateLevel={updateLevel}
+                               style={{width: '100%', height: '100%'}}/>
                     ) : (
                         <p></p>
                     )}
                 </div>
             </div>
+
+            {/* Sequential Filter Section */}
+            <Box sx={{
+                position: 'absolute',
+                top: '100px',
+                right: '20px',
+                width: '300px',
+                padding: '20px',
+                backgroundColor: '#f5f5f5',
+                borderRadius: '8px',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '15px',
+            }}>
+                <FormControl fullWidth>
+                    <InputLabel>Level 1</InputLabel>
+                    <Select value={level1} onChange={handleLevel1Change}>
+                        {level1Options.map((option, index) => (
+                            <MenuItem key={index} value={option}>
+                                {option}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+
+                <FormControl fullWidth disabled={!level1}>
+                    <InputLabel>Level 2</InputLabel>
+                    <Select value={level2} onChange={handleLevel2Change}>
+                        {level2Options.map((option, index) => (
+                            <MenuItem key={index} value={option}>
+                                {option}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+
+                <FormControl fullWidth disabled={!level2}>
+                    <InputLabel>Level 3</InputLabel>
+                    <Select value={level3} onChange={handleLevel3Change}>
+                        {level3Options.map((option, index) => (
+                            <MenuItem key={index} value={option}>
+                                {option}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            </Box>
             <Fab
                 color="primary"
                 aria-label="add"

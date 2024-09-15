@@ -5,7 +5,7 @@ import SimpleTooltip from "./SimpleTooltip";
 import './ContextMenu.css';
 import './LinkingMode.css'
 
-const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, style }) => {
+const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLevel, style }) => {
     const svgRef = useRef();
     const graphRef = useRef();
     const tooltipRef = useRef();
@@ -93,11 +93,17 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, style })
                 setTooltipData(null);
             })
             .on('dblclick', function (event, data) {
-                const assetId = data.id;
-                window.location.href = data.label === 'Device'
-                    ? `/devices/${assetId}`
-                    : `/assets/${assetId}`;
+            const assetId = data.id;
+            window.location.href = data.label === 'Device'
+                ? `/devices/${assetId}`
+                : `/assets/${assetId}`;
             })
+            // .on('dblclick', function (event, data) {
+            //     const assetId = data.id;
+            //     window.location.href = data.label === 'Device'
+            //         ? `/devices/${assetId}`
+            //         : `/assets/${assetId}`;
+            // })
             .on('contextmenu', function (event, data) {
                 event.preventDefault();
                 setContextMenuData({ type: 'Node', id: data.id, x: event.clientX, y: event.clientY });
