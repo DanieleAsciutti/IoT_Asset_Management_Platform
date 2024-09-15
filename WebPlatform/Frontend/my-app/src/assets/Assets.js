@@ -17,13 +17,26 @@ function Assets() {
         window.location.href = '/';
     }
 
-    const [nodes, setNodes] = useState([]);
-    const [links, setLinks] = useState([]);
+
     const [open, setOpen] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [addOpen, setAddOpen] = useState(false);
+
+    // Graph data
+    const [nodes, setNodes] = useState([]);
+    const [links, setLinks] = useState([]);
+
+    // New Asset data
     const [name, setName] = useState('');
     const [label, setLabel] = useState('MonitoringTarget'); // Default label
+    const [addL1, setAddL1] = useState('');
+    const [addL2, setAddL2] = useState('');
+    const [addL3, setAddL3] = useState('');
+    const [addL1Options, setAddL1Options] = useState([]);
+    const [addL2Options, setAddL2Options] = useState([]);
+    const [addL3Options, setAddL3Options] = useState([]);
+
+    // Filter data
     const [level1, setLevel1] = useState('');
     const [level2, setLevel2] = useState('');
     const [level3, setLevel3] = useState('');
@@ -49,38 +62,62 @@ function Assets() {
         getLevel1Options();
     }, []);
 
+    // Part used to update the levels
     const updateLevel = (value) => {
         if (currentFilter === 'l1') {
-            setLevel1(value);
+            handleLevel1Change(value);
         } else if (currentFilter === 'l2') {
-            setLevel2(value);
+            handleLevel2Change(value);
         } else if (currentFilter === 'l3') {
-            setLevel3(value);
+            handleLevel3Change(value);
         }
     };
 
-    const handleLevel1Change = (e) => {
-        const selectedLevel1 = e.target.value;
+
+    const handleLevel1Change = (e, fromAsset) => {
+        let selectedLevel1;
+        if(fromAsset) {
+            selectedLevel1 = e.target.value;
+        }else{
+            selectedLevel1 = e.value;
+        }
+
         setLevel1(selectedLevel1);
 
         setLevel2Options([]); // Reset level2 options
         setLevel3Options([]); // Reset level3 options
         setLevel2('');
         setLevel3('');
+        setCurrentFilter('l2');
         getLevel2Options(selectedLevel1);
     };
 
-    const handleLevel2Change = (e) => {
-        const selectedLevel2 = e.target.value;
+    const handleLevel2Change = (e, fromAsset) => {
+        let selectedLevel2;
+        if(fromAsset) {
+            selectedLevel2 = e.target.value;
+        }else{
+            selectedLevel2 = e.value
+        }
+
         setLevel2(selectedLevel2);
 
         setLevel3Options([]); // Reset level3 options
         setLevel3('');
+        setCurrentFilter('l3');
         getLevel3Options(level1, selectedLevel2);
     };
 
-    const handleLevel3Change = (e) => {
-        setLevel3(e.target.value);
+    const handleLevel3Change = (e, fromAsset) => {
+        let selectedLevel3;
+        if(fromAsset) {
+            selectedLevel3 = e.target.value;
+        }else{
+            selectedLevel3 = e.value
+        }
+        setLevel3(selectedLevel3);
+        setCurrentFilter('filtered');
+        getFilteredNetwork(level1, level2, selectedLevel3);
     };
 
     const getLevel1Options = async () => {
@@ -99,6 +136,12 @@ function Assets() {
             if (response.ok) {
                 const options = await response.json(); // Parse JSON response
                 setLevel1Options(options); // Assuming options is an array of strings
+                setNodes(options.map((str, index) => ({
+                    id: index + 1,
+                    name: str,
+                    label: str
+                })));
+                setLinks([]);
             } else {
                 console.error('Failed to fetch Level 1 options');
             }
@@ -123,6 +166,12 @@ function Assets() {
             if (response.ok) {
                 const options = await response.json(); // Parse JSON response
                 setLevel2Options(options);
+                setNodes(options.map((str, index) => ({
+                    id: index + 1,
+                    name: str,
+                    label: str
+                })));
+                setLinks([]);
             } else {
                 console.error('Failed to fetch Level 1 options');
             }
@@ -147,6 +196,12 @@ function Assets() {
             if (response.ok) {
                 const options = await response.json(); // Parse JSON response
                 setLevel3Options(options);
+                setNodes(options.map((str, index) => ({
+                    id: index + 1,
+                    name: str,
+                    label: str
+                })));
+                setLinks([]);
                 console.log('Level 3 options:', options)
             } else {
                 console.error('Failed to fetch Level 1 options');
@@ -156,6 +211,36 @@ function Assets() {
         }
     };
 
+    const getFilteredNetwork = async (level1, level2, level3) => {
+        // const response = await fetch(`/api/getFilteredNetwork?l1=${level1}&l2=${level2}&l3=${level3}`, {
+        //     method: 'GET',
+        //     credentials: 'include',
+        //     mode: 'cors',
+        // });
+
+        const response = await fetch(`http://localhost:9093/getFilteredNetwork?l1=${level1}&l2=${level2}&l3=${level3}`, {
+            method: 'GET',
+            credentials: 'include',
+            mode: 'cors',
+        });
+
+        const jsonData = await response.json();
+        if (jsonData == null || jsonData.nodes == null)
+            return;
+
+        const unchecked_links = jsonData.links;
+        const nodeIds = jsonData.nodes.map(node => node.id);
+        const filtered_links = unchecked_links.filter(link => {
+            // Check if both link.source and link.target exist in the nodeIds array
+            const sourceExists = nodeIds.includes(link.source);
+            const targetExists = nodeIds.includes(link.target);
+
+            return sourceExists && targetExists;
+        });
+
+        setNodes(jsonData.nodes);
+        setLinks(filtered_links);
+    }
 
     const fetchData = async () => {
         const response = await fetch('/api/getNetwork', {
@@ -205,25 +290,118 @@ function Assets() {
         fetchData();
     };
 
+    // Part used to add a new asset
+
     const openModal = () => {
         setAddOpen(true);
+        getAddL1Options();
     };
+
+    const getAddL1Options = async () => {
+        try {
+            // const response = await fetch('/api/getLevel1', {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
+            const response = await fetch('http://localhost:9093/getLevel1', {
+                method: 'GET',
+                credentials: 'include',
+                mode: 'cors',
+            });
+
+            if (response.ok) {
+                const options = await response.json(); // Parse JSON response
+                setAddL1Options(options); // Assuming options is an array of strings
+            } else {
+                console.error('Failed to fetch Level 1 options');
+            }
+        } catch (error) {
+            console.error('Error fetching Level 1 options:', error);
+        }
+    }
+
+    const getAddL2Options = async (level1) => {
+        try {
+            // const response = await fetch('/api/getLevel2?level1=${level1}', {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
+            const response = await fetch(`http://localhost:9093/getLevel2?level1=${level1}`, {
+                method: 'GET',
+                credentials: 'include',
+                mode: 'cors',
+            });
+
+            if (response.ok) {
+                const options = await response.json(); // Parse JSON response
+                setAddL2Options(options);
+            } else {
+                console.error('Failed to fetch Level 1 options');
+            }
+        } catch (error) {
+            console.error('Error fetching Level 1 options:', error);
+        }
+    }
+
+    const getAddL3Options = async (level1, level2) => {
+        try {
+            // const response = await fetch('/api/getLevel3?level1=${level1}&level2=${level2}', {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
+            const response = await fetch(`http://localhost:9093/getLevel3?level1=${level1}&level2=${level2}`, {
+                method: 'GET',
+                credentials: 'include',
+                mode: 'cors',
+            });
+
+            if (response.ok) {
+                const options = await response.json(); // Parse JSON response
+                setAddL3Options(options);
+            } else {
+                console.error('Failed to fetch Level 1 options');
+            }
+        } catch (error) {
+            console.error('Error fetching Level 1 options:', error);
+        }
+    }
 
     const handleAddAsset = async () => {
         try {
-            const response = await fetch(`/api/addAsset?name=${name}&label=${label}`, {
+            const assetData = {
+                name: name,
+                label: label,
+                level1: addL1,
+                level2: addL2,
+                level3: addL3
+            };
+
+            // const response = await fetch('/api/addAsset', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     credentials: 'include',
+            //     body: JSON.stringify(assetData),
+            // });
+            const response = await fetch('http://localhost:9093/addAsset', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
+                body: JSON.stringify(assetData),
             });
 
             if (response.ok) {
                 // Asset added successfully, do something (e.g., close modal)
                 console.log('Asset added successfully');
                 handleCloseAdd(); // Close modal after successful addition
-                fetchData();
+                //fetchData();
+                getLevel1Options();
             } else {
                 console.error('Failed to add asset');
             }
@@ -234,6 +412,12 @@ function Assets() {
 
     const handleCloseAdd = () => {
         setAddOpen(false);
+        setAddL1('');
+        setAddL2('');
+        setAddL3('');
+        setAddL1Options([]);
+        setAddL2Options([]);
+        setAddL3Options([]);
     };
 
     const handleLogout = () => {
@@ -308,7 +492,7 @@ function Assets() {
                 <div style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%'}}>
                     {nodes.length > 0 ? (
                         <Graph nodes={nodes} links={links} deleteNode={deleteNode} deleteLink={deleteLink} addRelationship={addRelationship}
-                               updateLevel={updateLevel}
+                               updateLevel={updateLevel} currentFilter={currentFilter}
                                style={{width: '100%', height: '100%'}}/>
                     ) : (
                         <p></p>
@@ -332,7 +516,7 @@ function Assets() {
             }}>
                 <FormControl fullWidth>
                     <InputLabel>Level 1</InputLabel>
-                    <Select value={level1} onChange={handleLevel1Change}>
+                    <Select value={level1} onChange={(e) => handleLevel1Change(e, true)}>
                         {level1Options.map((option, index) => (
                             <MenuItem key={index} value={option}>
                                 {option}
@@ -398,6 +582,72 @@ function Assets() {
                         <MenuItem value="MonitoringTarget">Monitoring Target</MenuItem>
                         <MenuItem value="Sensor">Sensor</MenuItem>
                         <MenuItem value="Gateway">Gateway</MenuItem>
+                    </Select>
+                    <Select
+                        value={addL1}
+                        onChange={(e) => {
+                            setAddL1(e.target.value)
+                            getAddL2Options(e.target.value);}
+                        }
+                        fullWidth
+                        label="Level 1"
+                    >
+                        {addL1Options.map((option, index) => (
+                            <MenuItem key={index} value={option}>
+                                {option}
+                            </MenuItem>
+                        ))}
+                        <MenuItem value="new">+ Add New</MenuItem>
+                        {/* Conditionally render the input field for new label */}
+                        {addL1 !== '' && (
+                            <div style={{ marginTop: '10px' }}>
+                                <TextField
+                                    autoFocus
+                                    margin="dense"
+                                    id="new-l1"
+                                    label="New Level 1"
+                                    type="text"
+                                    fullWidth
+                                    value={addL1}
+                                    onChange={(e) => setAddL1(e.target.value)}
+                                />
+                                <Button
+                                    style={{ marginTop: '10px' }}
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={getAddL2Options(addL1)}
+                                >
+                                    Add
+                                </Button>
+                            </div>
+                        )}
+                    </Select>
+                    <Select
+                        value={addL2}
+                        onChange={(e) => {
+                            setAddL2(e.target.value)
+                            getAddL3Options(addL1, e.target.value);}
+                        }
+                        fullWidth
+                        label="Level 2"
+                    >
+                        {addL2Options.map((option, index) => (
+                            <MenuItem key={index} value={option}>
+                                {option}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                    <Select
+                        value={addL3}
+                        onChange={(e) => setAddL3(e.target.value)}
+                        fullWidth
+                        label="Level 3"
+                    >
+                        {addL3Options.map((option, index) => (
+                            <MenuItem key={index} value={option}>
+                                {option}
+                            </MenuItem>
+                        ))}
                     </Select>
                 </DialogContent>
                 <DialogActions>

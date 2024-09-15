@@ -5,7 +5,7 @@ import SimpleTooltip from "./SimpleTooltip";
 import './ContextMenu.css';
 import './LinkingMode.css'
 
-const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLevel, style }) => {
+const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLevel, currentFilter, style }) => {
     const svgRef = useRef();
     const graphRef = useRef();
     const tooltipRef = useRef();
@@ -83,9 +83,11 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
 
         node
             .on('mouseover', function (event, data) {
-                d3.select(this).transition()
-                    .attr('opacity', '.95');
-                setTooltipData({ ...data, x: event.clientX, y: event.clientY });
+                if(currentFilter === 'filtered') {
+                    d3.select(this).transition()
+                        .attr('opacity', '.95');
+                    setTooltipData({...data, x: event.clientX, y: event.clientY});
+                }
             })
             .on('mouseout', function (event, data) {
                 d3.select(this).transition()
@@ -93,10 +95,15 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
                 setTooltipData(null);
             })
             .on('dblclick', function (event, data) {
-            const assetId = data.id;
-            window.location.href = data.label === 'Device'
-                ? `/devices/${assetId}`
-                : `/assets/${assetId}`;
+                if(currentFilter === 'filtered'){
+                    const assetId = data.id;
+                    window.location.href = data.label === 'Device'
+                        ? `/devices/${assetId}`
+                        : `/assets/${assetId}`;
+                }else{
+                    data.value = data.name;
+                    updateLevel(data, false);
+                }
             })
             // .on('dblclick', function (event, data) {
             //     const assetId = data.id;
@@ -105,8 +112,10 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
             //         : `/assets/${assetId}`;
             // })
             .on('contextmenu', function (event, data) {
-                event.preventDefault();
-                setContextMenuData({ type: 'Node', id: data.id, x: event.clientX, y: event.clientY });
+                if (currentFilter === 'filtered') {
+                    event.preventDefault();
+                    setContextMenuData({type: 'Node', id: data.id, x: event.clientX, y: event.clientY});
+                }
             })
             .on('click', (event, data) => {
                 const nodeId = data.id;
@@ -128,6 +137,11 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
 
         const zoom = d3.zoom()
             .scaleExtent([0.3, 2.5])
+            //.scaleExtent([0.3, 1])  // Limit zooming
+            .filter(function(event) {
+                // Disable zoom on double-click
+                return !event.type.includes('dblclick');
+            })
             .on('zoom', handleZoom);
 
         d3.select(graphRef.current)
