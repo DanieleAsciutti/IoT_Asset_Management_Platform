@@ -74,12 +74,17 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
             .attr('r', 35)
             .attr('fill', d => colorScale(d.label));
 
+        // node.append('circle')
+        //     .attr('r', d => Math.max(35, d.name.length *2))
+        //     .attr('fill', d => colorScale(d.label));
+
         node.append('text')
             .attr('text-anchor', 'middle')
             .attr('dy', 4)
             .attr('font-size', '13px')
             .attr('font-weight', '400')
             .text(d => d.name ? d.name : "");
+
 
         node
             .on('mouseover', function (event, data) {

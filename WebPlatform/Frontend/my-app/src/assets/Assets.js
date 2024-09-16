@@ -36,6 +36,15 @@ function Assets() {
     const [addL2Options, setAddL2Options] = useState([]);
     const [addL3Options, setAddL3Options] = useState([]);
 
+    const [newL1DialogOpen, setNewL1DialogOpen] = useState(false);
+    const [newL1, setNewL1] = useState('');
+
+    const [newL2DialogOpen, setNewL2DialogOpen] = useState(false);
+    const [newL2, setNewL2] = useState('');
+
+    const [newL3DialogOpen, setNewL3DialogOpen] = useState(false);
+    const [newL3, setNewL3] = useState('');
+
     // Filter data
     const [level1, setLevel1] = useState('');
     const [level2, setLevel2] = useState('');
@@ -268,7 +277,8 @@ function Assets() {
     };
 
     const addRelationship = async (assetId, relationships) => {
-        const url = `/api/addRelationships?assetId=${assetId}`;
+        // const url = `/api/addRelationships?assetId=${assetId}`;
+        const url = `http://localhost:9093/addRelationships?assetId=${assetId}`;
         try {
             const response = await fetch(url, {
                 method: 'POST',
@@ -287,7 +297,8 @@ function Assets() {
         } catch (error) {
             console.error('Error adding relationship:', error);
         }
-        fetchData();
+        //fetchData();
+        getFilteredNetwork(level1, level2, level3);
     };
 
     // Part used to add a new asset
@@ -369,6 +380,18 @@ function Assets() {
         }
     }
 
+    const handleRefreshAfterAdd = async () => {
+        if (currentFilter === 'l1') {
+            getLevel1Options();
+        } else if (currentFilter === 'l2') {
+            getLevel2Options(level1);
+        } else if (currentFilter === 'l3') {
+            getLevel3Options(level1, level2);
+        } else if (currentFilter === 'filtered'){
+            getFilteredNetwork(level1, level2, level3);
+        }
+    }
+
     const handleAddAsset = async () => {
         try {
             const assetData = {
@@ -400,8 +423,8 @@ function Assets() {
                 // Asset added successfully, do something (e.g., close modal)
                 console.log('Asset added successfully');
                 handleCloseAdd(); // Close modal after successful addition
-                //fetchData();
-                getLevel1Options();
+                //getFilteredNetwork(level1, level2, level3);
+                handleRefreshAfterAdd();
             } else {
                 console.error('Failed to add asset');
             }
@@ -429,7 +452,14 @@ function Assets() {
 
     const deleteNode = async (id) => {
         try {
-            const response = await fetch(`/api/deleteAsset?assetId=${id}`, {
+            // const response = await fetch(`/api/deleteAsset?assetId=${id}`, {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     credentials: 'include',
+            // });
+            const response = await fetch(`http://localhost:9093/deleteAsset?assetId=${id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -439,7 +469,9 @@ function Assets() {
 
             if (response.ok) {
                 console.log('Asset deleted successfully');
-                fetchData();
+                //fetchData();
+                getFilteredNetwork(level1, level2, level3);
+
             } else {
                 const errorMessage = await response.text();
                 console.error('Failed to delete asset:', errorMessage);
@@ -586,9 +618,13 @@ function Assets() {
                     <Select
                         value={addL1}
                         onChange={(e) => {
-                            setAddL1(e.target.value)
-                            getAddL2Options(e.target.value);}
-                        }
+                            if (e.target.value === 'new') {
+                                setNewL1DialogOpen(true);  // Open dialog to add new label
+                            } else {
+                                setAddL1(e.target.value);
+                                getAddL2Options(e.target.value);
+                            }
+                        }}
                         fullWidth
                         label="Level 1"
                     >
@@ -597,37 +633,18 @@ function Assets() {
                                 {option}
                             </MenuItem>
                         ))}
-                        <MenuItem value="new">+ Add New</MenuItem>
-                        {/* Conditionally render the input field for new label */}
-                        {addL1 !== '' && (
-                            <div style={{ marginTop: '10px' }}>
-                                <TextField
-                                    autoFocus
-                                    margin="dense"
-                                    id="new-l1"
-                                    label="New Level 1"
-                                    type="text"
-                                    fullWidth
-                                    value={addL1}
-                                    onChange={(e) => setAddL1(e.target.value)}
-                                />
-                                <Button
-                                    style={{ marginTop: '10px' }}
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={getAddL2Options(addL1)}
-                                >
-                                    Add
-                                </Button>
-                            </div>
-                        )}
+                        <MenuItem value="new">+ Add New Level 1</MenuItem>
                     </Select>
                     <Select
                         value={addL2}
                         onChange={(e) => {
-                            setAddL2(e.target.value)
-                            getAddL3Options(addL1, e.target.value);}
-                        }
+                            if (e.target.value === 'new') {
+                                setNewL2DialogOpen(true);  // Open dialog to add new Level 2
+                            } else {
+                                setAddL2(e.target.value);
+                                getAddL3Options(addL1, e.target.value);  // Fetch options for Level 3 based on Level 1 and 2
+                            }
+                        }}
                         fullWidth
                         label="Level 2"
                     >
@@ -636,10 +653,17 @@ function Assets() {
                                 {option}
                             </MenuItem>
                         ))}
+                        <MenuItem value="new">+ Add New Level 2</MenuItem>
                     </Select>
                     <Select
                         value={addL3}
-                        onChange={(e) => setAddL3(e.target.value)}
+                        onChange={(e) => {
+                            if (e.target.value === 'new') {
+                                setNewL3DialogOpen(true);  // Open dialog to add new Level 3
+                            } else {
+                                setAddL3(e.target.value);
+                            }
+                        }}
                         fullWidth
                         label="Level 3"
                     >
@@ -648,11 +672,101 @@ function Assets() {
                                 {option}
                             </MenuItem>
                         ))}
+                        <MenuItem value="new">+ Add New Level 3</MenuItem>
                     </Select>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseAdd}>Cancel</Button>
                     <Button onClick={handleAddAsset}>Add</Button>
+                </DialogActions>
+            </Dialog>
+            {/* Dialog to add a new Level 1 label */}
+            <Dialog open={newL1DialogOpen} onClose={() => setNewL1DialogOpen(false)}>
+                <DialogTitle>Add New Level 1</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="new-l1"
+                        label="New Level 1"
+                        type="text"
+                        fullWidth
+                        value={newL1}
+                        onChange={(e) => setNewL1(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setNewL1DialogOpen(false)}>Cancel</Button>
+                    <Button
+                        onClick={() => {
+                            setAddL1Options([...addL1Options, newL1]);  // Add the new label to the options list
+                            setAddL1(newL1);  // Set the new label as the selected value
+                            setNewL1DialogOpen(false);  // Close the dialog
+                            setNewL1(''); // Clear the input field
+                        }}
+                        color="primary"
+                    >
+                        Add
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog open={newL2DialogOpen} onClose={() => setNewL2DialogOpen(false)}>
+                <DialogTitle>Add New Level 2</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="new-l2"
+                        label="New Level 2"
+                        type="text"
+                        fullWidth
+                        value={newL2}
+                        onChange={(e) => setNewL2(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setNewL2DialogOpen(false)}>Cancel</Button>
+                    <Button
+                        onClick={() => {
+                            setAddL2Options([...addL2Options, newL2]);  // Add the new Level 2 label to the list
+                            setAddL2(newL2);  // Set the new label as the selected value
+                            setNewL2DialogOpen(false);  // Close the dialog
+                            getAddL3Options(addL1, newL2);  // Update Level 3 options based on new Level 2
+                            setNewL2(''); // Clear the input field
+                        }}
+                        color="primary"
+                    >
+                        Add
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog open={newL3DialogOpen} onClose={() => setNewL3DialogOpen(false)}>
+                <DialogTitle>Add New Level 3</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="new-l3"
+                        label="New Level 3"
+                        type="text"
+                        fullWidth
+                        value={newL3}
+                        onChange={(e) => setNewL3(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setNewL3DialogOpen(false)}>Cancel</Button>
+                    <Button
+                        onClick={() => {
+                            setAddL3Options([...addL3Options, newL3]);  // Add the new Level 3 label to the list
+                            setAddL3(newL3);  // Set the new label as the selected value
+                            setNewL3DialogOpen(false);  // Close the dialog
+                            setNewL3(''); // Clear the input field
+                        }}
+                        color="primary"
+                    >
+                        Add
+                    </Button>
                 </DialogActions>
             </Dialog>
 
