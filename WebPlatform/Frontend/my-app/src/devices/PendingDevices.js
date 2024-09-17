@@ -354,7 +354,7 @@ export default class Devices extends React.Component {
                                         }}
                                         label="Level 2"
                                         fullWidth
-                                        disabled={!this.state.level1Options.length}
+                                        disabled={!this.state.deviceData.level1}
                                     >
                                         {this.state.level2Options.map((option, index) => (
                                             <MenuItem key={index} value={option}>{option}</MenuItem>
@@ -379,7 +379,7 @@ export default class Devices extends React.Component {
                                         }}
                                         label="Level 3"
                                         fullWidth
-                                        disabled={!this.state.level2Options.length}
+                                        disabled={!this.state.deviceData.level2}
                                     >
                                         {this.state.level3Options.map((option, index) => (
                                             <MenuItem key={index} value={option}>{option}</MenuItem>
