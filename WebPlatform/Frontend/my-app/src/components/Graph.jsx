@@ -42,7 +42,29 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
             .attr('class', 'graph-group')
             .attr('transform', `scale(${scale})`);
 
+        // Aggregate the links between nodes if there are multiple links between 2 nodes, disabled for now
+        const groupedLinks = links.reduce((acc, link) => {
+            const key = `${link.source.id}-${link.target.id}`;  // Unique key for each source-target pair
+
+            // If the key doesn't exist, initialize it with the link and its name
+            if (!acc[key]) {
+                acc[key] = {
+                    source: link.source,
+                    target: link.target,
+                    label: link.label  // Initialize with the first link's name
+                };
+            } else {
+                // If the key exists, concatenate the link's name
+                acc[key].label += `, ${link.label}`;
+            }
+
+            return acc;
+        }, {});
+
+        const aggregatedLinks = Object.values(groupedLinks);
+
         const link = graphGroup.selectAll('.link')
+            //.data(aggregatedLinks) //if there are more links between 2 nodes
             .data(links)
             .enter()
             .append('line')
@@ -63,6 +85,7 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
                 event.preventDefault();
                 setContextMenuData({ type: 'Link', id: data.relId, x: event.x, y: event.y });
             });
+
 
         const node = graphGroup.selectAll('.node')
             .data(nodes)
@@ -259,6 +282,7 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
         }
     };
 
+
     return (
         <div className="graph-container" ref={graphRef}>
             <svg ref={svgRef}>
@@ -292,7 +316,13 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
                             <div className="context-menu-item" onClick={handleDeleteNode}>
                                 Delete Node
                             </div>
-                            <div className="context-menu-item" onClick={startLinkingMode}>
+                            {/*<div className="context-menu-item" onClick={startLinkingMode}>*/}
+                            {/*    Connect Another Node*/}
+                            {/*</div>*/}
+                            <div
+                                className={`context-menu-item ${nodes.length <= 1 ? 'disabled' : ''}`}
+                                onClick={nodes.length > 1 ? startLinkingMode : null}  // Disable click if only 1 node
+                            >
                                 Connect Another Node
                             </div>
                         </>

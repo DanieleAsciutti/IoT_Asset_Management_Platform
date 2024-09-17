@@ -19,3 +19,9 @@
 .context-menu-item:hover {
     background-color: #f0f0f0;
 }
+
+.disabled {
+    color: rgb(128, 128, 128);
+    cursor: not-allowed;
+    pointer-events: none;
+}

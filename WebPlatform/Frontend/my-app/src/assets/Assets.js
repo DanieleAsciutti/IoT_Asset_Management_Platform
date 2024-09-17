@@ -484,7 +484,14 @@ function Assets() {
 
     const deleteLink = async (id) => {
         try {
-            const response = await fetch(`/api/deleteRelationship?relId=${id}`, {
+            // const response = await fetch(`/api/deleteRelationship?relId=${id}`, {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     credentials: 'include',
+            // });
+            const response = await fetch(`http://localhost:9093/deleteRelationship?relId=${id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -494,7 +501,7 @@ function Assets() {
 
             if (response.ok) {
                 console.log('Link deleted successfully');
-                fetchData();
+                getFilteredNetwork(level1, level2, level3);
             } else {
                 console.error('Failed to delete link');
             }
@@ -559,7 +566,7 @@ function Assets() {
 
                 <FormControl fullWidth disabled={!level1}>
                     <InputLabel>Level 2</InputLabel>
-                    <Select value={level2} onChange={handleLevel2Change}>
+                    <Select value={level2} onChange={(e) => handleLevel2Change(e, true)}>
                         {level2Options.map((option, index) => (
                             <MenuItem key={index} value={option}>
                                 {option}
@@ -570,7 +577,7 @@ function Assets() {
 
                 <FormControl fullWidth disabled={!level2}>
                     <InputLabel>Level 3</InputLabel>
-                    <Select value={level3} onChange={handleLevel3Change}>
+                    <Select value={level3} onChange={(e) => handleLevel3Change(e, true)}>
                         {level3Options.map((option, index) => (
                             <MenuItem key={index} value={option}>
                                 {option}
@@ -647,6 +654,7 @@ function Assets() {
                         }}
                         fullWidth
                         label="Level 2"
+                        disabled={!addL1}
                     >
                         {addL2Options.map((option, index) => (
                             <MenuItem key={index} value={option}>
@@ -666,6 +674,7 @@ function Assets() {
                         }}
                         fullWidth
                         label="Level 3"
+                        disabled={!addL2}
                     >
                         {addL3Options.map((option, index) => (
                             <MenuItem key={index} value={option}>

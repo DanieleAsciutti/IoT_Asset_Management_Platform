@@ -31,7 +31,12 @@ export default class DevicePage extends React.Component {
 
     async componentDidMount() {
         this.setState({ isLoading: true });
-        const response = await fetch('/api/getAllRegisteredDevices', {
+        // const response = await fetch('/api/getAllRegisteredDevices', {
+        //     method: 'GET',
+        //     credentials: 'include', // Include cookies in the request
+        //     mode : 'cors',
+        // });
+        const response = await fetch('http://localhost:9093/getAllRegisteredDevices', {
             method: 'GET',
             credentials: 'include', // Include cookies in the request
             mode : 'cors',
