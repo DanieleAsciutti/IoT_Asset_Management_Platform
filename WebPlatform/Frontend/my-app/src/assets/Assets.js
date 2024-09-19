@@ -131,16 +131,16 @@ function Assets() {
 
     const getLevel1Options = async () => {
         try {
-            // const response = await fetch('/api/getLevel1', {
-            //     method: 'GET',
-            //     credentials: 'include',
-            //     mode: 'cors',
-            // });
-            const response = await fetch('http://localhost:9093/getLevel1', {
+            const response = await fetch('/api/getLevel1', {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',
             });
+            // const response = await fetch('http://localhost:9093/getLevel1', {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
 
             if (response.ok) {
                 const options = await response.json(); // Parse JSON response
@@ -161,16 +161,16 @@ function Assets() {
 
     const getLevel2Options = async (level1) => {
         try {
-            // const response = await fetch('/api/getLevel2?level1=${level1}', {
-            //     method: 'GET',
-            //     credentials: 'include',
-            //     mode: 'cors',
-            // });
-            const response = await fetch(`http://localhost:9093/getLevel2?level1=${level1}`, {
+            const response = await fetch(`/api/getLevel2?level1=${level1}`, {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',
             });
+            // const response = await fetch(`http://localhost:9093/getLevel2?level1=${level1}`, {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
 
             if (response.ok) {
                 const options = await response.json(); // Parse JSON response
@@ -191,16 +191,16 @@ function Assets() {
 
     const getLevel3Options = async (level1, level2) => {
         try {
-            // const response = await fetch('/api/getLevel3?level1=${level1}&level2=${level2}', {
-            //     method: 'GET',
-            //     credentials: 'include',
-            //     mode: 'cors',
-            // });
-            const response = await fetch(`http://localhost:9093/getLevel3?level1=${level1}&level2=${level2}`, {
+            const response = await fetch(`/api/getLevel3?level1=${level1}&level2=${level2}`, {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',
             });
+            // const response = await fetch(`http://localhost:9093/getLevel3?level1=${level1}&level2=${level2}`, {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
 
             if (response.ok) {
                 const options = await response.json(); // Parse JSON response
@@ -221,17 +221,17 @@ function Assets() {
     };
 
     const getFilteredNetwork = async (level1, level2, level3) => {
-        // const response = await fetch(`/api/getFilteredNetwork?l1=${level1}&l2=${level2}&l3=${level3}`, {
-        //     method: 'GET',
-        //     credentials: 'include',
-        //     mode: 'cors',
-        // });
-
-        const response = await fetch(`http://localhost:9093/getFilteredNetwork?l1=${level1}&l2=${level2}&l3=${level3}`, {
+        const response = await fetch(`/api/getFilteredNetwork?l1=${level1}&l2=${level2}&l3=${level3}`, {
             method: 'GET',
             credentials: 'include',
             mode: 'cors',
         });
+
+        // const response = await fetch(`http://localhost:9093/getFilteredNetwork?l1=${level1}&l2=${level2}&l3=${level3}`, {
+        //     method: 'GET',
+        //     credentials: 'include',
+        //     mode: 'cors',
+        // });
 
         const jsonData = await response.json();
         if (jsonData == null || jsonData.nodes == null)
@@ -277,8 +277,8 @@ function Assets() {
     };
 
     const addRelationship = async (assetId, relationships) => {
-        // const url = `/api/addRelationships?assetId=${assetId}`;
-        const url = `http://localhost:9093/addRelationships?assetId=${assetId}`;
+        const url = `/api/addRelationships?assetId=${assetId}`;
+        // const url = `http://localhost:9093/addRelationships?assetId=${assetId}`;
         try {
             const response = await fetch(url, {
                 method: 'POST',
@@ -310,16 +310,16 @@ function Assets() {
 
     const getAddL1Options = async () => {
         try {
-            // const response = await fetch('/api/getLevel1', {
-            //     method: 'GET',
-            //     credentials: 'include',
-            //     mode: 'cors',
-            // });
-            const response = await fetch('http://localhost:9093/getLevel1', {
+            const response = await fetch('/api/getLevel1', {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',
             });
+            // const response = await fetch('http://localhost:9093/getLevel1', {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
 
             if (response.ok) {
                 const options = await response.json(); // Parse JSON response
@@ -334,16 +334,16 @@ function Assets() {
 
     const getAddL2Options = async (level1) => {
         try {
-            // const response = await fetch('/api/getLevel2?level1=${level1}', {
-            //     method: 'GET',
-            //     credentials: 'include',
-            //     mode: 'cors',
-            // });
-            const response = await fetch(`http://localhost:9093/getLevel2?level1=${level1}`, {
+            const response = await fetch(`/api/getLevel2?level1=${level1}`, {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',
             });
+            // const response = await fetch(`http://localhost:9093/getLevel2?level1=${level1}`, {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
 
             if (response.ok) {
                 const options = await response.json(); // Parse JSON response
@@ -358,16 +358,16 @@ function Assets() {
 
     const getAddL3Options = async (level1, level2) => {
         try {
-            // const response = await fetch('/api/getLevel3?level1=${level1}&level2=${level2}', {
-            //     method: 'GET',
-            //     credentials: 'include',
-            //     mode: 'cors',
-            // });
-            const response = await fetch(`http://localhost:9093/getLevel3?level1=${level1}&level2=${level2}`, {
+            const response = await fetch(`/api/getLevel3?level1=${level1}&level2=${level2}`, {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',
             });
+            // const response = await fetch(`http://localhost:9093/getLevel3?level1=${level1}&level2=${level2}`, {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
 
             if (response.ok) {
                 const options = await response.json(); // Parse JSON response
@@ -402,15 +402,7 @@ function Assets() {
                 level3: addL3
             };
 
-            // const response = await fetch('/api/addAsset', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     credentials: 'include',
-            //     body: JSON.stringify(assetData),
-            // });
-            const response = await fetch('http://localhost:9093/addAsset', {
+            const response = await fetch('/api/addAsset', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -418,6 +410,14 @@ function Assets() {
                 credentials: 'include',
                 body: JSON.stringify(assetData),
             });
+            // const response = await fetch('http://localhost:9093/addAsset', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     credentials: 'include',
+            //     body: JSON.stringify(assetData),
+            // });
 
             if (response.ok) {
                 // Asset added successfully, do something (e.g., close modal)
@@ -452,20 +452,20 @@ function Assets() {
 
     const deleteNode = async (id) => {
         try {
-            // const response = await fetch(`/api/deleteAsset?assetId=${id}`, {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     credentials: 'include',
-            // });
-            const response = await fetch(`http://localhost:9093/deleteAsset?assetId=${id}`, {
+            const response = await fetch(`/api/deleteAsset?assetId=${id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
             });
+            // const response = await fetch(`http://localhost:9093/deleteAsset?assetId=${id}`, {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     credentials: 'include',
+            // });
 
             if (response.ok) {
                 console.log('Asset deleted successfully');
@@ -484,20 +484,20 @@ function Assets() {
 
     const deleteLink = async (id) => {
         try {
-            // const response = await fetch(`/api/deleteRelationship?relId=${id}`, {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     credentials: 'include',
-            // });
-            const response = await fetch(`http://localhost:9093/deleteRelationship?relId=${id}`, {
+            const response = await fetch(`/api/deleteRelationship?relId=${id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
             });
+            // const response = await fetch(`http://localhost:9093/deleteRelationship?relId=${id}`, {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     credentials: 'include',
+            // });
 
             if (response.ok) {
                 console.log('Link deleted successfully');

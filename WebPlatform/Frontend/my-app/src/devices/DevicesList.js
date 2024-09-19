@@ -31,16 +31,16 @@ export default class DevicePage extends React.Component {
 
     async componentDidMount() {
         this.setState({ isLoading: true });
-        // const response = await fetch('/api/getAllRegisteredDevices', {
-        //     method: 'GET',
-        //     credentials: 'include', // Include cookies in the request
-        //     mode : 'cors',
-        // });
-        const response = await fetch('http://localhost:9093/getAllRegisteredDevices', {
+        const response = await fetch('/api/getAllRegisteredDevices', {
             method: 'GET',
             credentials: 'include', // Include cookies in the request
             mode : 'cors',
         });
+        // const response = await fetch('http://localhost:9093/getAllRegisteredDevices', {
+        //     method: 'GET',
+        //     credentials: 'include', // Include cookies in the request
+        //     mode : 'cors',
+        // });
         const data = await response.json();
         const devices = JSON.parse(JSON.parse(data)).map(device => JSON.parse(device));
         this.setState({ Devices: devices , registeredDevices: devices.length, isLoading: false});

@@ -4,6 +4,12 @@ import Tooltip from './Tooltip';
 import SimpleTooltip from "./SimpleTooltip";
 import './ContextMenu.css';
 import './LinkingMode.css'
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+
 
 const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLevel, currentFilter, style }) => {
     const svgRef = useRef();
@@ -15,6 +21,8 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
     const [contextMenuData, setContextMenuData] = useState(null);
     const [linkingMode, setLinkingMode] = useState(null);
     const linkSourceId= useRef(null);
+    const [linkSelectionPopupOpen, setLinkSelectionPopupOpen] = useState(false);
+    const [relationsToDelete, setRelationsToDelete] = useState([]);
 
     useEffect(() => {
         if (!nodes) return;
@@ -51,11 +59,16 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
                 acc[key] = {
                     source: link.source,
                     target: link.target,
-                    label: link.label  // Initialize with the first link's name
+                    label: link.label,  // Initialize with the first link's name
+                    relations: [{
+                        label: link.label,
+                        relId: link.relId
+                    }]
                 };
             } else {
                 // If the key exists, concatenate the link's name
                 acc[key].label += `, ${link.label}`;
+                acc[key].relations.push({label: link.label, relId: link.relId});
             }
 
             return acc;
@@ -64,8 +77,8 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
         const aggregatedLinks = Object.values(groupedLinks);
 
         const link = graphGroup.selectAll('.link')
-            //.data(aggregatedLinks) //if there are more links between 2 nodes
-            .data(links)
+            .data(aggregatedLinks) //if there are more links between 2 nodes
+            //.data(links)
             .enter()
             .append('line')
             .attr('class', 'link')
@@ -81,9 +94,27 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
                     .attr('opacity', '1');
                 setSimpleTooltipData(null);
             })
+            // .on('contextmenu', function (event, data) {
+            //     event.preventDefault();
+            //     //setContextMenuData({ type: 'Link', id: data.relId, x: event.x, y: event.y });
+            //     setContextMenuData({ type: 'Link', relations: data.relations, x: event.x, y: event.y });
+            // });
             .on('contextmenu', function (event, data) {
                 event.preventDefault();
-                setContextMenuData({ type: 'Link', id: data.relId, x: event.x, y: event.y });
+
+                // Log to check what data.relations contains
+                console.log('Context menu data:', data);
+
+                // Safely ensure relations is an array (or empty if not available)
+                const relations = data.relations || [];
+
+                // Now set the contextMenuData with the relations array
+                setContextMenuData({
+                    type: 'Link',
+                    relations: relations,  // Ensure this is passed correctly
+                    x: event.x,
+                    y: event.y
+                });
             });
 
 
@@ -232,11 +263,37 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
         }
     };
 
+
+    // const handleDeleteLink = async () => {
+    //     if (contextMenuData) {
+    //         console.log(contextMenuData);
+    //         await deleteLink(contextMenuData.id);
+    //         setContextMenuData(null);
+    //     }
+    // };
     const handleDeleteLink = async () => {
-        if (contextMenuData) {
-            await deleteLink(contextMenuData.id);
-            setContextMenuData(null);
+        if (contextMenuData && contextMenuData.relations) {
+            // Check if there are multiple links
+            if (contextMenuData.relations.length > 1) {
+                // Open the popup/modal for selecting the link to delete
+                setContextMenuData(null);
+                setRelationsToDelete(contextMenuData.relations);
+                setLinkSelectionPopupOpen(true);
+            } else if (contextMenuData.relations.length === 1) {
+                // If only one link, delete it directly
+                await deleteLink(contextMenuData.relations[0].relId);
+                setContextMenuData(null);
+                setRelationsToDelete([]);  // Clear the relations to delete
+            }
         }
+    };
+
+    const handleSelectLinkToDelete = async (relId) => {
+        // Perform the deletion of the selected link
+        await deleteLink(relId);
+        setContextMenuData(null);
+        setLinkSelectionPopupOpen(false);  // Close the popup after deletion
+        setRelationsToDelete([]);  // Clear the relations to delete
     };
 
     // Event listener for node click
@@ -316,9 +373,6 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
                             <div className="context-menu-item" onClick={handleDeleteNode}>
                                 Delete Node
                             </div>
-                            {/*<div className="context-menu-item" onClick={startLinkingMode}>*/}
-                            {/*    Connect Another Node*/}
-                            {/*</div>*/}
                             <div
                                 className={`context-menu-item ${nodes.length <= 1 ? 'disabled' : ''}`}
                                 onClick={nodes.length > 1 ? startLinkingMode : null}  // Disable click if only 1 node
@@ -327,6 +381,9 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
                             </div>
                         </>
                     ) : (
+                        // <div className="context-menu-item" onClick={handleDeleteLink}>
+                        //     Delete Link
+                        // </div>
                         <div className="context-menu-item" onClick={handleDeleteLink}>
                             Delete Link
                         </div>
@@ -334,6 +391,23 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
                     <div className="context-menu-item" onClick={closeMenu}>Close Menu </div>
                 </div>
             )}
+            <Dialog open={linkSelectionPopupOpen} onClose={() => setLinkSelectionPopupOpen(false)}>
+                <DialogTitle>Select a Link to Delete</DialogTitle>
+                <DialogContent>
+                    <ul>
+                        {relationsToDelete.map((rel, index) => (
+                            <li key={index}>
+                                <Button onClick={() => handleSelectLinkToDelete(rel.relId)}>
+                                    {rel.label}
+                                </Button>
+                            </li>
+                        ))}
+                    </ul>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setLinkSelectionPopupOpen(false)}>Cancel</Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 };

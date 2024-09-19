@@ -2,13 +2,13 @@ import React from 'react';
 import { useEffect, useState, useCallback} from 'react';
 import GraphMini from "../components/GraphMini";
 
-function Assets({id}) {
+function Assets({id, l1, l2, l3}) {
 
     const [nodes, setNodes] = useState([]);
     const [links, setLinks] = useState([]);
 
     const fetchData = useCallback(async()=>{
-        const response = await fetch('/api/getNetwork', {
+        const response = await fetch(`/api/getFilteredNetwork?l1=${l1}&l2=${l2}&l3=${l3}`, {
             method: 'GET',
             credentials: 'include',
             mode : 'cors',

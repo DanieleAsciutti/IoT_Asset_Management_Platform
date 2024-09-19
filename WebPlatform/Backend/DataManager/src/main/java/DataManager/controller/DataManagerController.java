@@ -242,7 +242,7 @@ public class DataManagerController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping(value = "getNetwork")
+    @GetMapping(value = "/getNetwork")
     public ResponseEntity<String> getNetwork(){
         log.info("GetNetwork endpoint called");
         List<String> assets = assetRepository.getAssetsForNetwork();

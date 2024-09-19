@@ -398,7 +398,12 @@ class Devices extends React.Component {
                                         }}>
                                             <div style={{maxWidth: '100%', maxHeight: '450px', overflow: 'hidden'}}>
                                                 {console.log(this.state.deviceData.elementId)}
-                                                <Network id={this.state.deviceData.elementId} style={{
+                                                <Network
+                                                    id={this.state.deviceData.elementId}
+                                                    l1={this.state.deviceData.asset.properties.level1}
+                                                    l2={this.state.deviceData.asset.properties.level2}
+                                                    l3={this.state.deviceData.asset.properties.level3}
+                                                    style={{
                                                     maxWidth: '70%',
                                                     maxHeight: '70%',
                                                     overflow: 'hidden'

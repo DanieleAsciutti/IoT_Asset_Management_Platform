@@ -43,16 +43,16 @@ export default class Devices extends React.Component {
 
     async componentDidMount() {
         this.setState({ isLoading: true });
-        // const response = await fetch('/api/getAllUnregisteredDevices', {
-        //     method: 'GET',
-        //     credentials: 'include', // Include cookies in the request
-        //     mode : 'cors',
-        // });
-        const response = await fetch('http://localhost:9093/getAllUnregisteredDevices', {
+        const response = await fetch('/api/getAllUnregisteredDevices', {
             method: 'GET',
             credentials: 'include', // Include cookies in the request
             mode : 'cors',
         });
+        // const response = await fetch('http://localhost:9093/getAllUnregisteredDevices', {
+        //     method: 'GET',
+        //     credentials: 'include', // Include cookies in the request
+        //     mode : 'cors',
+        // });
         const data = await response.json();
         console.log(data);
         this.setState({ pendingDevices: data ,unregisteredDevices: data.length, isLoading: false});
@@ -68,7 +68,12 @@ export default class Devices extends React.Component {
 
     async getLevel1Options() {
         try {
-            const response = await fetch(`http://localhost:9093/getLevel1`, {
+            // const response = await fetch(`http://localhost:9093/getLevel1`, {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
+            const response = await fetch(`/api/getLevel1`, {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',
@@ -94,16 +99,7 @@ export default class Devices extends React.Component {
             level3: level3
         };
 
-        // const response = await fetch(`/api/registerDevice?id=${id}`, {
-        //     method: 'POST',
-        //     credentials: 'include', // Include cookies in the request
-        //     mode : 'cors',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify(deviceDTO),
-        // });
-        const response = await fetch(`http://localhost:9093/registerDevice?id=${id}`, {
+        const response = await fetch(`/api/registerDevice?id=${id}`, {
             method: 'POST',
             credentials: 'include', // Include cookies in the request
             mode : 'cors',
@@ -112,6 +108,15 @@ export default class Devices extends React.Component {
             },
             body: JSON.stringify(deviceDTO),
         });
+        // const response = await fetch(`http://localhost:9093/registerDevice?id=${id}`, {
+        //     method: 'POST',
+        //     credentials: 'include', // Include cookies in the request
+        //     mode : 'cors',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify(deviceDTO),
+        // });
 
         this.getLevel1Options();
         if (!response.ok) {
@@ -131,16 +136,7 @@ export default class Devices extends React.Component {
                 [nodeId]: connectionName}
             };
             console.log(relationships);
-            // const response = await fetch(`/api/addRelationships?assetId=${this.state.deviceData.id}`, {
-            //     method: 'POST',
-            //     credentials: 'include', // Include cookies in the request
-            //     mode : 'cors',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify(relationships),
-            // });
-            const response = await fetch(`http://localhost:9093/addRelationships?assetId=${this.state.deviceData.id}`, {
+            const response = await fetch(`/api/addRelationships?assetId=${this.state.deviceData.id}`, {
                 method: 'POST',
                 credentials: 'include', // Include cookies in the request
                 mode : 'cors',
@@ -149,6 +145,15 @@ export default class Devices extends React.Component {
                 },
                 body: JSON.stringify(relationships),
             });
+            // const response = await fetch(`http://localhost:9093/addRelationships?assetId=${this.state.deviceData.id}`, {
+            //     method: 'POST',
+            //     credentials: 'include', // Include cookies in the request
+            //     mode : 'cors',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify(relationships),
+            // });
 
             if (!response.ok) {
                 console.log('Failed to add relationship to device');
@@ -220,7 +225,12 @@ export default class Devices extends React.Component {
         });
 
         if (level1) {
-            const response = await fetch(`http://localhost:9093/getLevel2?level1=${level1}`, {
+            // const response = await fetch(`http://localhost:9093/getLevel2?level1=${level1}`, {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
+            const response = await fetch(`/api/getLevel2?level1=${level1}`, {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',
@@ -238,7 +248,12 @@ export default class Devices extends React.Component {
         });
 
         if (level2) {
-            const response = await fetch(`http://localhost:9093/getLevel3?level1=${this.state.deviceData.level1}&level2=${level2}`, {
+            // const response = await fetch(`http://localhost:9093/getLevel3?level1=${this.state.deviceData.level1}&level2=${level2}`, {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
+            const response = await fetch(`/api/getLevel3?level1=${this.state.deviceData.level1}&level2=${level2}`, {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',
