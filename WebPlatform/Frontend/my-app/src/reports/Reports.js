@@ -7,6 +7,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import DrawerComponent from "../components/DrawerComponent";
 import Container from "@mui/material/Container";
+import SequentialFilter from "../components/SequentialFilter";
 
 const Reports = () => {
     const [open, setOpen] = useState(true);
@@ -15,6 +16,13 @@ const Reports = () => {
     const [selectedDeviceId, setSelectedDeviceId] = useState("");
     const [pendingData, setPendingData] = useState(false);
     const [measurements, setMeasurements] = useState([]);
+    const [level1, setLevel1] = useState('');
+    const [level2, setLevel2] = useState('');
+    const [level3, setLevel3] = useState('');
+    const [level1Options, setLevel1Options] = useState([]);
+    const [level2Options, setLevel2Options] = useState([]);
+    const [level3Options, setLevel3Options] = useState([]);
+
 
     const userDataString = sessionStorage.getItem('userData');
     const userData = JSON.parse(userDataString);
@@ -26,19 +34,42 @@ const Reports = () => {
     }
 
     useEffect(() => {
+        // const fetchData = async () => {
+        //     try {
+        //         const response = await fetch('/api/getAllRegisteredDevices', {
+        //             method: 'GET',
+        //             credentials: 'include',
+        //             headers: { 'Content-Type': 'application/json' }
+        //         });
+        //         const data = await response.json();
+        //         const devices = JSON.parse(JSON.parse(data)).map(device => JSON.parse(device));
+        //         setDevices(devices);
+        //         console.log(devices);
+        //     } catch (error) {
+        //         console.error('Error fetching devices:', error);
+        //     }
+        // };
         const fetchData = async () => {
             try {
-                const response = await fetch('/api/getAllRegisteredDevices', {
+                const response = await fetch('/api/getLevel1', {
                     method: 'GET',
                     credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' }
+                    mode: 'cors',
                 });
-                const data = await response.json();
-                const devices = JSON.parse(JSON.parse(data)).map(device => JSON.parse(device));
-                setDevices(devices);
-                console.log(devices);
+                // const response = await fetch('http://localhost:9093/getLevel1', {
+                //     method: 'GET',
+                //     credentials: 'include',
+                //     mode: 'cors',
+                // });
+
+                if (response.ok) {
+                    const options = await response.json(); // Parse JSON response
+                    setLevel1Options(options);
+                } else {
+                    console.error('Failed to fetch Level 1 options');
+                }
             } catch (error) {
-                console.error('Error fetching devices:', error);
+                console.error('Error fetching Level 1 options:', error);
             }
         };
 
@@ -94,6 +125,8 @@ const Reports = () => {
         fetchMeasurements();
     }, [selectedDeviceId]);
 
+
+
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -129,6 +162,79 @@ const Reports = () => {
         }
     };
 
+    const handleLevel1Change = async (event) => {
+        try {
+            const level1 = event.target.value;
+            setLevel1(level1);
+            const response = await fetch(`/api/getLevel2?level1=${level1}`, {
+                method: 'GET',
+                credentials: 'include',
+                mode: 'cors',
+            });
+            // const response = await fetch(`http://localhost:9093/getLevel2?level1=${level1}`, {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
+
+            if (response.ok) {
+                const options = await response.json(); // Parse JSON response
+                setLevel2Options(options);
+                setLevel3Options([]);
+            } else {
+                console.error('Failed to fetch Level 1 options');
+            }
+        } catch (error) {
+            console.error('Error fetching Level 1 options:', error);
+        }
+    }
+
+    const handleLevel2Change = async (event) => {
+        try {
+            const level2 = event.target.value;
+            setLevel2(level2);
+            const response = await fetch(`/api/getLevel3?level1=${level1}&level2=${level2}`, {
+                method: 'GET',
+                credentials: 'include',
+                mode: 'cors',
+            });
+            // const response = await fetch(`http://localhost:9093/getLevel3?level1=${level1}&level2=${level2}`, {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
+
+            if (response.ok) {
+                const options = await response.json(); // Parse JSON response
+                setLevel3Options(options);
+                console.log('Level 3 options:', options)
+            } else {
+                console.error('Failed to fetch Level 1 options');
+            }
+        } catch (error) {
+            console.error('Error fetching Level 1 options:', error);
+        }
+    }
+
+    const handleLevel3Change = async (event) => {
+        const level3 = event.target.value;
+        setLevel3(level3);
+        const response = await fetch(`/api/getFilteredRegisteredDevices?l1=${level1}&l2=${level2}&l3=${level3}`, {
+            method: 'GET',
+            credentials: 'include',
+            mode: 'cors',
+        });
+
+        const data = await response.json();
+        if (data == null)
+            return;
+
+        console.log(data);
+        const devices = data.map(deviceString => JSON.parse(deviceString));
+        console.log(devices);
+        setDevices(devices);
+    }
+
     return (
         <CustomThemeProvider>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -151,35 +257,70 @@ const Reports = () => {
                             <Grid container spacing={3}>
                                 <Grid item xs={12}>
                                     <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                                        <Select
-                                            value={selectedDeviceId}
-                                            onChange={handleChange}
-                                            displayEmpty
-                                            inputProps={{ 'aria-label': 'Without label' }}
-                                        >
-                                            <MenuItem value="">
-                                                <em>None</em>
-                                            </MenuItem>
-                                            {devices.map((device) => (
-                                                <MenuItem key={device.id} value={device.id}>{device.name}</MenuItem>
-                                            ))}
-                                        </Select>
-                                        {selectedDeviceId && (
+
+                                        {/* Sequential Filter Component */}
+                                        <SequentialFilter
+                                            level1={level1}
+                                            level2={level2}
+                                            level3={level3}
+                                            level1Options={level1Options}
+                                            level2Options={level2Options}
+                                            level3Options={level3Options}
+                                            handleLevel1Change={handleLevel1Change}
+                                            handleLevel2Change={handleLevel2Change}
+                                            handleLevel3Change={handleLevel3Change}
+                                        />
+
+                                        {/* Device Selector */}
+                                        {devices.length > 0 && (
                                             <>
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    onClick={handleRequestNewData}
-                                                    disabled={pendingData}
+                                                <Select
+                                                    value={selectedDeviceId}
+                                                    onChange={handleChange}
+                                                    displayEmpty
+                                                    inputProps={{ 'aria-label': 'Without label' }}
                                                     sx={{ mt: 2 }}
                                                 >
-                                                    REQUEST NEW DATA
-                                                </Button>
-                                                {pendingData && <Typography sx={{ mt: 2 }}>New data requested from the device</Typography>}
-                                                {measurements.length === 0 ? (
-                                                    <Typography sx={{ mt: 2 }}>No data available, please request new data</Typography>
-                                                ) : (
-                                                    <DeviceDataReports deviceId={selectedDeviceId} measurements={measurements} />
+                                                    <MenuItem value="">
+                                                        <em>None</em>
+                                                    </MenuItem>
+                                                    {devices.map((device) => (
+                                                        <MenuItem key={device.id} value={device.id}>
+                                                            {device.name}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+
+                                                {/* Conditional rendering based on selected device */}
+                                                {selectedDeviceId && (
+                                                    <>
+                                                        <Button
+                                                            variant="contained"
+                                                            color="primary"
+                                                            onClick={handleRequestNewData}
+                                                            disabled={pendingData}
+                                                            sx={{ mt: 2 }}
+                                                        >
+                                                            REQUEST NEW DATA
+                                                        </Button>
+
+                                                        {pendingData && (
+                                                            <Typography sx={{ mt: 2 }}>
+                                                                New data requested from the device
+                                                            </Typography>
+                                                        )}
+
+                                                        {measurements.length === 0 ? (
+                                                            <Typography sx={{ mt: 2 }}>
+                                                                No data available, please request new data
+                                                            </Typography>
+                                                        ) : (
+                                                            <DeviceDataReports
+                                                                deviceId={selectedDeviceId}
+                                                                measurements={measurements}
+                                                            />
+                                                        )}
+                                                    </>
                                                 )}
                                             </>
                                         )}

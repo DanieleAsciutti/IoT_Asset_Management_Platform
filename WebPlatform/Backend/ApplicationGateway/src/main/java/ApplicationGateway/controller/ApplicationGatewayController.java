@@ -194,6 +194,20 @@ public class ApplicationGatewayController {
         return ResponseEntity.ok(applicationGatewayService.getAllRegisteredDevices());
     }
 
+    @GetMapping(value = "/getFilteredRegisteredDevices")
+    public ResponseEntity<List<String>> getFilteredRegisteredDevices(
+            @CookieValue (value = "token", defaultValue = "") String accessToken,
+            @RequestParam String l1, @RequestParam String l2, @RequestParam String l3){
+        log.info("GetFilteredRegisteredDevices endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize( new AuthorizationRequest(accessToken) );
+        if( !authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        log.info("User authorized");
+        return ResponseEntity.ok(applicationGatewayService.getFilteredRegisteredDevices(l1,l2,l3));
+    }
+
     @PostMapping(value = "/registerDevice")
     public ResponseEntity<Void> registerDevice(
             @CookieValue (value = "token", defaultValue = "") String accessToken,
@@ -255,7 +269,7 @@ public class ApplicationGatewayController {
     public ResponseEntity<String> getFilteredNetwork(
             @CookieValue (value = "token", defaultValue = "") String accessToken,
             @RequestParam String l1, @RequestParam String l2, @RequestParam String l3){
-        log.info("GetNetwork endpoint called");
+        log.info("GetFilteredNetwork endpoint called");
         ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize(new AuthorizationRequest(accessToken));
         if (!authorization.getBody().getIsAuthorized()) {
             log.info("User unauthorized");

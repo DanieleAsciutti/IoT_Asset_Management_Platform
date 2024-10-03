@@ -5,6 +5,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CustomThemeProvider from '../components/ThemeProvider';
 import AppBarComponent from '../components/AppBarComponent';
 import DrawerComponent from '../components/DrawerComponent';
+import SequentialFilter from "../components/SequentialFilter";
 
 function Assets() {
 
@@ -553,38 +554,17 @@ function Assets() {
                 flexDirection: 'column',
                 gap: '15px',
             }}>
-                <FormControl fullWidth>
-                    <InputLabel>Level 1</InputLabel>
-                    <Select value={level1} onChange={(e) => handleLevel1Change(e, true)}>
-                        {level1Options.map((option, index) => (
-                            <MenuItem key={index} value={option}>
-                                {option}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-
-                <FormControl fullWidth disabled={!level1}>
-                    <InputLabel>Level 2</InputLabel>
-                    <Select value={level2} onChange={(e) => handleLevel2Change(e, true)}>
-                        {level2Options.map((option, index) => (
-                            <MenuItem key={index} value={option}>
-                                {option}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-
-                <FormControl fullWidth disabled={!level2}>
-                    <InputLabel>Level 3</InputLabel>
-                    <Select value={level3} onChange={(e) => handleLevel3Change(e, true)}>
-                        {level3Options.map((option, index) => (
-                            <MenuItem key={index} value={option}>
-                                {option}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                <SequentialFilter
+                    level1={level1}
+                    level2={level2}
+                    level3={level3}
+                    level1Options={level1Options}
+                    level2Options={level2Options}
+                    level3Options={level3Options}
+                    handleLevel1Change={handleLevel1Change}
+                    handleLevel2Change={handleLevel2Change}
+                    handleLevel3Change={handleLevel3Change}
+                />
             </Box>
             <Fab
                 color="primary"

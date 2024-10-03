@@ -2,6 +2,8 @@ package DataManager.repository;
 
 import DataManager.model.graphDB.Device;
 
+import org.neo4j.driver.Result;
+import org.neo4j.driver.internal.value.MapValue;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public interface AssetRepository extends Neo4jRepository<Device, String>{
 
@@ -41,6 +44,11 @@ public interface AssetRepository extends Neo4jRepository<Device, String>{
             "status: d.status, regDate: d.registrationDate})")
     ArrayList<String> getAllRegisteredDevices();
 
+    @Query("MATCH (d:Device) WHERE d.isRegistered = true AND d.level1 = $level1 AND d.level2 = $level2 AND d.level3 = $level3 RETURN " +
+            "apoc.convert.toJson({id: elementId(d), name: d.name, place: d.place, type: d.type, " +
+            "status: d.status, regDate: d.registrationDate})")
+    ArrayList<String> getFilteredRegisteredDevices(String level1, String level2, String level3);
+
     @Query("MATCH (d) WHERE elementId(d) = $id RETURN labels(d)[0] as labels")
     String getNodeLabelById(String id);
 
@@ -66,7 +74,7 @@ public interface AssetRepository extends Neo4jRepository<Device, String>{
      @Query("CALL apoc.cypher.doIt($query, {deviceId: $deviceId, targetId: $targetId})")
      void addRelationship(@Param("deviceId") String deviceId, @Param("targetId") String targetId, @Param("query") String query);
 
-     @Query("MATCH (d) WHERE elementId(d) = $id RETURN apoc.convert.toJson({l1: d.level1, l2: d.level2, l3: d.level3})")
+     @Query("MATCH (d) WHERE elementId(d) = $id RETURN apoc.convert.toJson({isReg: d.isRegistered, l1: d.level1, l2: d.level2, l3: d.level3})")
      String getLevels(@Param("id") String id);
 
      @Query("MATCH (d)-[r]-(t) WHERE elementId(r) = $relationshipId DELETE r")
@@ -123,4 +131,18 @@ public interface AssetRepository extends Neo4jRepository<Device, String>{
 
      @Query("MATCH (n) WHERE n.level1 = $level1 AND n.level2 = $level2 RETURN DISTINCT n.level3")
      List<String> retrieveLevel3(@Param("level1") String level1, @Param("level2") String level2);
+
+    /**
+     * TO DELETE, IT NEEDS ONLY FOR PYTHON SCRIPT //TODO
+     */
+
+    @Query("CALL apoc.cypher.doIt($query, {name: $name, level1: $level1, level2: $level2, level3: $level3})")
+    List<Map<String, Object>> pythonAddAsset(@Param("query") String query, @Param("name") String name, @Param("level1") String level1, @Param("level2") String level2, @Param("level3") String level3);
+
+    /**
+     * TO DELETE, IT NEEDS ONLY FOR PYTHON SCRIPT //TODO
+     */
+    @Query("MATCH (d) RETURN elementId(d)")
+    List<String> retrieveAll();
+
 }

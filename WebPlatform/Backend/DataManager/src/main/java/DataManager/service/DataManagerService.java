@@ -31,6 +31,9 @@ public class DataManagerService {
     public Boolean checkNewRelationship(String assetId, String targetId){
         JSONObject assetJson = new JSONObject(assetRepository.getLevels(assetId));
         JSONObject targetJson = new JSONObject(assetRepository.getLevels(targetId));
+        if(!assetJson.getBoolean("isReg")){
+            return true;
+        }
 
         return assetJson.getString("l1").equals(targetJson.getString("l1")) &&
                 assetJson.getString("l2").equals(targetJson.getString("l2")) &&

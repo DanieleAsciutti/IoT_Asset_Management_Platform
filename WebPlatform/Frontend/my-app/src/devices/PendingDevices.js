@@ -54,9 +54,7 @@ export default class Devices extends React.Component {
         //     mode : 'cors',
         // });
         const data = await response.json();
-        console.log(data);
         this.setState({ pendingDevices: data ,unregisteredDevices: data.length, isLoading: false});
-        console.log(this.state.pendingDevices);
     }
 
     componentDidUpdate(prevState) {
@@ -125,8 +123,6 @@ export default class Devices extends React.Component {
         
     }
     handleNodeClick = async(nodeId) => {
-        console.log(nodeId);
-        console.log(this.state.deviceData.id);
         const connectionName = window.prompt("Please enter the connection name");
         if (connectionName) {
             this.setState({ connectionName });
@@ -135,7 +131,6 @@ export default class Devices extends React.Component {
                 "relationships": {
                 [nodeId]: connectionName}
             };
-            console.log(relationships);
             const response = await fetch(`/api/addRelationships?assetId=${this.state.deviceData.id}`, {
                 method: 'POST',
                 credentials: 'include', // Include cookies in the request
@@ -323,8 +318,8 @@ export default class Devices extends React.Component {
                         <>
                             <DialogTitle>Register Device</DialogTitle>
                             <DialogContent>
-                                <TextField name="id" label="ID" value={this.state.deviceData.id} onChange={this.handleChange} fullWidth />
-                                <TextField name="name" label="Name" value={this.state.deviceData.name} onChange={this.handleChange} fullWidth />
+                                {/*<TextField name="id" label="ID" value={this.state.deviceData.id} onChange={this.handleChange} fullWidth />*/}
+                                <TextField name="name" label="Name" value={this.state.deviceData.name} onChange={this.handleChange} fullWidth  style={{ marginTop: '10px' }}/>
                                 <TextField name="place" label="Place" value={this.state.deviceData.place} onChange={this.handleChange} fullWidth />
                                 <TextField name="type" label="Type" value={this.state.deviceData.type} onChange={this.handleChange} fullWidth />
                                 <TextField name="status" label="Status" value={this.state.deviceData.status} onChange={this.handleChange} fullWidth />
@@ -466,7 +461,12 @@ export default class Devices extends React.Component {
                         <>
                             <DialogTitle>Select the links</DialogTitle>
                             <DialogContent>
-                                <Network onNodeClick={this.handleNodeClick}/>
+                                <Network
+                                    onNodeClick={this.handleNodeClick}
+                                    level1={this.state.deviceData.level1}
+                                    level2={this.state.deviceData.level2}
+                                    level3={this.state.deviceData.level3}
+                                />
                             </DialogContent>
                             <DialogActions>
                                 <Button onClick={this.handleClose}>Cancel</Button>

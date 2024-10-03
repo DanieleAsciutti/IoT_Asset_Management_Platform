@@ -2,7 +2,7 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import Graph from "../components/GraphMini2";
 
-function Assets({onNodeClick}) {
+function Assets({onNodeClick, level1, level2, level3}) {
 
     const [nodes, setNodes] = useState([]);
     const [links, setLinks] = useState([]);
@@ -13,14 +13,13 @@ function Assets({onNodeClick}) {
     },[]);
 
     const fetchData = async()=>{
-        const response = await fetch('/api/getNetwork', {
+        const response = await fetch(`/api/getFilteredNetwork?l1=${level1}&l2=${level2}&l3=${level3}`, {
             method: 'GET',
             credentials: 'include',
             mode : 'cors',
         });
 
         const jsonData = await response.json();
-
         const unchecked_links = jsonData.links;
         const nodeIds = jsonData.nodes.map(node => node.id);
         const filtered_links = unchecked_links.filter(link => {

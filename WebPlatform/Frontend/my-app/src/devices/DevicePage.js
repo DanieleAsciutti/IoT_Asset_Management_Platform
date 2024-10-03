@@ -34,7 +34,6 @@ const handleLogout = () => {
 
 export function DevicesWrapper() {
     const {id} = useParams();
-    console.log(id);
     return <Devices deviceId={id}/>;
 }
 
@@ -182,7 +181,6 @@ class Devices extends React.Component {
             }),
         });
 
-        console.log(response);
 
         if (response.ok) {
             // Handle successful response
@@ -196,6 +194,7 @@ class Devices extends React.Component {
     }
 
     async componentDidMount() {
+        //TODO RIMETTERE IL CONTROLLO SULL'UTENTE
         const userDataString = sessionStorage.getItem('userData');
         const userData = JSON.parse(userDataString);
 
@@ -204,24 +203,29 @@ class Devices extends React.Component {
             window.location.href = '/';
         }
 
-        console.log(this.props.deviceId);
         const response = await fetch(`/api/getAsset?id=${this.props.deviceId}`, {
             method: 'GET',
             credentials: 'include', // Include cookies in the request
 
         });
+        // const response = await fetch(`http://localhost:9093/getAsset?id=${this.props.deviceId}`, {
+        //     method: 'GET',
+        //     credentials: 'include', // Include cookies in the request
+        //
+        // });
         const data = await response.json();
-        console.log(data);
         this.setState({deviceData: data,});
 
         const resp = await fetch(`/api/getDeviceModelsHistory?deviceId=${this.props.deviceId}`, {
             method: 'GET',
             credentials: 'include', // Include cookies in the request
         });
-        console.log(resp)
+        // const resp = await fetch(`http://localhost:9093/getDeviceModelsHistory?deviceId=${this.props.deviceId}`, {
+        //     method: 'GET',
+        //     credentials: 'include', // Include cookies in the request
+        // });
 
         const dataModel = await resp.json();
-        console.log(dataModel);
         const modelsfromUser = dataModel.userHistory;
         modelsfromUser.forEach(item => {
             item.from = "User";
@@ -243,6 +247,11 @@ class Devices extends React.Component {
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
         });
+        // const response2 = await fetch(`http://localhost:9093/retrieveDeviceDataMeasurements?deviceId=${this.props.deviceId}`, {
+        //     method: 'GET',
+        //     credentials: 'include',
+        //     headers: { 'Content-Type': 'application/json' }
+        // });
 
         if (response2.ok) {
             const measurements = await response2.json();
@@ -267,6 +276,10 @@ class Devices extends React.Component {
             method: 'POST',
             credentials: 'include', // Include cookies in the request
         });
+        // const response = await fetch(`http://localhost:9093/updateData?deviceId=${this.props.deviceId}`, {
+        //     method: 'POST',
+        //     credentials: 'include', // Include cookies in the request
+        // });
         if (response.ok) {
             console.log('Data updated successfully');
         } else {
@@ -278,6 +291,10 @@ class Devices extends React.Component {
             method: 'GET',
             credentials: 'include', // Include cookies in the request
         });
+        // const response = await fetch(`http://localhost:9093/retrieveModel?assetId=${this.props.deviceId}&modelName=${modelName}&fromUser=true`, {
+        //     method: 'GET',
+        //     credentials: 'include', // Include cookies in the request
+        // });
         const data = await response.blob();
         const url = window.URL.createObjectURL(new Blob([data]));
         const link = document.createElement('a');

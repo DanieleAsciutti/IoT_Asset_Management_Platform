@@ -221,6 +221,20 @@ public class ApplicationGatewayService {
         else return Collections.emptyList();
     }
 
+    public List<String> getFilteredRegisteredDevices(String l1, String l2, String l3) {
+        String url = String.format("http://%s:%d/getFilteredRegisteredDevices?",dataManagerAddress, dataManagerPort) + "l1=" + l1 + "&l2=" + l2 + "&l3=" + l3;
+        ResponseEntity<List<String>> response = webClient
+                .get().uri(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<String>>() {})
+                .block();
+
+        // Handle error or return an empty list
+        if (Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() && response.getBody() != null) return response.getBody();
+        else return Collections.emptyList();
+    }
+
     public ResponseEntity<Void> registerDevice(String id, AddDeviceDTO addDeviceDTO)
     {
         String url = String.format("http://%s:%d/registerDevice?",dataManagerAddress, dataManagerPort)+"assetId="+id;
