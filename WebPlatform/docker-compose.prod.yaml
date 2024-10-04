@@ -114,6 +114,7 @@ services:
       - ./nginx/:/etc/nginx/conf.d/
     ports:
       - "3050:80"
+#      - "3000:80"
     networks:
       - n-frontend
       - backend
@@ -123,6 +124,7 @@ services:
     stdin_open: true
     environment:
       - CHOKIDAR_USEPOLLING=true
+      - REACT_APP_WS_URL=ws://nginx:3050/ws
     build:
       dockerfile: Dockerfile
       context: ./Frontend/my-app
@@ -130,7 +132,8 @@ services:
     networks:
       - n-frontend
     expose:
-      - 3002
+#      - 3002
+      - 3000
 
 networks:
   backend:

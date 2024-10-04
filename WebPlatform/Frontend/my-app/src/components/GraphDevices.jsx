@@ -61,7 +61,6 @@ const Graph = React.forwardRef (({ nodes, links, onNodeClick}, ref) => {
             .attr('class', 'node')
             .on('click', (event, data) => {
                 onNodeClick(data.id);
-                console.log(data.id);
             });
 
         // Add circles representing nodes

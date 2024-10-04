@@ -11,11 +11,17 @@ import DataManager.repository.AssetRepository;
 import DataManager.repository.InfluxRepository;
 import DataManager.repository.UserRepository;
 import DataManager.service.DataManagerService;
+import com.influxdb.client.JSON;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.neo4j.driver.Result;
+import org.neo4j.driver.internal.value.MapValue;
+import org.neo4j.driver.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.neo4j.core.mapping.EntityInstanceWithSource;
+import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -189,8 +195,14 @@ public class DataManagerController {
     @GetMapping(value = "/getAllRegisteredDevices")
     public ResponseEntity<ArrayList<String>> getAllRegisteredDevices(){
         log.info("GetAllRegisteredDevices endpoint called");
-        log.info(assetRepository.getAllRegisteredDevices().toString());
+//        log.info(assetRepository.getAllRegisteredDevices().toString());
         return ResponseEntity.ok(assetRepository.getAllRegisteredDevices());
+    }
+
+    @GetMapping(value = "/getFilteredRegisteredDevices")
+    public ResponseEntity<ArrayList<String>> getFilteredRegisteredDevices(@RequestParam String l1, @RequestParam String l2, @RequestParam String l3){
+        log.info("GetFilteredRegisteredDevices endpoint called");
+        return ResponseEntity.ok(assetRepository.getFilteredRegisteredDevices(l1, l2, l3));
     }
 
 
@@ -471,5 +483,44 @@ public class DataManagerController {
                 .header("X-Accel-Buffering", "no")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
+    }
+
+
+    /**
+     *
+     * TO DELETE, IT NEEDS ONLY FOR THE PYTHON SCRIPT //TODO
+     */
+    @PostMapping(value = "/PythonaddAsset")
+    public ResponseEntity<String> pythonAddAsset(@RequestBody AddAssetDTO addAssetDTO) {
+        log.info("PythonInsertAsset endpoint called");
+        if (addAssetDTO.getLabel().equals("Device")) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (addAssetDTO.getName() == null || addAssetDTO.getName().isEmpty() ||
+                addAssetDTO.getLabel() == null || addAssetDTO.getLabel().isEmpty() ||
+                addAssetDTO.getLevel1() == null || addAssetDTO.getLevel1().isEmpty() ||
+                addAssetDTO.getLevel2() == null || addAssetDTO.getLevel2().isEmpty() ||
+                addAssetDTO.getLevel3() == null || addAssetDTO.getLevel3().isEmpty()) {
+
+            return ResponseEntity.badRequest().body("One or more parameters are missing or empty");
+        }
+
+        String query = String.format("CREATE (d:%s {name:$name}) " +
+                "SET d.isRegistered = true, d.level1 = $level1, d.level2 = $level2, d.level3 = $level3 " +
+                "RETURN elementId(d)", addAssetDTO.getLabel());
+
+
+        List<Map<String, Object>> result = assetRepository.pythonAddAsset(query, addAssetDTO.getName(), addAssetDTO.getLevel1(), addAssetDTO.getLevel2(), addAssetDTO.getLevel3());
+        return ResponseEntity.ok(result.get(0).get("elementId(d)").toString());
+    }
+
+    /**
+     * TO DELETE, IT NEEDS ONLY FOR THE PYTHON SCRIPT //TODO
+     */
+    @GetMapping(value = "/PythonRetrieveAll")
+    public ResponseEntity<List<String>> pythonRetrieveAll() {
+        log.info("PythonRetrieveAll endpoint called");
+        return ResponseEntity.ok(assetRepository.retrieveAll());
     }
 }
