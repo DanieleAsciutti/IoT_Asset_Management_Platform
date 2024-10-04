@@ -287,7 +287,7 @@ class Devices extends React.Component {
         }
     }
     downloadModel = async (modelName) => {
-        const response = await fetch(`/api/retrieveModel?assetId=${this.props.deviceId}&modelName=${modelName}&fromUser=true`, {
+        const response = await fetch(`/api/retrieveModel?deviceId=${this.props.deviceId}&modelName=${modelName}&fromUser=true`, {
             method: 'GET',
             credentials: 'include', // Include cookies in the request
         });
