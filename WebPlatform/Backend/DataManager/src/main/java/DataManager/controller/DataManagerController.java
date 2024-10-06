@@ -248,6 +248,18 @@ public class DataManagerController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping(value = "/getAllDeviceTags")
+    public ResponseEntity<List<String>> getAllDeviceTags(){
+        log.info("GetAllDeviceTags endpoint called");
+        return ResponseEntity.ok(assetRepository.getAllDeviceTags());
+    }
+
+    @GetMapping(value = "/getDevicesByTag")
+    public ResponseEntity<List<String>> getDevicesByTag(@RequestParam String tag){
+        log.info("GetDevicesByTag endpoint called");
+        return ResponseEntity.ok(assetRepository.getDevicesByTag(tag));
+    }
+
     @PostMapping(value = "/addRelationships")
     public ResponseEntity<Void> addRelationships(@RequestParam String assetId, @RequestBody RelationshipsDTO relationshipsDTO){
         //The map is: <targetId, relationshipLabel>

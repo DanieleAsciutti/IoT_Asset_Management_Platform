@@ -43,15 +43,7 @@ export default function SignInSide() {
         const hashedPassword = sha256(password).toString();
 
         try {
-            const response = await fetch('/api/authenticate', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ username: nickname, passwordHash: hashedPassword }),
-            });
-            // const response = await fetch('http://localhost:9093/authenticate', {
+            // const response = await fetch('/api/authenticate', {
             //     method: 'POST',
             //     credentials: 'include',
             //     headers: {
@@ -59,6 +51,14 @@ export default function SignInSide() {
             //     },
             //     body: JSON.stringify({ username: nickname, passwordHash: hashedPassword }),
             // });
+            const response = await fetch('http://localhost:9093/authenticate', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username: nickname, passwordHash: hashedPassword }),
+            });
             const data = await response.json();
 
             if (response.ok) {

@@ -203,8 +203,32 @@ public class ApplicationGatewayService {
                 .retrieve()
                 .toEntity(Void.class)
                 .block();
+    }
 
+    public List<String> getAllDeviceTags(){
+        String url = String.format("http://%s:%d/getAllDeviceTags",dataManagerAddress, dataManagerPort);
+        ResponseEntity<List<String>> response = webClient
+                .get().uri(url)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<String>>() {})
+                .block();
 
+        if (Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() && response.getBody() != null) return response.getBody();
+        else return Collections.emptyList();
+    }
+
+    public List<String> getDevicesByTag(String tag){
+        String url = String.format("http://%s:%d/getDevicesByTag?",dataManagerAddress, dataManagerPort) + "tag=" + tag;
+        ResponseEntity<List<String>> response = webClient
+                .get().uri(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<String>>() {})
+                .block();
+
+        if (Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() && response.getBody() != null) return response.getBody();
+        else return Collections.emptyList();
     }
 
     public List<UnregisteredDeviceDTO> getAllUnregisteredDevices() {

@@ -67,6 +67,11 @@ function Assets() {
         setAnchorEl(null);
     };
 
+    const handleLogout = () => {
+        sessionStorage.removeItem('userData');
+        window.location.href = '/signin';
+    };
+
     useEffect(() => {
         //fetchData();
         getLevel1Options();
@@ -252,31 +257,6 @@ function Assets() {
         setLinks(filtered_links);
     }
 
-    const fetchData = async () => {
-        const response = await fetch('/api/getNetwork', {
-            method: 'GET',
-            credentials: 'include',
-            mode: 'cors',
-        });
-
-        const jsonData = await response.json();
-        if (jsonData == null || jsonData.nodes == null)
-            return;
-
-        const unchecked_links = jsonData.links;
-        const nodeIds = jsonData.nodes.map(node => node.id);
-        const filtered_links = unchecked_links.filter(link => {
-            // Check if both link.source and link.target exist in the nodeIds array
-            const sourceExists = nodeIds.includes(link.source);
-            const targetExists = nodeIds.includes(link.target);
-
-            return sourceExists && targetExists;
-        });
-
-        setNodes(jsonData.nodes);
-        setLinks(filtered_links);
-    };
-
     const addRelationship = async (assetId, relationships) => {
         const url = `/api/addRelationships?assetId=${assetId}`;
         // const url = `http://localhost:9093/addRelationships?assetId=${assetId}`;
@@ -444,12 +424,6 @@ function Assets() {
         setAddL3Options([]);
     };
 
-    const handleLogout = () => {
-        // Cancella i dati dello user dalla sessione
-        sessionStorage.removeItem('userData');
-        // Reindirizza l'utente alla pagina di login
-        window.location.href = '/signin';
-    };
 
     const deleteNode = async (id) => {
         try {

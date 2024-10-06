@@ -187,6 +187,33 @@ public class ApplicationGatewayController {
 
     }
 
+    @GetMapping(value = "/getAllDeviceTags")
+    public ResponseEntity<List<String>> getAllDeviceTags(
+            @CookieValue (value = "token", defaultValue = "") String accessToken
+    ){
+        log.info("getAllDeviceTags endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize( new AuthorizationRequest(accessToken) );
+        if( !authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(applicationGatewayService.getAllDeviceTags());
+    }
+
+    @GetMapping(value = "/getDevicesByTag")
+    public ResponseEntity<List<String>> getDevicesByTag(
+            @CookieValue (value = "token", defaultValue = "") String accessToken,
+            @RequestParam String tag
+    ){
+        log.info("getDevicesByTag endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize( new AuthorizationRequest(accessToken) );
+        if( !authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(applicationGatewayService.getDevicesByTag(tag));
+    }
+
     @GetMapping(value = "/getAllUnregisteredDevices")
     public ResponseEntity<List<UnregisteredDeviceDTO>> getAllUnregisteredDevices(@CookieValue (value = "token", defaultValue = "") String accessToken){
         log.info("GetAllUnregisteredDevices endpoint called");

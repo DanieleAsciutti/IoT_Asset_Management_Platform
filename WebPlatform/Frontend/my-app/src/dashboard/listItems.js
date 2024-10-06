@@ -11,6 +11,7 @@ import CodeIcon from "@mui/icons-material/Code";
 import PhonelinkRingIcon from "@mui/icons-material/PhonelinkRing";
 import DevicesIcon from "@mui/icons-material/Devices";
 import ReportIcon from "@mui/icons-material/Summarize";
+import PodcastsIcon from '@mui/icons-material/Podcasts';
 
 export const mainListItems = (
     <React.Fragment>
@@ -37,6 +38,12 @@ export const mainListItems = (
                 <LayersIcon/>
             </ListItemIcon>
             <ListItemText primary="Assets"/>
+        </ListItemButton>
+        <ListItemButton component={Link} to="/managedevices">
+            <ListItemIcon>
+                <PodcastsIcon />
+            </ListItemIcon>
+            <ListItemText primary="Manage Devices"/>
         </ListItemButton>
     </React.Fragment>
 );

@@ -10,6 +10,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import IconButton from '@mui/material/IconButton';
 import CircularProgress from '@mui/material/CircularProgress';
 import SequentialFilter from "../components/SequentialFilter";
+import DevicesTable from "./DevicesTable";
 
 export default class DevicePage extends React.Component {
     constructor(props) {
@@ -19,7 +20,6 @@ export default class DevicePage extends React.Component {
             deviceData: { id: '', name: '', regDate: '', place: '', type: '', status: '' },
             Devices: [],
             registeredDevices: 0,
-            isLoading: false,
             hoveredRow: null,
             level1: '',    // For filter
             level2: '',    // For filter
@@ -57,10 +57,9 @@ export default class DevicePage extends React.Component {
         if (data == null)
             return;
 
-        console.log(data);
+
         const devices = data.map(deviceString => JSON.parse(deviceString));
-        console.log(devices);
-        this.setState({ Devices: devices, registeredDevices: devices.length, isLoading: false });
+        this.setState({ Devices: devices, registeredDevices: devices.length});
     };
 
     getLevel1Options = async () => {
@@ -169,6 +168,14 @@ export default class DevicePage extends React.Component {
         this.props.history.push(`/devices/${device.id}`);
     };
 
+    handleRowHover = (index) => {
+        this.setState({ hoveredRow: index });
+    };
+
+    handleRowLeave = () => {
+        this.setState({ hoveredRow: null });
+    };
+
     render() {
         return (
             <React.Fragment>
@@ -187,45 +194,50 @@ export default class DevicePage extends React.Component {
                     handleLevel3Change={this.handleLevel3Change}
                 />
 
-                {/* Loading Indicator */}
-                {this.state.isLoading && <CircularProgress />}
+
+                <DevicesTable
+                    devices={this.state.Devices}
+                    hoveredRow={this.state.hoveredRow}
+                    handleRowHover={this.handleRowHover}
+                    handleRowLeave={this.handleRowLeave}
+                />
 
                 {/* Devices Table */}
-                {!this.state.isLoading && this.state.Devices.length > 0 && (
-                    <Table size="small">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell><strong>Name</strong></TableCell>
-                                <TableCell><strong>Registration Date</strong></TableCell>
-                                <TableCell><strong>Status</strong></TableCell>
-                                <TableCell><strong>Place</strong></TableCell>
-                                <TableCell><strong>Type</strong></TableCell>
-                                <TableCell align="right"><strong>Details</strong></TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {this.state.Devices.map((device, index) => (
-                                <TableRow
-                                    key={device.id}
-                                    onMouseEnter={() => this.setState({ hoveredRow: index })}
-                                    onMouseLeave={() => this.setState({ hoveredRow: null })}
-                                    style={{ backgroundColor: this.state.hoveredRow === index ? '#f5f5f5' : 'inherit' }}
-                                >
-                                    <TableCell>{device.name}</TableCell>
-                                    <TableCell>{device.regDate}</TableCell>
-                                    <TableCell>{device.status}</TableCell>
-                                    <TableCell>{device.place}</TableCell>
-                                    <TableCell>{device.type}</TableCell>
-                                    <TableCell align="right">
-                                        <IconButton color="primary" component={RouterLink} to={`/devices/${device.id}`}>
-                                            <KeyboardArrowRightIcon />
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                )}
+                {/*{!this.state.isLoading && this.state.Devices.length > 0 && (*/}
+                {/*    <Table size="small">*/}
+                {/*        <TableHead>*/}
+                {/*            <TableRow>*/}
+                {/*                <TableCell><strong>Name</strong></TableCell>*/}
+                {/*                <TableCell><strong>Registration Date</strong></TableCell>*/}
+                {/*                <TableCell><strong>Status</strong></TableCell>*/}
+                {/*                <TableCell><strong>Place</strong></TableCell>*/}
+                {/*                <TableCell><strong>Type</strong></TableCell>*/}
+                {/*                <TableCell align="right"><strong>Details</strong></TableCell>*/}
+                {/*            </TableRow>*/}
+                {/*        </TableHead>*/}
+                {/*        <TableBody>*/}
+                {/*            {this.state.Devices.map((device, index) => (*/}
+                {/*                <TableRow*/}
+                {/*                    key={device.id}*/}
+                {/*                    onMouseEnter={() => this.setState({ hoveredRow: index })}*/}
+                {/*                    onMouseLeave={() => this.setState({ hoveredRow: null })}*/}
+                {/*                    style={{ backgroundColor: this.state.hoveredRow === index ? '#f5f5f5' : 'inherit' }}*/}
+                {/*                >*/}
+                {/*                    <TableCell>{device.name}</TableCell>*/}
+                {/*                    <TableCell>{device.regDate}</TableCell>*/}
+                {/*                    <TableCell>{device.status}</TableCell>*/}
+                {/*                    <TableCell>{device.place}</TableCell>*/}
+                {/*                    <TableCell>{device.type}</TableCell>*/}
+                {/*                    <TableCell align="right">*/}
+                {/*                        <IconButton color="primary" component={RouterLink} to={`/devices/${device.id}`}>*/}
+                {/*                            <KeyboardArrowRightIcon />*/}
+                {/*                        </IconButton>*/}
+                {/*                    </TableCell>*/}
+                {/*                </TableRow>*/}
+                {/*            ))}*/}
+                {/*        </TableBody>*/}
+                {/*    </Table>*/}
+                {/*)}*/}
             </React.Fragment>
         );
     }

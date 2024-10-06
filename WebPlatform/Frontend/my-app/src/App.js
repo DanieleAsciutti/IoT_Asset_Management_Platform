@@ -8,6 +8,7 @@ import Technician from "./technician/Technician";
 import Reports from "./reports/Reports";
 import DevicesWrapper from "./devices/DevicePage";
 import AssetsWrapper from './devices/AssetPage';
+import ManageDevices from "./manageDevices/ManageDevices";
 
 function App() {
     return (
@@ -21,6 +22,7 @@ function App() {
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/devices/:id" element={<DevicesWrapper/>} />
                 <Route path="/assets/:id" element={<AssetsWrapper/>}/>
+                <Route path="/managedevices" element={<ManageDevices />}/>
             </Routes>
         </Router>
     );
