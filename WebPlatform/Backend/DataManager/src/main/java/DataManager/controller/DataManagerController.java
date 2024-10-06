@@ -4,6 +4,7 @@ import DataManager.dto.UnregisteredDeviceDTO;
 import DataManager.dto.asset.*;
 import DataManager.dto.auth.UserDTO;
 import DataManager.dto.gateway.AddUserDTO;
+import DataManager.dto.gateway.DeviceTagDTO;
 import DataManager.model.Role;
 import DataManager.model.graphDB.Device;
 import DataManager.model.relDB.User;
@@ -208,10 +209,16 @@ public class DataManagerController {
 
     @PostMapping(value = "/addAttributes")
     public ResponseEntity<Void> addAttributes(@RequestParam String assetId, @RequestBody AttributesDTO attributesDTO){
-        log.info("RegisterAsset endpoint called");
+        log.info("AddAttributes endpoint called");
         String assetLabel = assetRepository.getNodeLabelById(assetId);
         String query = "MATCH (d:"+assetLabel+") WHERE elementId(d) = $assetId SET d += $value";
-        assetRepository.setAttributes(assetId, attributesDTO.getAttributes(), query);
+        Map<String, String> toPut = new HashMap<>();
+        for(Map.Entry<String, String> entry : attributesDTO.getAttributes().entrySet()){
+            if(!entry.getKey().equals("tag")){
+                toPut.put(entry.getKey(), entry.getValue());
+            }
+        }
+        assetRepository.setAttributes(assetId, toPut, query);
         return ResponseEntity.ok().build();
     }
 
@@ -225,6 +232,19 @@ public class DataManagerController {
         }
         query = query.substring(0, query.length()-1);
         assetRepository.removeAttributes(assetId, query);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(value = "/modifyDeviceTag")
+    public ResponseEntity<Void> modifyDeviceTag(@RequestBody DeviceTagDTO deviceTagDTO){
+        log.info("ModifyTag endpoint called");
+        String query;
+        if(deviceTagDTO.getTag() == null){
+            query = "MATCH (d:Device) WHERE elementId(d) = $id REMOVE d.tag";
+        }else{
+            query = "MATCH (d:Device) WHERE elementId(d) = $id SET d.tag=\"" + deviceTagDTO.getTag() + "\"";
+        }
+        assetRepository.modifyDeviceTag(deviceTagDTO.getDeviceId(), query);
         return ResponseEntity.ok().build();
     }
 

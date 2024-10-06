@@ -5,6 +5,7 @@ import ApplicationGateway.dto.SecurityResponse;
 import ApplicationGateway.dto.assetManDTO.*;
 import ApplicationGateway.dto.auth_AuthDTO.*;
 import ApplicationGateway.dto.dataManagerDTO.AddAssetDTO;
+import ApplicationGateway.dto.dataManagerDTO.DeviceTagDTO;
 import ApplicationGateway.dto.frontend.CompactUserDTO;
 import ApplicationGateway.dto.frontend.ModelDTO;
 import ApplicationGateway.dto.frontend.UserDTO;
@@ -168,6 +169,22 @@ public class ApplicationGatewayController {
         }
         log.info("User authorized");
         return applicationGatewayService.removeAttributes(assetId,attributes);
+    }
+
+    @PostMapping(value = "/modifyDeviceTag")
+    public ResponseEntity<Void> modifyDeviceTag(
+            @CookieValue (value = "token", defaultValue = "") String accessToken,
+            @RequestBody DeviceTagDTO deviceTagDTO
+            ){
+        log.info("ModifyDeviceTag endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize( new AuthorizationRequest(accessToken) );
+        if( !authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        log.info("User authorized");
+        return applicationGatewayService.modifyDeviceTag(deviceTagDTO);
+
     }
 
     @GetMapping(value = "/getAllUnregisteredDevices")

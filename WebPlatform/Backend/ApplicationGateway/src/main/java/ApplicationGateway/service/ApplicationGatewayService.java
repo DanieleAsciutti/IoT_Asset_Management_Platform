@@ -5,6 +5,7 @@ import ApplicationGateway.dto.AsyncControllerDTO.DeviceDataDTO;
 import ApplicationGateway.dto.assetManDTO.*;
 import ApplicationGateway.dto.auth_AuthDTO.*;
 import ApplicationGateway.dto.dataManagerDTO.AddAssetDTO;
+import ApplicationGateway.dto.dataManagerDTO.DeviceTagDTO;
 import ApplicationGateway.dto.dataManagerDTO.UserInfoDTO;
 import ApplicationGateway.dto.frontend.CompactUserDTO;
 import ApplicationGateway.dto.frontend.ModelDTO;
@@ -180,8 +181,7 @@ public class ApplicationGatewayService {
                 .block();
     }
 
-    public ResponseEntity<Void> removeAttributes(String assetId, NamesDTO names)
-    {
+    public ResponseEntity<Void> removeAttributes(String assetId, NamesDTO names) {
         String url = String.format("http://%s:%d/addAttributes?",assetManagerAddress,assetManagerPort)+"assetId="+assetId;
         return webClient
                 .post()
@@ -190,6 +190,21 @@ public class ApplicationGatewayService {
                 .retrieve()
                 .toEntity(Void.class)
                 .block();
+    }
+
+    public ResponseEntity<Void> modifyDeviceTag(DeviceTagDTO deviceTagDTO){
+        String url = String.format("http://%s:%d/modifyDeviceTag", dataManagerAddress, dataManagerPort);
+
+        return webClient
+                .post()
+                .uri(url)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(deviceTagDTO)
+                .retrieve()
+                .toEntity(Void.class)
+                .block();
+
+
     }
 
     public List<UnregisteredDeviceDTO> getAllUnregisteredDevices() {

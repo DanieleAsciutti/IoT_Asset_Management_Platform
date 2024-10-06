@@ -67,6 +67,9 @@ public interface AssetRepository extends Neo4jRepository<Device, String>{
     @Query("CALL apoc.cypher.doIt($query, {id: $id })")
     void removeAttributes(@Param("id") String id, @Param("query") String query);
 
+    @Query("CALL apoc.cypher.doIt($query, {id: $id})")
+    void modifyDeviceTag(@Param("id") String id, @Param("query") String query);
+
     @Query("MATCH (d:Device) WHERE elementId(d) = $id DELETE d")
     void deleteDeviceById(String id);
 

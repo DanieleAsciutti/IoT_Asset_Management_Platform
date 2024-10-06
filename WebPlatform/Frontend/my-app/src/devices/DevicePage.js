@@ -25,7 +25,7 @@ import DrawerComponent from '../components/DrawerComponent';
 import CustomThemeProvider from "../components/ThemeProvider";
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
-import {useEffect} from "react";
+import TagButton from "./TagButton";
 
 const handleLogout = () => {
     sessionStorage.removeItem('userData');
@@ -38,6 +38,7 @@ export function DevicesWrapper() {
 }
 
 class Devices extends React.Component {
+
     constructor(props) {
         super(props);
         this.state = {
@@ -72,7 +73,19 @@ class Devices extends React.Component {
     handleSubmit = async () => {
         const attributes = {[this.state.label]: this.state.value};
 
-        const response = await fetch(`/api/addAttributes?assetId=${this.props.deviceId}`, {
+        // const response = await fetch(`/api/addAttributes?assetId=${this.props.deviceId}`, {
+        //     method: 'POST',
+        //     credentials: 'include', // Include cookies in the request
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({
+        //             attributes
+        //         }
+        //     ),
+        // });
+
+        const response = await fetch(`http://localhost:9093/addAttributes?assetId=${this.props.deviceId}`, {
             method: 'POST',
             credentials: 'include', // Include cookies in the request
             headers: {
@@ -194,7 +207,6 @@ class Devices extends React.Component {
     }
 
     async componentDidMount() {
-        //TODO RIMETTERE IL CONTROLLO SULL'UTENTE
         const userDataString = sessionStorage.getItem('userData');
         const userData = JSON.parse(userDataString);
 
@@ -203,27 +215,27 @@ class Devices extends React.Component {
             window.location.href = '/';
         }
 
-        const response = await fetch(`/api/getAsset?id=${this.props.deviceId}`, {
-            method: 'GET',
-            credentials: 'include', // Include cookies in the request
-
-        });
-        // const response = await fetch(`http://localhost:9093/getAsset?id=${this.props.deviceId}`, {
+        // const response = await fetch(`/api/getAsset?id=${this.props.deviceId}`, {
         //     method: 'GET',
         //     credentials: 'include', // Include cookies in the request
         //
         // });
+        const response = await fetch(`http://localhost:9093/getAsset?id=${this.props.deviceId}`, {
+            method: 'GET',
+            credentials: 'include', // Include cookies in the request
+
+        });
         const data = await response.json();
         this.setState({deviceData: data,});
 
-        const resp = await fetch(`/api/getDeviceModelsHistory?deviceId=${this.props.deviceId}`, {
-            method: 'GET',
-            credentials: 'include', // Include cookies in the request
-        });
-        // const resp = await fetch(`http://localhost:9093/getDeviceModelsHistory?deviceId=${this.props.deviceId}`, {
+        // const resp = await fetch(`/api/getDeviceModelsHistory?deviceId=${this.props.deviceId}`, {
         //     method: 'GET',
         //     credentials: 'include', // Include cookies in the request
         // });
+        const resp = await fetch(`http://localhost:9093/getDeviceModelsHistory?deviceId=${this.props.deviceId}`, {
+            method: 'GET',
+            credentials: 'include', // Include cookies in the request
+        });
 
         const dataModel = await resp.json();
         const modelsfromUser = dataModel.userHistory;
@@ -242,16 +254,16 @@ class Devices extends React.Component {
         }
         this.setState({modelHistory: models});
 
-        const response2 = await fetch(`/api/retrieveDeviceDataMeasurements?deviceId=${this.props.deviceId}`, {
-            method: 'GET',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' }
-        });
-        // const response2 = await fetch(`http://localhost:9093/retrieveDeviceDataMeasurements?deviceId=${this.props.deviceId}`, {
+        // const response2 = await fetch(`/api/retrieveDeviceDataMeasurements?deviceId=${this.props.deviceId}`, {
         //     method: 'GET',
         //     credentials: 'include',
         //     headers: { 'Content-Type': 'application/json' }
         // });
+        const response2 = await fetch(`http://localhost:9093/retrieveDeviceDataMeasurements?deviceId=${this.props.deviceId}`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+        });
 
         if (response2.ok) {
             const measurements = await response2.json();
@@ -272,14 +284,14 @@ class Devices extends React.Component {
     }
 
     handleReceiveData = async () => {
-        const response = await fetch(`/api/updateData?deviceId=${this.props.deviceId}`, {
-            method: 'POST',
-            credentials: 'include', // Include cookies in the request
-        });
-        // const response = await fetch(`http://localhost:9093/updateData?deviceId=${this.props.deviceId}`, {
+        // const response = await fetch(`/api/updateData?deviceId=${this.props.deviceId}`, {
         //     method: 'POST',
         //     credentials: 'include', // Include cookies in the request
         // });
+        const response = await fetch(`http://localhost:9093/updateData?deviceId=${this.props.deviceId}`, {
+            method: 'POST',
+            credentials: 'include', // Include cookies in the request
+        });
         if (response.ok) {
             console.log('Data updated successfully');
         } else {
@@ -287,14 +299,14 @@ class Devices extends React.Component {
         }
     }
     downloadModel = async (modelName) => {
-        const response = await fetch(`/api/retrieveModel?deviceId=${this.props.deviceId}&modelName=${modelName}&fromUser=true`, {
-            method: 'GET',
-            credentials: 'include', // Include cookies in the request
-        });
-        // const response = await fetch(`http://localhost:9093/retrieveModel?assetId=${this.props.deviceId}&modelName=${modelName}&fromUser=true`, {
+        // const response = await fetch(`/api/retrieveModel?deviceId=${this.props.deviceId}&modelName=${modelName}&fromUser=true`, {
         //     method: 'GET',
         //     credentials: 'include', // Include cookies in the request
         // });
+        const response = await fetch(`http://localhost:9093/retrieveModel?assetId=${this.props.deviceId}&modelName=${modelName}&fromUser=true`, {
+            method: 'GET',
+            credentials: 'include', // Include cookies in the request
+        });
         const data = await response.blob();
         const url = window.URL.createObjectURL(new Blob([data]));
         const link = document.createElement('a');
@@ -353,6 +365,57 @@ class Devices extends React.Component {
     //     }
     // }
 
+    addTag = async (newTag) => {
+        //TODO: SE newTag è null vuol dire che è da eliminare il tag e non modificare
+        try {
+            // API endpoint for adding or modifying the tag
+            // const response = await fetch(`/api/modifyDeviceTag`, {
+            //     method: 'POST', // or PUT if you are modifying an existing tag
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify({
+            //         deviceId: this.props.deviceId,
+            //         tag: newTag,
+            //     }),
+            // });
+
+            console.log("qui ", newTag);
+            const response = await fetch(`http://localhost:9093/modifyDeviceTag`, {
+                method: 'POST', // or PUT if you are modifying an existing tag
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    deviceId: this.props.deviceId,
+                    tag: newTag
+                }),
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                // Handle error if response is not OK
+                this.setState((prevState) => ({
+                    deviceData: {
+                        ...prevState.deviceData,
+                        asset: {
+                            ...prevState.deviceData.asset,
+                            properties: {
+                                ...prevState.deviceData.asset?.properties,  // Safely access properties
+                                tag: null  // Set tag to null (add if it doesn't exist)
+                            }
+                        }
+                    }
+                }));
+
+                throw new Error('Failed to add the tag');
+            }
+
+        }catch (error) {
+            // Handle any errors from the API
+            console.error('Error adding the tag:', error);
+        }
+    }
 
     render() {
         const openMenu = Boolean(this.state.anchorEl);
@@ -494,6 +557,13 @@ class Devices extends React.Component {
                                         </Grid>
                                     </Grid>
                                 </Grid>
+
+                                <Grid item xs={12}>
+                                    <TagButton currTag={this.state.deviceData.asset.properties?.tag ? this.state.deviceData.asset.properties.tag : null}
+                                               addTag={this.addTag}
+                                    />
+                                </Grid>
+
                                 <Grid item xs={12} sx={{p: 2}}>
                                     <Grid container spacing={2} direction="column">
                                         <Grid item xs={12}>
