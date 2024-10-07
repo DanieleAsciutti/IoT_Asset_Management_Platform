@@ -1,6 +1,7 @@
 package ApplicationGateway.service;
 
 import ApplicationGateway.dto.AsyncControllerDTO.AsyncModelDTO;
+import ApplicationGateway.dto.AsyncControllerDTO.AsyncMultipleModelsDTO;
 import ApplicationGateway.dto.AsyncControllerDTO.DeviceDataDTO;
 import ApplicationGateway.dto.assetManDTO.*;
 import ApplicationGateway.dto.auth_AuthDTO.*;
@@ -8,6 +9,7 @@ import ApplicationGateway.dto.dataManagerDTO.AddAssetDTO;
 import ApplicationGateway.dto.dataManagerDTO.DeviceTagDTO;
 import ApplicationGateway.dto.dataManagerDTO.UserInfoDTO;
 import ApplicationGateway.dto.frontend.CompactUserDTO;
+import ApplicationGateway.dto.frontend.ModelByTagDTO;
 import ApplicationGateway.dto.frontend.ModelDTO;
 import ApplicationGateway.dto.frontend.UserDTO;
 import lombok.RequiredArgsConstructor;
@@ -398,6 +400,32 @@ public class ApplicationGatewayService {
                 .toEntity(Void.class)
                 .block();
 
+    }
+
+    public ResponseEntity<Void> addModelsByTag(ModelByTagDTO modelByTagDTO){
+
+        String url = String.format("http://%s:%d/addModelsByTag", dataManagerAddress, dataManagerPort);
+        ResponseEntity<Void> response =  webClient.post()
+                .uri(url)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(modelByTagDTO)
+                .retrieve()
+                .toEntity(Void.class)
+                .block();
+
+        url = String.format("http://%s:%d/ser/updateMultipleModels", asyncControllerAddress, asyncControllerPort);
+        AsyncMultipleModelsDTO asyncMultipleModelsDTO = AsyncMultipleModelsDTO.builder()
+                .model(modelByTagDTO.getModel())
+                .deviceIds(modelByTagDTO.getDeviceIds())
+                .build();
+
+        return webClient.post()
+                .uri(url)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(asyncMultipleModelsDTO)
+                .retrieve()
+                .toEntity(Void.class)
+                .block();
     }
 
     public ResponseEntity<Void> sendModel(ModelDTO modelDTO){

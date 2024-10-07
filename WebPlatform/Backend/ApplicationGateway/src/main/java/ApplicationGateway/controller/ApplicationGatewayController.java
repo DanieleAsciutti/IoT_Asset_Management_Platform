@@ -6,9 +6,7 @@ import ApplicationGateway.dto.assetManDTO.*;
 import ApplicationGateway.dto.auth_AuthDTO.*;
 import ApplicationGateway.dto.dataManagerDTO.AddAssetDTO;
 import ApplicationGateway.dto.dataManagerDTO.DeviceTagDTO;
-import ApplicationGateway.dto.frontend.CompactUserDTO;
-import ApplicationGateway.dto.frontend.ModelDTO;
-import ApplicationGateway.dto.frontend.UserDTO;
+import ApplicationGateway.dto.frontend.*;
 import ApplicationGateway.service.ApplicationGatewayService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -340,6 +338,20 @@ public class ApplicationGatewayController {
         return applicationGatewayService.addNewModel(modelDTO);
     }
 
+    @PostMapping(value = "/addModelsByTag")
+    public ResponseEntity<Void> addModelsByTag(
+            @CookieValue (value = "token", defaultValue = "") String accessToken,
+            @RequestBody ModelByTagDTO modelByTagDTO){
+
+        log.info("AddModelsByTag endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize( new AuthorizationRequest(accessToken) );
+        if( !authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        return applicationGatewayService.addModelsByTag(modelByTagDTO);
+    }
+
     /**
      * This endpoint is called by the user to request to retrieve the updated model for a specific device
      * @param accessToken the token of the user
@@ -356,6 +368,14 @@ public class ApplicationGatewayController {
             return ResponseEntity.status(401).build();
         }
         return applicationGatewayService.updateModel(deviceId);
+    }
+
+    @PostMapping(value = "/updateModelsByTag")
+    public ResponseEntity<Void> updateModelsByTag(
+            @CookieValue (value = "token", defaultValue = "") String accessToken,
+            @RequestBody UPDModelsDTO updModelsDTO){
+
+        return ResponseEntity.ok().build();
     }
 
 

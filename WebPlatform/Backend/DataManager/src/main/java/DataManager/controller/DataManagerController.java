@@ -5,6 +5,7 @@ import DataManager.dto.asset.*;
 import DataManager.dto.auth.UserDTO;
 import DataManager.dto.gateway.AddUserDTO;
 import DataManager.dto.gateway.DeviceTagDTO;
+import DataManager.dto.gateway.ModelByTagDTO;
 import DataManager.model.Role;
 import DataManager.model.graphDB.Device;
 import DataManager.model.relDB.User;
@@ -343,6 +344,20 @@ public class DataManagerController {
 
                 response = requests.post(url, json=data)
          */
+    }
+
+    @PostMapping(value = "/addModelsByTag")
+    public ResponseEntity<Void> addModelsByTag(@RequestBody ModelByTagDTO modelByTagDTO){
+        log.info("AddModelsByTag endpoint called");
+        for(String deviceId : modelByTagDTO.getDeviceIds()){
+            String path = assetRepository.retrieveModelPath(deviceId);
+            if(path == null) {
+                path = dataManagerService.createModelFolder(folderPath + modelsPath, deviceId);
+                assetRepository.addModelPath(deviceId, path);
+            }
+            dataManagerService.saveModel(path, modelByTagDTO.getModelName(), modelByTagDTO.getModel(), true, deviceId);
+        }
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping(value = "/modelInserted")

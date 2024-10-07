@@ -7,16 +7,10 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import TextField from '@mui/material/TextField';
-import DialogActions from '@mui/material/DialogActions';
 import { Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import AppBarComponent from "../components/AppBarComponent";
 import DrawerComponent from '../components/DrawerComponent';
 import CustomThemeProvider from "../components/ThemeProvider";
-import Graph from "../components/Graph";
 import DevicesTable from "../devices/DevicesTable";
 
 const ManageDevices = () => {
@@ -26,7 +20,6 @@ const ManageDevices = () => {
 
     const [deviceTags, setDeviceTags] = useState([]);      // List of tags fetched from the API
     const [selectedTag, setSelectedTag] = useState('');    // Selected device tag
-    const [dialogOpen, setDialogOpen] = useState(false);   // For handling any dialog
     const [devices, setDevices] = useState([]); // Devices data from API
     const [hoveredRow, setHoveredRow] = useState(null); // Row hover effect for table
 
@@ -130,11 +123,53 @@ const ManageDevices = () => {
 
     const handleUploadMLModel = () => {
         // Logic to upload ML model here
-        setDialogOpen(true);
-    };
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.pkl';
+        input.onchange = async (event) => {
+            const file = event.target.files[0];
 
-    const handleDialogClose = () => {
-        setDialogOpen(false);
+            // FileReader to convert the file into a model
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const arrayBuffer = event.target.result;
+                const model = new Uint8Array(arrayBuffer);
+
+                const deviceIds = devices.map(device => device.id);
+                const modelByTagDTO = {
+                    model: Array.from(model),
+                    deviceIds: deviceIds,
+                    modelName: file.name,
+                };
+
+                // Post model data to server
+                // const response = await fetch('/api/addModelsByTag', {
+                //     method: 'POST',
+                //     credentials: 'include', // Include cookies in the request
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //     },
+                //     body: JSON.stringify(modelByTagDTO),
+                // });
+                const response = await fetch('http://localhost:9093/addModelsByTag', {
+                    method: 'POST',
+                    credentials: 'include', // Include cookies in the request
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(modelByTagDTO),
+                });
+
+                if (response.ok) {
+                    console.log('Model added successfully');
+                } else {
+                    console.log('Failed to add model');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        };
+
+        input.click();
     };
 
     return (
@@ -227,29 +262,6 @@ const ManageDevices = () => {
                                         </Button>
                                     </Grid>
                                 </Grid>
-
-                                {/* Upload Model Dialog */}
-                                <Dialog open={dialogOpen} onClose={handleDialogClose}>
-                                    <DialogTitle>Upload New ML Model</DialogTitle>
-                                    <DialogContent>
-                                        <TextField
-                                            autoFocus
-                                            margin="dense"
-                                            id="ml-model"
-                                            label="Upload ML Model"
-                                            type="file"
-                                            fullWidth
-                                        />
-                                    </DialogContent>
-                                    <DialogActions>
-                                        <Button onClick={handleDialogClose} color="primary">
-                                            Cancel
-                                        </Button>
-                                        <Button onClick={handleDialogClose} color="primary">
-                                            Upload
-                                        </Button>
-                                    </DialogActions>
-                                </Dialog>
                             </Paper>
                         </Grid>
 

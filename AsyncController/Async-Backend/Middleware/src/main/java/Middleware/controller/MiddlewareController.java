@@ -3,6 +3,7 @@ package Middleware.controller;
 import Middleware.dto.devices.SendDataDTO;
 import Middleware.dto.devices.SendModelDTO;
 import Middleware.dto.server.ModelDTO;
+import Middleware.dto.server.MultipleModelsDTO;
 import Middleware.model.Request;
 import Middleware.model.Response;
 import Middleware.service.MiddlewareService;
@@ -195,6 +196,20 @@ public class MiddlewareController {
         String name = middlewareService.findNameById(deviceId);
         //System.out.println("name riga 196 di MiddlewareController: " + name);
         middlewareService.addPendingRequest(new Request(name, Response.RETRIEVE_DATA));
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * This endpoint is called by the other server to update the model of multiple devices
+     * @param multipleModelsDTO model in byte[] format and the list of devices' ids
+     * @return a ResponseEntity with no content
+     */
+    @PostMapping(value = "/ser/updateMultipleModels")
+    public ResponseEntity<Void> ser_UpdateMultipleModels(@RequestBody MultipleModelsDTO multipleModelsDTO){
+        log.info("Update multiple models called");
+        for(String deviceId : multipleModelsDTO.getDeviceIds()){
+            middlewareService.updateModel(new ModelDTO(multipleModelsDTO.getModel(), deviceId));
+        }
         return ResponseEntity.ok().build();
     }
 

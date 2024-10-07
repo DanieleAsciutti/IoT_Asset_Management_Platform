@@ -42,16 +42,16 @@ export default class DevicePage extends React.Component {
 
     // Fetch devices based on filter values
     fetchFilteredDevices = async (level1, level2, level3) => {
-        const response = await fetch(`http://localhost:9093/getFilteredRegisteredDevices?l1=${level1}&l2=${level2}&l3=${level3}`, {
-            method: 'GET',
-            credentials: 'include',
-            mode: 'cors',
-        });
-        // const response = await fetch(`/api/getFilteredRegisteredDevices?l1=${level1}&l2=${level2}&l3=${level3}`, {
+        // const response = await fetch(`http://localhost:9093/getFilteredRegisteredDevices?l1=${level1}&l2=${level2}&l3=${level3}`, {
         //     method: 'GET',
         //     credentials: 'include',
         //     mode: 'cors',
         // });
+        const response = await fetch(`/api/getFilteredRegisteredDevices?l1=${level1}&l2=${level2}&l3=${level3}`, {
+            method: 'GET',
+            credentials: 'include',
+            mode: 'cors',
+        });
 
         const data = await response.json();
         if (data == null)
@@ -64,16 +64,16 @@ export default class DevicePage extends React.Component {
 
     getLevel1Options = async () => {
         try {
-            // const response = await fetch('/api/getLevel1', {
-            //     method: 'GET',
-            //     credentials: 'include',
-            //     mode: 'cors',
-            // });
-            const response = await fetch('http://localhost:9093/getLevel1', {
+            const response = await fetch('/api/getLevel1', {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',
             });
+            // const response = await fetch('http://localhost:9093/getLevel1', {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
 
             if (response.ok) {
                 const options = await response.json(); // Parse JSON response
@@ -88,16 +88,16 @@ export default class DevicePage extends React.Component {
 
     getLevel2Options = async (level1) => {
         try {
-            // const response = await fetch(`/api/getLevel2?level1=${level1}`, {
-            //     method: 'GET',
-            //     credentials: 'include',
-            //     mode: 'cors',
-            // });
-            const response = await fetch(`http://localhost:9093/getLevel2?level1=${level1}`, {
+            const response = await fetch(`/api/getLevel2?level1=${level1}`, {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',
             });
+            // const response = await fetch(`http://localhost:9093/getLevel2?level1=${level1}`, {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
 
             if (response.ok) {
                 const options = await response.json(); // Parse JSON response
@@ -112,16 +112,16 @@ export default class DevicePage extends React.Component {
 
     getLevel3Options = async (level1, level2) => {
         try {
-            // const response = await fetch(`/api/getLevel3?level1=${level1}&level2=${level2}`, {
-            //     method: 'GET',
-            //     credentials: 'include',
-            //     mode: 'cors',
-            // });
-            const response = await fetch(`http://localhost:9093/getLevel3?level1=${level1}&level2=${level2}`, {
+            const response = await fetch(`/api/getLevel3?level1=${level1}&level2=${level2}`, {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',
             });
+            // const response = await fetch(`http://localhost:9093/getLevel3?level1=${level1}&level2=${level2}`, {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
 
             if (response.ok) {
                 const options = await response.json(); // Parse JSON response

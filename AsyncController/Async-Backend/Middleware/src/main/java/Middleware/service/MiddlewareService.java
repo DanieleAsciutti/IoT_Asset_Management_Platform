@@ -111,7 +111,6 @@ public class MiddlewareService {
 
     public void updateModel(ModelDTO modelDTO){
         String name = findNameById(modelDTO.getDeviceId());
-        System.out.println(name);
         if(name == null){
             log.error("Device not found");
             return;
