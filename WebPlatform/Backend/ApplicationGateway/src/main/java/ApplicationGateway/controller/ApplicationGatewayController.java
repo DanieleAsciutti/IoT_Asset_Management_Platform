@@ -373,9 +373,15 @@ public class ApplicationGatewayController {
     @PostMapping(value = "/updateModelsByTag")
     public ResponseEntity<Void> updateModelsByTag(
             @CookieValue (value = "token", defaultValue = "") String accessToken,
-            @RequestBody UPDModelsDTO updModelsDTO){
+            @RequestBody DeviceIdsDTO deviceIdsDTO){
 
-        return ResponseEntity.ok().build();
+        log.info("UpdateModelsByTag endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize( new AuthorizationRequest(accessToken) );
+        if( !authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        return applicationGatewayService.updateModelsByTag(deviceIdsDTO);
     }
 
 
@@ -412,6 +418,24 @@ public class ApplicationGatewayController {
         }
         return applicationGatewayService.updateData(deviceId);
     }
+
+    /**
+     * This endpoint is called by the user to request to retrieve the updated data for multiple devices
+     */
+    @PostMapping(value = "/updateDataByTag")
+    public ResponseEntity<Void> updateDataByTag(
+            @CookieValue (value = "token", defaultValue = "") String accessToken,
+            @RequestBody DeviceIdsDTO deviceIdsDTO){
+
+        log.info("updateDataByTag endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize( new AuthorizationRequest(accessToken) );
+        if( !authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        return applicationGatewayService.updateDataByTag(deviceIdsDTO);
+    }
+
 
     /**
      * This endpoint is called by the asyncController to save the data for a specific device

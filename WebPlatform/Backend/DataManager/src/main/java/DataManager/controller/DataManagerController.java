@@ -6,6 +6,7 @@ import DataManager.dto.auth.UserDTO;
 import DataManager.dto.gateway.AddUserDTO;
 import DataManager.dto.gateway.DeviceTagDTO;
 import DataManager.dto.gateway.ModelByTagDTO;
+import DataManager.dto.gateway.MultiplePendingsDTO;
 import DataManager.model.Role;
 import DataManager.model.graphDB.Device;
 import DataManager.model.relDB.User;
@@ -30,8 +31,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Function;
 
 @RestController
 @RequiredArgsConstructor
@@ -59,14 +63,14 @@ public class DataManagerController {
      */
 
     @PostMapping(value = "/test")
-    public String test(){
+    public String test() {
         log.info("Test endpoint called");
         return dataManagerService.getModelsHistory("/data/models", "4:937e76b2-57c3-49ec-875c-1d6379c40dca:7");
     }
 
 
     @GetMapping(value = "/test2")
-    public void test2(){
+    public void test2() {
         log.info("Test2 endpoint called");
         /*
         deviceRepository.addDevice("test",true);
@@ -87,7 +91,7 @@ public class DataManagerController {
         String assetLabel = assetRepository.getNodeLabelById(deviceId);
         String targetLabel = assetRepository.getNodeLabelById(targetId);
         String relationship = "PROVA";
-        String query = "MATCH (d:"+assetLabel+"), (t:"+targetLabel+") WHERE elementId(d) = $deviceId AND elementId(t) = $targetId CREATE (d)-[r:"+relationship+"]->(t)";
+        String query = "MATCH (d:" + assetLabel + "), (t:" + targetLabel + ") WHERE elementId(d) = $deviceId AND elementId(t) = $targetId CREATE (d)-[r:" + relationship + "]->(t)";
         assetRepository.addRelationship(deviceId, targetId, query);
 
     }
@@ -121,14 +125,14 @@ public class DataManagerController {
 
 
     @PostMapping(value = "/addDevice")
-    public ResponseEntity<String> addDevice(@RequestParam String name){
+    public ResponseEntity<String> addDevice(@RequestParam String name) {
         log.info("InsertDevice endpoint called");
         String id = assetRepository.addDevice(name, false);
         return ResponseEntity.ok(id);
     }
 
     @PostMapping(value = "/registerDevice")
-    public ResponseEntity<Void> registerDevice(@RequestParam String assetId, @RequestBody AddDeviceDTO addDeviceDTO){
+    public ResponseEntity<Void> registerDevice(@RequestParam String assetId, @RequestBody AddDeviceDTO addDeviceDTO) {
         log.info("RegisterDevice endpoint called");
         assetRepository.registerDevice(assetId, addDeviceDTO.getPlace(), addDeviceDTO.getType(), addDeviceDTO.getStatus(), LocalDate.now().toString(),
                 addDeviceDTO.getLevel1(), addDeviceDTO.getLevel2(), addDeviceDTO.getLevel3());
@@ -156,66 +160,66 @@ public class DataManagerController {
         if (addAssetDTO.getLabel().equals("Device")) {
             return ResponseEntity.badRequest().build();
         }
-        String query = "CREATE (d:"+addAssetDTO.getLabel()+" {name:$name}) SET d.isRegistered = true, d.level1 = $level1, d.level2 = $level2, d.level3 = $level3";
+        String query = "CREATE (d:" + addAssetDTO.getLabel() + " {name:$name}) SET d.isRegistered = true, d.level1 = $level1, d.level2 = $level2, d.level3 = $level3";
         assetRepository.addAsset(query, addAssetDTO.getName(), addAssetDTO.getLevel1(), addAssetDTO.getLevel2(), addAssetDTO.getLevel3());
         return ResponseEntity.ok().build();
     }
 
 
     @PostMapping(value = "/deleteAsset")
-    public ResponseEntity<Void> deleteAsset(@RequestParam String id){
+    public ResponseEntity<Void> deleteAsset(@RequestParam String id) {
         log.info("DeleteAsset endpoint called");
         assetRepository.deleteAsset(id);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping(value = "/deleteRelationship")
-    public ResponseEntity<Void> deleteRelationship(@RequestParam String relId){
+    public ResponseEntity<Void> deleteRelationship(@RequestParam String relId) {
         log.info("DeleteRelationship endpoint called");
         assetRepository.deleteRelationship(relId);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "/getAsset")
-    public ResponseEntity<String> getAsset(@RequestParam String id){
+    public ResponseEntity<String> getAsset(@RequestParam String id) {
         log.info("GetAsset endpoint called");
         return ResponseEntity.ok(assetRepository.getAsset(id));
     }
 
 
     @GetMapping(value = "/getAllUnregisteredDevices")
-    public ResponseEntity<ArrayList<UnregisteredDeviceDTO>> getAllUnregisteredDevices(){
+    public ResponseEntity<ArrayList<UnregisteredDeviceDTO>> getAllUnregisteredDevices() {
         log.info("GetAllUnregisteredDevices endpoint called");
         ArrayList<Device> devices = assetRepository.getAllUnregisteredDevices();
         ArrayList<UnregisteredDeviceDTO> result = new ArrayList<>();
-        for(Device device : devices){
-            result.add(new UnregisteredDeviceDTO(device.getId(),device.getName()));
+        for (Device device : devices) {
+            result.add(new UnregisteredDeviceDTO(device.getId(), device.getName()));
         }
         return ResponseEntity.ok(result);
     }
 
     @GetMapping(value = "/getAllRegisteredDevices")
-    public ResponseEntity<ArrayList<String>> getAllRegisteredDevices(){
+    public ResponseEntity<ArrayList<String>> getAllRegisteredDevices() {
         log.info("GetAllRegisteredDevices endpoint called");
 //        log.info(assetRepository.getAllRegisteredDevices().toString());
         return ResponseEntity.ok(assetRepository.getAllRegisteredDevices());
     }
 
     @GetMapping(value = "/getFilteredRegisteredDevices")
-    public ResponseEntity<ArrayList<String>> getFilteredRegisteredDevices(@RequestParam String l1, @RequestParam String l2, @RequestParam String l3){
+    public ResponseEntity<ArrayList<String>> getFilteredRegisteredDevices(@RequestParam String l1, @RequestParam String l2, @RequestParam String l3) {
         log.info("GetFilteredRegisteredDevices endpoint called");
         return ResponseEntity.ok(assetRepository.getFilteredRegisteredDevices(l1, l2, l3));
     }
 
 
     @PostMapping(value = "/addAttributes")
-    public ResponseEntity<Void> addAttributes(@RequestParam String assetId, @RequestBody AttributesDTO attributesDTO){
+    public ResponseEntity<Void> addAttributes(@RequestParam String assetId, @RequestBody AttributesDTO attributesDTO) {
         log.info("AddAttributes endpoint called");
         String assetLabel = assetRepository.getNodeLabelById(assetId);
-        String query = "MATCH (d:"+assetLabel+") WHERE elementId(d) = $assetId SET d += $value";
+        String query = "MATCH (d:" + assetLabel + ") WHERE elementId(d) = $assetId SET d += $value";
         Map<String, String> toPut = new HashMap<>();
-        for(Map.Entry<String, String> entry : attributesDTO.getAttributes().entrySet()){
-            if(!entry.getKey().equals("tag")){
+        for (Map.Entry<String, String> entry : attributesDTO.getAttributes().entrySet()) {
+            if (!entry.getKey().equals("tag")) {
                 toPut.put(entry.getKey(), entry.getValue());
             }
         }
@@ -224,25 +228,25 @@ public class DataManagerController {
     }
 
     @PostMapping(value = "/removeAttributes")
-    public ResponseEntity<Void> removeAttributes(@RequestParam String assetId, @RequestBody NamesDTO namesDTO){
+    public ResponseEntity<Void> removeAttributes(@RequestParam String assetId, @RequestBody NamesDTO namesDTO) {
         log.info("RemoveAttributes endpoint called");
         String assetLabel = assetRepository.getNodeLabelById(assetId);
-        String query = "MATCH (d:"+assetLabel+") REMOVE";
-        for(String attribute : namesDTO.getAttributesName()){
-            query += " d."+attribute+",";
+        String query = "MATCH (d:" + assetLabel + ") REMOVE";
+        for (String attribute : namesDTO.getAttributesName()) {
+            query += " d." + attribute + ",";
         }
-        query = query.substring(0, query.length()-1);
+        query = query.substring(0, query.length() - 1);
         assetRepository.removeAttributes(assetId, query);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping(value = "/modifyDeviceTag")
-    public ResponseEntity<Void> modifyDeviceTag(@RequestBody DeviceTagDTO deviceTagDTO){
+    public ResponseEntity<Void> modifyDeviceTag(@RequestBody DeviceTagDTO deviceTagDTO) {
         log.info("ModifyTag endpoint called");
         String query;
-        if(deviceTagDTO.getTag() == null){
+        if (deviceTagDTO.getTag() == null) {
             query = "MATCH (d:Device) WHERE elementId(d) = $id REMOVE d.tag";
-        }else{
+        } else {
             query = "MATCH (d:Device) WHERE elementId(d) = $id SET d.tag=\"" + deviceTagDTO.getTag() + "\"";
         }
         assetRepository.modifyDeviceTag(deviceTagDTO.getDeviceId(), query);
@@ -250,23 +254,23 @@ public class DataManagerController {
     }
 
     @GetMapping(value = "/getAllDeviceTags")
-    public ResponseEntity<List<String>> getAllDeviceTags(){
+    public ResponseEntity<List<String>> getAllDeviceTags() {
         log.info("GetAllDeviceTags endpoint called");
         return ResponseEntity.ok(assetRepository.getAllDeviceTags());
     }
 
     @GetMapping(value = "/getDevicesByTag")
-    public ResponseEntity<List<String>> getDevicesByTag(@RequestParam String tag){
+    public ResponseEntity<List<String>> getDevicesByTag(@RequestParam String tag) {
         log.info("GetDevicesByTag endpoint called");
         return ResponseEntity.ok(assetRepository.getDevicesByTag(tag));
     }
 
     @PostMapping(value = "/addRelationships")
-    public ResponseEntity<Void> addRelationships(@RequestParam String assetId, @RequestBody RelationshipsDTO relationshipsDTO){
+    public ResponseEntity<Void> addRelationships(@RequestParam String assetId, @RequestBody RelationshipsDTO relationshipsDTO) {
         //The map is: <targetId, relationshipLabel>
         log.info("AddRelationships endpoint called");
-        for(Map.Entry<String, String> entry : relationshipsDTO.getRelationships().entrySet()){
-            if(dataManagerService.checkNewRelationship(assetId, entry.getKey())) {
+        for (Map.Entry<String, String> entry : relationshipsDTO.getRelationships().entrySet()) {
+            if (dataManagerService.checkNewRelationship(assetId, entry.getKey())) {
                 String assetLabel = assetRepository.getNodeLabelById(assetId);
                 String targetLabel = assetRepository.getNodeLabelById(entry.getKey());
                 String relationship = entry.getValue();
@@ -279,47 +283,47 @@ public class DataManagerController {
     }
 
     @PostMapping(value = "/removeRelationships")
-    public ResponseEntity<Void> removeRelationships(@RequestBody RelNamesDTO relNamesDTO){
+    public ResponseEntity<Void> removeRelationships(@RequestBody RelNamesDTO relNamesDTO) {
         log.info("RemoveRelationships endpoint called");
-        for(String relationship : relNamesDTO.getRelationships()){
+        for (String relationship : relNamesDTO.getRelationships()) {
             assetRepository.removeRelationship(relationship);
         }
         return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "/getNetwork")
-    public ResponseEntity<String> getNetwork(){
+    public ResponseEntity<String> getNetwork() {
         log.info("GetNetwork endpoint called");
         List<String> assets = assetRepository.getAssetsForNetwork();
         List<String> relationships = assetRepository.getRelationsForNetwork();
-        String toReturn = "{\"nodes\":"+assets.toString()+", \"links\":"+relationships.toString()+"}";
+        String toReturn = "{\"nodes\":" + assets.toString() + ", \"links\":" + relationships.toString() + "}";
         return ResponseEntity.ok(toReturn);
     }
 
     @GetMapping(value = "/getFilteredNetwork")
-    public ResponseEntity<String> getFilteredNetwork(@RequestParam String l1, @RequestParam String l2, @RequestParam String l3){
+    public ResponseEntity<String> getFilteredNetwork(@RequestParam String l1, @RequestParam String l2, @RequestParam String l3) {
         log.info("GetFilteredNetwork endpoint called");
         List<String> assets = assetRepository.getFilteredAssetsForNetwork(l1, l2, l3);
         List<String> relationships = assetRepository.getFilteredRelationsForNetwork(l1, l2, l3);
-        String toReturn = "{\"nodes\":"+assets.toString()+", \"links\":"+relationships.toString()+"}";
+        String toReturn = "{\"nodes\":" + assets.toString() + ", \"links\":" + relationships.toString() + "}";
         return ResponseEntity.ok(toReturn);
 
     }
 
     @PostMapping(value = "/addNewModel")
-    public ResponseEntity<Void> addNewModel(@RequestBody ModelDTO modelDTO){
+    public ResponseEntity<Void> addNewModel(@RequestBody ModelDTO modelDTO) {
         log.info("AddNewModel endpoint called");
 
         log.info(modelDTO.getAssetId());
         String path = assetRepository.retrieveModelPath(modelDTO.getAssetId());
         log.info(path);
-        if(path == null) {
+        if (path == null) {
             path = dataManagerService.createModelFolder(folderPath + modelsPath, modelDTO.getAssetId());
             //TODO: CAPIRE SE SOSTITUIRE getAssetId con getAssetName (se gli asset hanno un nome univoco)
             assetRepository.addModelPath(modelDTO.getAssetId(), path);
         }
         //path is something like /data/models/assetId
-        dataManagerService.saveModel(path, modelDTO.getModelName(),modelDTO.getModel(), modelDTO.getFromUser(), modelDTO.getAssetId());
+        dataManagerService.saveModel(path, modelDTO.getModelName(), modelDTO.getModel(), modelDTO.getFromUser(), modelDTO.getAssetId());
         //TODO: CAPIRE SE SOSTITUIRE il timestamp con un modelName
         return ResponseEntity.ok().build();
 
@@ -347,11 +351,11 @@ public class DataManagerController {
     }
 
     @PostMapping(value = "/addModelsByTag")
-    public ResponseEntity<Void> addModelsByTag(@RequestBody ModelByTagDTO modelByTagDTO){
+    public ResponseEntity<Void> addModelsByTag(@RequestBody ModelByTagDTO modelByTagDTO) {
         log.info("AddModelsByTag endpoint called");
-        for(String deviceId : modelByTagDTO.getDeviceIds()){
+        for (String deviceId : modelByTagDTO.getDeviceIds()) {
             String path = assetRepository.retrieveModelPath(deviceId);
-            if(path == null) {
+            if (path == null) {
                 path = dataManagerService.createModelFolder(folderPath + modelsPath, deviceId);
                 assetRepository.addModelPath(deviceId, path);
             }
@@ -361,7 +365,7 @@ public class DataManagerController {
     }
 
     @PostMapping(value = "/modelInserted")
-    public ResponseEntity<Void> modelInserted(@RequestParam String deviceId){
+    public ResponseEntity<Void> modelInserted(@RequestParam String deviceId) {
         log.info("ModelInserted endpoint called");
         assetRepository.setPendingSend(deviceId, false);
         String model = assetRepository.getPendingModel(deviceId);
@@ -373,7 +377,7 @@ public class DataManagerController {
     }
 
     @PostMapping(value = "/saveDeviceData")
-    public ResponseEntity<Void> saveDeviceData(@RequestBody DeviceDataDTO deviceDataDTO){
+    public ResponseEntity<Void> saveDeviceData(@RequestBody DeviceDataDTO deviceDataDTO) {
         log.info("SaveDeviceData endpoint called");
         influxRepository.saveData(deviceDataDTO.getData());
         assetRepository.setPendingData(deviceDataDTO.getDeviceId(), false);
@@ -381,28 +385,68 @@ public class DataManagerController {
     }
 
     @PostMapping(value = "/setPendingRetrieve")
-    public ResponseEntity<Void> setPendingRetrieve(@RequestParam String deviceId, @RequestParam boolean value){
+    public ResponseEntity<Void> setPendingRetrieve(@RequestParam String deviceId, @RequestParam boolean value) {
         log.info("SetPendingRetrieve endpoint called");
         assetRepository.setPendingRetrieve(deviceId, value);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping(value = "/setPendingData")
-    public ResponseEntity<Void> setPendingData(@RequestParam String deviceId, @RequestParam boolean value){
+    public ResponseEntity<Void> setPendingData(@RequestParam String deviceId, @RequestParam boolean value) {
         log.info("SetPendingData endpoint called");
         assetRepository.setPendingData(deviceId, value);
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * This method is used to set multiple pending for many devices. It takes the DTO that contains the list of devices,
+     * the type of pending to set and the boolean value.
+     *
+     * @return the list of devices that have been set to pending. Doesn't return the devices that are already in that state.
+     */
+    @PostMapping(value = "/setMultiplePending")
+    public ResponseEntity<List<String>> setMultiplePending(@RequestBody MultiplePendingsDTO multiplePendingsDTO) {
+        log.info("SetMultiplePending endpoint called");
+        List<String> result = new ArrayList<>();
+        for (String deviceId : multiplePendingsDTO.getDeviceIds()) {
+            JSONObject json = new JSONObject(assetRepository.getDevicePendings(deviceId));
+            boolean pending = json.getBoolean(multiplePendingsDTO.getPending().toString().toLowerCase());
+            if (pending != multiplePendingsDTO.getValue()) {
+                result.add(deviceId);
+                try {
+                    // Lambda function to capitalize the first letter
+                    Function<String, String> capitalize = str -> str.isEmpty()
+                            ? str
+                            : str.substring(0, 1).toUpperCase() + str.substring(1);
+
+                    // Construct the method name dynamically
+                    String methodName = "setPending" + capitalize.apply(multiplePendingsDTO.getPending().toString().toLowerCase());
+
+                    // Get the method from the assetRepository class with the right parameter types
+                    Method method = assetRepository.getClass().getMethod(methodName, String.class, boolean.class);
+
+                    // Invoke the method dynamically with the deviceId and the value
+                    method.invoke(assetRepository, deviceId, multiplePendingsDTO.getValue());
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    // Handle exceptions (e.g., log the error)
+
+                    e.printStackTrace();
+                    return ResponseEntity.internalServerError().build();
+                }
+            }
+        }
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping(value = "/getDeviceModelsHistory")
-    public ResponseEntity<String> getDeviceModelsHistory(@RequestParam String deviceId){
+    public ResponseEntity<String> getDeviceModelsHistory(@RequestParam String deviceId) {
         log.info("GetDeviceModelsHistory endpoint called");
         return ResponseEntity.ok(dataManagerService.getModelsHistory(folderPath + modelsPath, deviceId));
     }
 
 
     @GetMapping(value = "/getDevicePendings")
-    public ResponseEntity<PendingDeviceDTO> getDevicePendings(@RequestParam String deviceId){
+    public ResponseEntity<PendingDeviceDTO> getDevicePendings(@RequestParam String deviceId) {
         log.info("GetDevicePendings endpoint called");
         JSONObject json = new JSONObject(assetRepository.getDevicePendings(deviceId));
         boolean data = json.getBoolean("data");
@@ -413,7 +457,7 @@ public class DataManagerController {
     }
 
     @GetMapping(value = "/retrieveModel")
-    public ResponseEntity<byte[]> retrieveModel(@RequestParam String deviceId, @RequestParam String modelName, @RequestParam boolean fromUser){
+    public ResponseEntity<byte[]> retrieveModel(@RequestParam String deviceId, @RequestParam String modelName, @RequestParam boolean fromUser) {
         log.info("RetrieveModel endpoint called");
         try {
             byte[] model = dataManagerService.retrieveModel(folderPath + modelsPath + "/" + deviceId, modelName, fromUser);
@@ -426,26 +470,25 @@ public class DataManagerController {
 
 
     @GetMapping(value = "/getLevel1")
-    public ResponseEntity<List<String>> getLevel1(){
+    public ResponseEntity<List<String>> getLevel1() {
         log.info("RetrieveLevel1 endpoint called");
         return ResponseEntity.ok(assetRepository.retrieveLevel1());
     }
 
     @GetMapping(value = "/getLevel2")
-    public ResponseEntity<List<String>> getLevel2(@RequestParam String level1){
+    public ResponseEntity<List<String>> getLevel2(@RequestParam String level1) {
         log.info("RetrieveLevel2 endpoint called");
         return ResponseEntity.ok(assetRepository.retrieveLevel2(level1));
     }
 
     @GetMapping(value = "/getLevel3")
-    public ResponseEntity<List<String>> getLevel3(@RequestParam String level1, @RequestParam String level2){
+    public ResponseEntity<List<String>> getLevel3(@RequestParam String level1, @RequestParam String level2) {
         log.info("RetrieveLevel3 endpoint called");
         System.out.println(level1 + " " + level2);
         List<String> result = assetRepository.retrieveLevel3(level1, level2);
         System.out.println(result.toString());
         return ResponseEntity.ok(assetRepository.retrieveLevel3(level1, level2));
     }
-
 
 
     //------- USER MANAGEMENT -------//
@@ -465,14 +508,14 @@ public class DataManagerController {
         log.info("GetUsers endpoint called");
         List<User> users = userRepository.findUsers();
         List<UserInfoDTO> result = new ArrayList<>();
-        for(User user : users){
+        for (User user : users) {
             result.add(new UserInfoDTO(user.getUsername(), user.getRole(), user.getId()));
         }
         return ResponseEntity.ok(result);
     }
 
     @PostMapping(value = "/addUser")
-    public ResponseEntity<Void> addUser(@RequestBody AddUserDTO addUserDTO){
+    public ResponseEntity<Void> addUser(@RequestBody AddUserDTO addUserDTO) {
         log.info("AddUser endpoint called");
         User user = new User(addUserDTO.getUsername(), addUserDTO.getPassword(), Role.valueOf(addUserDTO.getRole()));
         userRepository.save(user);
@@ -480,28 +523,28 @@ public class DataManagerController {
     }
 
     @PostMapping(value = "/deleteUser")
-    public ResponseEntity<Void> deleteUser(@RequestParam long id){
+    public ResponseEntity<Void> deleteUser(@RequestParam long id) {
         log.info("DeleteUser endpoint called");
         userRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping(value = "/updateUserRole")
-    public ResponseEntity<Void> updateUserRole(@RequestParam long id, @RequestParam Role role){
+    public ResponseEntity<Void> updateUserRole(@RequestParam long id, @RequestParam Role role) {
         log.info("UpdateUser endpoint called");
         Optional<User> user = userRepository.findById(id);
         //TODO: testare se funziona quando va supabase
-        if(user.isPresent()){
+        if (user.isPresent()) {
             user.get().setRole(role);
             userRepository.save(user.get());
             return ResponseEntity.ok().build();
-        }else
+        } else
             return ResponseEntity.notFound().build();
     }
 
     @GetMapping(value = "/getAllNodesId")
     @ResponseBody
-    public ResponseEntity<List<String>> getAllNodesId(){
+    public ResponseEntity<List<String>> getAllNodesId() {
         log.info("GetAllNodesId endpoint called");
         return ResponseEntity.ok(assetRepository.getAllNodesId());
     }
@@ -511,7 +554,7 @@ public class DataManagerController {
     public ResponseEntity<String> retrieveDeviceDataMetadata(@RequestParam String deviceId, @RequestParam String measurement) {
         log.info("RetrieveDeviceDataMetadata endpoint called");
 
-        return ResponseEntity.ok(influxRepository.getMetadataForDevice(deviceId,measurement));
+        return ResponseEntity.ok(influxRepository.getMetadataForDevice(deviceId, measurement));
     }
 
     @GetMapping(value = "/retrieveDeviceDataMeasurements")
@@ -534,7 +577,6 @@ public class DataManagerController {
 
 
     /**
-     *
      * TO DELETE, IT NEEDS ONLY FOR THE PYTHON SCRIPT //TODO
      */
     @PostMapping(value = "/PythonaddAsset")

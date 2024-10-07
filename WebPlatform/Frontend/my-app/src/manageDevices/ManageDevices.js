@@ -7,11 +7,13 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
-import { Select, MenuItem, InputLabel, FormControl } from '@mui/material';
+import {Select, MenuItem, InputLabel, FormControl, Snackbar, LinearProgress} from '@mui/material';
 import AppBarComponent from "../components/AppBarComponent";
 import DrawerComponent from '../components/DrawerComponent';
 import CustomThemeProvider from "../components/ThemeProvider";
 import DevicesTable from "../devices/DevicesTable";
+import {toast, ToastContainer} from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css';
 
 const ManageDevices = () => {
 
@@ -22,6 +24,11 @@ const ManageDevices = () => {
     const [selectedTag, setSelectedTag] = useState('');    // Selected device tag
     const [devices, setDevices] = useState([]); // Devices data from API
     const [hoveredRow, setHoveredRow] = useState(null); // Row hover effect for table
+
+    // Snackbar state
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [progress, setProgress] = useState(0);
 
     // Fetch device tags when the component mounts
     useEffect(() => {
@@ -103,19 +110,68 @@ const ManageDevices = () => {
 
     const handleGetMLModel = async () => {
         try {
-            const response = await fetch(`https://your-backend-api.com/ml-model?tag=${selectedTag}`);
-            const modelData = await response.json();
-            console.log('ML Model data:', modelData);
+
+            const deviceIds = devices.map(device => device.id);
+
+            const response = await fetch('/api/updateModelsByTag', {
+                method: 'POST',
+                credentials: 'include', // Include cookies in the request
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({deviceIds}),
+            });
+            // const response = await fetch('http://localhost:9093/updateModelsByTag', {
+            //     method: 'POST',
+            //     credentials: 'include', // Include cookies in the request
+            //         mode: 'cors',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify({deviceIds}),
+            // });
+
+            if (response.ok) {
+                toast.success('Request to update ML model sent successfully')
+            } else {
+                toast.error('Failed to send the request to update ML model');
+            }
         } catch (error) {
-            console.error('Error fetching ML model:', error);
+            console.error('Error sending requests to update the models:', error);
         }
     };
 
     const handleGetDeviceData = async () => {
         try {
-            const response = await fetch(`https://your-backend-api.com/device-data?tag=${selectedTag}`);
-            const data = await response.json();
-            console.log('Device data:', data);
+            const deviceIds = devices.map(device => device.id);
+
+            const response = await fetch('/api/updateDataByTag', {
+                method: 'POST',
+                credentials: 'include', // Include cookies in the request
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({deviceIds}),
+            });
+
+            // const response = await fetch('http://localhost:9093/updateDataByTag', {
+            //     method: 'POST',
+            //     credentials: 'include', // Include cookies in the request
+            //     mode: 'cors',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify({deviceIds}),
+            // });
+
+            if (response.ok) {
+                toast.success('Request to update data sent successfully');
+            } else {
+                toast.error('Failed to send the request to update data');
+            }
+
         } catch (error) {
             console.error('Error fetching device data:', error);
         }
@@ -143,27 +199,29 @@ const ManageDevices = () => {
                 };
 
                 // Post model data to server
-                // const response = await fetch('/api/addModelsByTag', {
-                //     method: 'POST',
-                //     credentials: 'include', // Include cookies in the request
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //     },
-                //     body: JSON.stringify(modelByTagDTO),
-                // });
-                const response = await fetch('http://localhost:9093/addModelsByTag', {
+                const response = await fetch('/api/addModelsByTag', {
                     method: 'POST',
                     credentials: 'include', // Include cookies in the request
+                    mode: 'cors',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(modelByTagDTO),
                 });
+                // const response = await fetch('http://localhost:9093/addModelsByTag', {
+                //     method: 'POST',
+                //     credentials: 'include', // Include cookies in the request
+                //     mode: 'cors',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //     },
+                //     body: JSON.stringify(modelByTagDTO),
+                // });
 
                 if (response.ok) {
-                    console.log('Model added successfully');
+                    toast.success('Model added successfully');
                 } else {
-                    console.log('Failed to add model');
+                    toast.error('Failed to add model');
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -276,6 +334,17 @@ const ManageDevices = () => {
                         </Grid>
                     </Grid>
                 </Box>
+                <ToastContainer
+                    position="top-center"
+                    autoClose={3000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable={false}
+                    pauseOnHover={false}
+                />
             </Box>
         </CustomThemeProvider>
     );

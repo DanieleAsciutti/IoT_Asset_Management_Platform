@@ -10,6 +10,6 @@ import java.util.List;
 @Builder
 @ToString
 @Getter
-public class UPDModelsDTO {
+public class DeviceIdsDTO {
     private List<String> deviceIds;
 }

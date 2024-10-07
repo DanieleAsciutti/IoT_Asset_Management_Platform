@@ -7,11 +7,10 @@ import ApplicationGateway.dto.assetManDTO.*;
 import ApplicationGateway.dto.auth_AuthDTO.*;
 import ApplicationGateway.dto.dataManagerDTO.AddAssetDTO;
 import ApplicationGateway.dto.dataManagerDTO.DeviceTagDTO;
+import ApplicationGateway.dto.dataManagerDTO.MultiplePendingsDTO;
 import ApplicationGateway.dto.dataManagerDTO.UserInfoDTO;
-import ApplicationGateway.dto.frontend.CompactUserDTO;
-import ApplicationGateway.dto.frontend.ModelByTagDTO;
-import ApplicationGateway.dto.frontend.ModelDTO;
-import ApplicationGateway.dto.frontend.UserDTO;
+import ApplicationGateway.dto.enums.Pendings;
+import ApplicationGateway.dto.frontend.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -462,6 +461,43 @@ public class ApplicationGatewayService {
                 .block();
     }
 
+    public ResponseEntity<Void> updateModelsByTag(DeviceIdsDTO deviceIdsDTO){
+
+        MultiplePendingsDTO multiplePendingsDTO = MultiplePendingsDTO.builder()
+                .deviceIds(deviceIdsDTO.getDeviceIds())
+                .pending(Pendings.RETRIEVE)
+                .value(true)
+                .build();
+
+        String url = String.format("http://%s:%d/setMultiplePending", dataManagerAddress, dataManagerPort);
+        ResponseEntity<List<String>> response = webClient.post()
+                .uri(url)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(multiplePendingsDTO)
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<String>>() {})
+                .block();
+
+        if(!Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() || response.getBody() == null){
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
+        if(response.getBody().isEmpty())
+            return ResponseEntity.ok().build();
+
+
+        url = String.format("http://%s:%d/ser/retrieveMultipleModels", asyncControllerAddress, asyncControllerPort);
+        return webClient.post()
+                .uri(url)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(Collections.singletonMap("deviceIds", response.getBody()))
+                .retrieve()
+                .toEntity(Void.class)
+                .block();
+
+
+    }
+
     public ResponseEntity<Void> modelInserted(String deviceId){
         String url = String.format("http://%s:%d/modelInserted?", dataManagerAddress, dataManagerPort) + "deviceId=" + deviceId;
         return webClient.post()
@@ -492,6 +528,41 @@ public class ApplicationGatewayService {
                 .retrieve()
                 .toEntity(Void.class)
                 .block();
+    }
+
+    public ResponseEntity<Void> updateDataByTag(DeviceIdsDTO deviceIdsDTO){
+
+        MultiplePendingsDTO multiplePendingsDTO = MultiplePendingsDTO.builder()
+                .deviceIds(deviceIdsDTO.getDeviceIds())
+                .pending(Pendings.DATA)
+                .value(true)
+                .build();
+
+        String url = String.format("http://%s:%d/setMultiplePending", dataManagerAddress, dataManagerPort);
+        ResponseEntity<List<String>> response = webClient.post()
+                .uri(url)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(multiplePendingsDTO)
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<String>>() {})
+                .block();
+
+        if(!Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() || response.getBody() == null){
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
+        if(response.getBody().isEmpty())
+            return ResponseEntity.ok().build();
+
+        url = String.format("http://%s:%d/ser/retrieveMultipleData", asyncControllerAddress, asyncControllerPort);
+        return webClient.post()
+                .uri(url)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(Collections.singletonMap("deviceIds", response.getBody()))
+                .retrieve()
+                .toEntity(Void.class)
+                .block();
+
     }
 
     public ResponseEntity<Void> saveDeviceData(DeviceDataDTO deviceDataDTO){

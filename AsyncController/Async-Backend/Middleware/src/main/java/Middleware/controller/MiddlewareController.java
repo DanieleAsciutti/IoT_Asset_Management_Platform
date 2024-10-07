@@ -2,6 +2,7 @@ package Middleware.controller;
 
 import Middleware.dto.devices.SendDataDTO;
 import Middleware.dto.devices.SendModelDTO;
+import Middleware.dto.server.DeviceIdsDTO;
 import Middleware.dto.server.ModelDTO;
 import Middleware.dto.server.MultipleModelsDTO;
 import Middleware.model.Request;
@@ -194,10 +195,11 @@ public class MiddlewareController {
     public ResponseEntity<Void> ser_RetrieveData(@RequestParam String deviceId){
         log.info("Retrieve data called");
         String name = middlewareService.findNameById(deviceId);
-        //System.out.println("name riga 196 di MiddlewareController: " + name);
         middlewareService.addPendingRequest(new Request(name, Response.RETRIEVE_DATA));
         return ResponseEntity.ok().build();
     }
+
+
 
     /**
      * This endpoint is called by the other server to update the model of multiple devices
@@ -209,6 +211,31 @@ public class MiddlewareController {
         log.info("Update multiple models called");
         for(String deviceId : multipleModelsDTO.getDeviceIds()){
             middlewareService.updateModel(new ModelDTO(multipleModelsDTO.getModel(), deviceId));
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * This endpoint is called by the other server to retrieve the model of multiple devices
+     * @param deviceIdsDTO list of devices' ids
+     * @return a ResponseEntity with no content
+     */
+    @PostMapping(value = "/ser/retrieveMultipleModels")
+    public ResponseEntity<Void> ser_RetrieveMultipleModels(@RequestBody DeviceIdsDTO deviceIdsDTO){
+        log.info("Retrieve multiple models called");
+        for(String deviceId : deviceIdsDTO.getDeviceIds()){
+            String name = middlewareService.findNameById(deviceId);
+            middlewareService.addPendingRequest(new Request(name, Response.RETRIEVE_MODEL));
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(value = "/ser/retrieveMultipleData")
+    public ResponseEntity<Void> ser_RetrieveMultipleData(@RequestBody DeviceIdsDTO deviceIdsDTO){
+        log.info("Retrieve multiple data called");
+        for(String deviceId : deviceIdsDTO.getDeviceIds()){
+            String name = middlewareService.findNameById(deviceId);
+            middlewareService.addPendingRequest(new Request(name, Response.RETRIEVE_DATA));
         }
         return ResponseEntity.ok().build();
     }
