@@ -16,6 +16,8 @@ import AddIcon from '@mui/icons-material/Add';
 import Network from './DevicesGraph';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import {toast, ToastContainer} from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css';
 
 export default class Devices extends React.Component {
 
@@ -43,16 +45,16 @@ export default class Devices extends React.Component {
 
     async componentDidMount() {
         this.setState({ isLoading: true });
-        const response = await fetch('/api/getAllUnregisteredDevices', {
-            method: 'GET',
-            credentials: 'include', // Include cookies in the request
-            mode : 'cors',
-        });
-        // const response = await fetch('http://localhost:9093/getAllUnregisteredDevices', {
+        // const response = await fetch('/api/getAllUnregisteredDevices', {
         //     method: 'GET',
         //     credentials: 'include', // Include cookies in the request
         //     mode : 'cors',
         // });
+        const response = await fetch('http://localhost:9093/getAllUnregisteredDevices', {
+            method: 'GET',
+            credentials: 'include', // Include cookies in the request
+            mode : 'cors',
+        });
         const data = await response.json();
         this.setState({ pendingDevices: data ,unregisteredDevices: data.length, isLoading: false});
     }
@@ -117,8 +119,16 @@ export default class Devices extends React.Component {
         // });
 
         this.getLevel1Options();
-        if (!response.ok) {
-            console.log('Failed to register device');
+
+        if(response.ok){
+            this.setState((prevState) => ({
+                pendingDevices: prevState.pendingDevices.filter(device => device.id !== id),
+                unregisteredDevices: prevState.unregisteredDevices - 1,
+            }));
+            toast.success('Device registered successfully');
+        }else{
+            toast.error('Failed to register device');
+            console.error('Failed to register device');
         }
         
     }
@@ -476,6 +486,17 @@ export default class Devices extends React.Component {
                     )}
                 </Dialog>
                 }
+                <ToastContainer
+                    position="top-center"
+                    autoClose={3000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable={false}
+                    pauseOnHover={false}
+                />
             </React.Fragment>
             
         );
