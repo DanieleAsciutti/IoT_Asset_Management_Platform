@@ -310,6 +310,50 @@ public class DataManagerController {
 
     }
 
+    @GetMapping(value = "/getNodesDataByLevels")
+    public ResponseEntity<List<Map<String, Object>>> getNodesDataByLevels
+            (@RequestParam String l1,
+             @RequestParam(required = false) String l2,
+             @RequestParam(required = false) String l3) {
+        log.info("GetNodesDataByLevels endpoint called");
+        String query = "MATCH (d) WHERE d.level1 =\""+ l1 + "\"";
+        if(l2 != null){
+            query += " AND d.level2 =\""+ l2 + "\"";
+            if (l3 != null){
+                query += " AND d.level3 =\""+ l3 + "\"";
+            }
+        }
+
+        query += " WITH labels(d) AS label, count(d) AS count RETURN COLLECT({label: label[0], count: count}) as result";
+        List<Map<String,List<Map<String, Object>>>> result = assetRepository.getNodesDataByLevels(query);
+
+        if(result != null){
+            List<Map<String, Object>> res = result.get(0).get("result");
+            return ResponseEntity.ok(res);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping(value = "/deleteNodesByLevels")
+    public ResponseEntity<Void> deleteNodesByLevels
+            (@RequestParam String l1,
+             @RequestParam(required = false) String l2,
+             @RequestParam(required = false) String l3) {
+
+        log.info("DeleteNodesByLevels endpoint called");
+        String query = "MATCH (d) WHERE d.level1 =\""+ l1 + "\"";
+        if(l2 != null){
+            query += " AND d.level2 =\""+ l2 + "\"";
+            if (l3 != null){
+                query += " AND d.level3 =\""+ l3 + "\"";
+            }
+        }
+        query += " DETACH DELETE d";
+        assetRepository.deleteNodesByLevels(query);
+        return ResponseEntity.ok().build();
+    }
+
+
     @PostMapping(value = "/addNewModel")
     public ResponseEntity<Void> addNewModel(@RequestBody ModelDTO modelDTO) {
         log.info("AddNewModel endpoint called");

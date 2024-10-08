@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -328,6 +329,36 @@ public class ApplicationGatewayService {
                 .accept(MediaType.APPLICATION_JSON)  // Setting Accept header as application/json
                 .retrieve()
                 .toEntity(String.class)
+                .block();
+    }
+
+    public ResponseEntity<List<Map<String, Object>>> getNodesDataByLevels(String l1, String l2, String l3){
+        String url = String.format("http://%s:%d/getNodesDataByLevels", dataManagerAddress, dataManagerPort) + "?l1=" + l1;
+        if(l2 != null) {
+            url += "&l2=" + l2;
+            if(l3 != null)
+                url += "&l3=" + l3;
+        }
+        return webClient.get()
+                .uri(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<Map<String, Object>>>() {})
+                .block();
+    }
+
+    public ResponseEntity<Void> deleteNodesByLevels(String l1, String l2, String l3){
+        String url = String.format("http://%s:%d/deleteNodesByLevels?", dataManagerAddress, dataManagerPort) + "l1=" + l1;
+        if(l2 != null) {
+            url += "&l2=" + l2;
+            if(l3 != null)
+                url += "&l3=" + l3;
+        }
+        return webClient.post()
+                .uri(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntity(Void.class)
                 .block();
     }
 

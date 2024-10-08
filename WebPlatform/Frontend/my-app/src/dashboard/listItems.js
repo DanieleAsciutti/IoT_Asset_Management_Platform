@@ -4,6 +4,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 import PeopleIcon from '@mui/icons-material/People';
 import LayersIcon from '@mui/icons-material/Layers';
@@ -44,6 +45,12 @@ export const mainListItems = (
                 <PodcastsIcon />
             </ListItemIcon>
             <ListItemText primary="Manage Devices"/>
+        </ListItemButton>
+        <ListItemButton component={Link} to="/managelevels">
+            <ListItemIcon>
+                <FilterListIcon />
+            </ListItemIcon>
+            <ListItemText primary="Manage Levels"/>
         </ListItemButton>
     </React.Fragment>
 );

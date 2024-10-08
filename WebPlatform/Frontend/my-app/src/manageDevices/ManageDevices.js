@@ -25,10 +25,15 @@ const ManageDevices = () => {
     const [devices, setDevices] = useState([]); // Devices data from API
     const [hoveredRow, setHoveredRow] = useState(null); // Row hover effect for table
 
-    // Snackbar state
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-    const [snackbarMessage, setSnackbarMessage] = useState('');
-    const [progress, setProgress] = useState(0);
+
+    const userDataString = sessionStorage.getItem('userData');
+    const userData = JSON.parse(userDataString);
+
+    // Check if user data exists
+    if (!userData) {
+        // Redirect to sign-in page if user data is not present
+        window.location.href = '/';
+    }
 
     // Fetch device tags when the component mounts
     useEffect(() => {
@@ -133,7 +138,7 @@ const ManageDevices = () => {
             // });
 
             if (response.ok) {
-                toast.success('Request to update ML model sent successfully')
+                toast.success('Request to update ML model sent successfully');
             } else {
                 toast.error('Failed to send the request to update ML model');
             }

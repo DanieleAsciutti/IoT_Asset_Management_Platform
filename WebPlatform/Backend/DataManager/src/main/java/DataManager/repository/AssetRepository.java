@@ -2,8 +2,6 @@ package DataManager.repository;
 
 import DataManager.model.graphDB.Device;
 
-import org.neo4j.driver.Result;
-import org.neo4j.driver.internal.value.MapValue;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public interface AssetRepository extends Neo4jRepository<Device, String>{
 
@@ -143,10 +140,15 @@ public interface AssetRepository extends Neo4jRepository<Device, String>{
      @Query("MATCH (n) WHERE n.level1 = $level1 AND n.level2 = $level2 RETURN DISTINCT n.level3")
      List<String> retrieveLevel3(@Param("level1") String level1, @Param("level2") String level2);
 
+    @Query("CALL apoc.cypher.doIt($query, {})")
+    List<Map<String, List<Map<String, Object>>>> getNodesDataByLevels(@Param("query") String query);
+
+    @Query("CALL apoc.cypher.doIt($query, {})")
+    void deleteNodesByLevels(@Param("query") String query);
+
     /**
      * TO DELETE, IT NEEDS ONLY FOR PYTHON SCRIPT //TODO
      */
-
     @Query("CALL apoc.cypher.doIt($query, {name: $name, level1: $level1, level2: $level2, level3: $level3})")
     List<Map<String, Object>> pythonAddAsset(@Param("query") String query, @Param("name") String name, @Param("level1") String level1, @Param("level2") String level2, @Param("level3") String level3);
 

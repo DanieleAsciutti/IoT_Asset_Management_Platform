@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -319,6 +320,36 @@ public class ApplicationGatewayController {
         }
         log.info("User authorized");
         return applicationGatewayService.getFilteredNetwork(l1,l2,l3);
+    }
+
+    @GetMapping(value ="/getNodesDataByLevels")
+    public ResponseEntity<List<Map<String, Object>>> getNodesDataByLevels(
+            @CookieValue (value = "token", defaultValue = "") String accessToken,
+            @RequestParam String l1, @RequestParam(required = false) String l2, @RequestParam(required = false) String l3){
+
+        log.info("GetNodesDataByLevels endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize(new AuthorizationRequest(accessToken));
+        if (!authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        log.info("User authorized");
+        return applicationGatewayService.getNodesDataByLevels(l1,l2,l3);
+    }
+
+    @PostMapping(value = "/deleteNodesByLevels")
+    public ResponseEntity<Void> deleteNodesByLevels(
+            @CookieValue (value = "token", defaultValue = "") String accessToken,
+            @RequestParam String l1, @RequestParam(required = false) String l2, @RequestParam(required = false) String l3) {
+
+        log.info("DeleteNodesByLevels endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize(new AuthorizationRequest(accessToken));
+        if (!authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        log.info("User authorized");
+        return applicationGatewayService.deleteNodesByLevels(l1,l2,l3);
     }
 
     /**

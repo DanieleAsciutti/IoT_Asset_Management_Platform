@@ -34,21 +34,6 @@ const Reports = () => {
     }
 
     useEffect(() => {
-        // const fetchData = async () => {
-        //     try {
-        //         const response = await fetch('/api/getAllRegisteredDevices', {
-        //             method: 'GET',
-        //             credentials: 'include',
-        //             headers: { 'Content-Type': 'application/json' }
-        //         });
-        //         const data = await response.json();
-        //         const devices = JSON.parse(JSON.parse(data)).map(device => JSON.parse(device));
-        //         setDevices(devices);
-        //         console.log(devices);
-        //     } catch (error) {
-        //         console.error('Error fetching devices:', error);
-        //     }
-        // };
         const fetchData = async () => {
             try {
                 const response = await fetch('/api/getLevel1', {
