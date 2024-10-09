@@ -1,10 +1,23 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import TableContainer from "@mui/material/TableContainer";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 
 const NodeTable = ({assets}) => {
+    const [hoveredRow, setHoveredRow] = useState(null);
+
+    const handleRowHover = (index) => {
+        setHoveredRow(index);
+    };
+
+    const handleRowLeave = () => {
+        setHoveredRow(null);
+    };
+
+
+
+
     const totalNodes = assets.reduce((sum, asset) => sum + asset.count, 0);
 
     if (assets.length === 0) {
@@ -17,7 +30,7 @@ const NodeTable = ({assets}) => {
 
     return (
         <TableContainer component={Paper}>
-            <Table size="small">
+            <Table size="medium">
                 <TableHead>
                     <TableRow>
                         <TableCell><strong>Label</strong></TableCell>
@@ -29,16 +42,23 @@ const NodeTable = ({assets}) => {
                         <TableCell><strong>Total Nodes</strong></TableCell>
                         <TableCell align="right"><strong>{totalNodes}</strong></TableCell>
                     </TableRow>
-                    {assets.map((device, index) => (
-                        <TableRow key={index}>
-                            <TableCell>{device.label}</TableCell>
-                            <TableCell align="right">{device.count}</TableCell>
+                    {assets.map((asset, index) => (
+                        <TableRow
+                            key={index}
+                            onMouseEnter={() => handleRowHover(index)}
+                            onMouseLeave={handleRowLeave}
+                            style={{ backgroundColor: hoveredRow === index ? '#f5f5f5' : 'inherit' }}
+                        >
+                            <TableCell>{asset.label}</TableCell>
+                            <TableCell align="right">{asset.count}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
             </Table>
         </TableContainer>
     );
+
+
 };
 
 export default NodeTable;

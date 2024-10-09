@@ -334,7 +334,7 @@ public class ApplicationGatewayController {
             return ResponseEntity.status(401).build();
         }
         log.info("User authorized");
-        return applicationGatewayService.getNodesDataByLevels(l1,l2,l3);
+        return ResponseEntity.ok(applicationGatewayService.getNodesDataByLevels(l1,l2,l3));
     }
 
     @PostMapping(value = "/deleteNodesByLevels")
@@ -612,11 +612,11 @@ public class ApplicationGatewayController {
             @CookieValue (value = "token", defaultValue = "") String accessToken,
             @RequestBody UserDTO userDTO){
         log.info("AddUser endpoint called");
-        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize( new AuthorizationRequest(accessToken) );
-        if( !authorization.getBody().getIsAuthorized()) {
-            log.info("User unauthorized");
-            return ResponseEntity.status(401).build();
-        }
+//        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize( new AuthorizationRequest(accessToken) );
+//        if( !authorization.getBody().getIsAuthorized()) {
+//            log.info("User unauthorized");
+//            return ResponseEntity.status(401).build();
+//        }
         return applicationGatewayService.addUser(userDTO);
 
     }

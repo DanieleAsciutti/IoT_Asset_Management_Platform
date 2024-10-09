@@ -10,6 +10,7 @@ services:
       - "9090:9090"
     networks:
       - backend
+      - postgre-neo4j
     volumes:
       - data:/data
 
@@ -74,6 +75,38 @@ services:
     expose:
       - "8086"
 
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgresDB
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - postgre-neo4j
+
+
+  neo4j:
+    image: neo4j:5.11.0
+    container_name: neo4j-db
+    environment:
+      NEO4J_AUTH: neo4j/password
+      NEO4JLABS_PLUGINS: '["apoc"]'  # This line installs the APOC plugin
+      NEO4J_apoc_export_file_enabled: "true"  # Enable exporting files using APOC
+      NEO4J_apoc_import_file_enabled: "true"  # Enable importing files using APOC
+    ports:
+      - "7474:7474"   # HTTP access to Neo4j browser
+      - "7687:7687"   # Bolt protocol for connecting with drivers
+    volumes:
+      - neo4j_data:/data
+      - ./plugins:/var/lib/neo4j/plugins  # Mount plugin directory
+    networks:
+      - postgre-neo4j
+
   grafana:
     image: grafana/grafana-oss
     container_name: grafana
@@ -106,7 +139,6 @@ services:
       - f-frontend
       - grafana
       - influxdb
-    restart: always
     container_name: nginx
     image: nginx:latest
     build:
@@ -141,9 +173,12 @@ networks:
     external: true
     name: int-net
   graf-influx:
+  postgre-neo4j:
 
 
 volumes:
   data:
   influxdbv2:
   grafana-storage:
+  postgres_data:
+  neo4j_data:

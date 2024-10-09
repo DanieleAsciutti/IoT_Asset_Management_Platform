@@ -63,17 +63,17 @@ const ManageDevices = () => {
 
     const fetchDeviceTags = async () => {
         try {
-            // const response = await fetch('/api/getAllDeviceTags', {
-            //     method: 'GET',
-            //     credentials: 'include',
-            //     mode: 'cors',
-            // });
-
-            const response = await fetch('http://localhost:9093/getAllDeviceTags', {
+            const response = await fetch('/api/getAllDeviceTags', {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',
             });
+
+            // const response = await fetch('http://localhost:9093/getAllDeviceTags', {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
 
             const tags = await response.json();
             setDeviceTags(tags);
@@ -84,17 +84,17 @@ const ManageDevices = () => {
 
     const fetchDevicesByTag = async (tag) => {
         try {
-            // const response = await fetch(`/api/getDevicesByTag?tag=${tag}`, {
-            //     method: 'GET',
-            //     credentials: 'include',
-            //     mode: 'cors',
-            // });
-
-            const response = await fetch(`http://localhost:9093/getDevicesByTag?tag=${tag}`, {
+            const response = await fetch(`/api/getDevicesByTag?tag=${tag}`, {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',
             });
+
+            // const response = await fetch(`http://localhost:9093/getDevicesByTag?tag=${tag}`, {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
 
             const data = await response.json();
             if (data == null)

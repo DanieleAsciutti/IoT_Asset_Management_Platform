@@ -14,6 +14,7 @@ import DataManager.repository.AssetRepository;
 import DataManager.repository.InfluxRepository;
 import DataManager.repository.UserRepository;
 import DataManager.service.DataManagerService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.influxdb.client.JSON;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.neo4j.core.mapping.EntityInstanceWithSource;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -306,6 +308,7 @@ public class DataManagerController {
         List<String> assets = assetRepository.getFilteredAssetsForNetwork(l1, l2, l3);
         List<String> relationships = assetRepository.getFilteredRelationsForNetwork(l1, l2, l3);
         String toReturn = "{\"nodes\":" + assets.toString() + ", \"links\":" + relationships.toString() + "}";
+        log.info(toReturn);
         return ResponseEntity.ok(toReturn);
 
     }

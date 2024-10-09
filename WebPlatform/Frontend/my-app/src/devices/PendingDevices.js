@@ -45,16 +45,16 @@ export default class Devices extends React.Component {
 
     async componentDidMount() {
         this.setState({ isLoading: true });
-        // const response = await fetch('/api/getAllUnregisteredDevices', {
-        //     method: 'GET',
-        //     credentials: 'include', // Include cookies in the request
-        //     mode : 'cors',
-        // });
-        const response = await fetch('http://localhost:9093/getAllUnregisteredDevices', {
+        const response = await fetch('/api/getAllUnregisteredDevices', {
             method: 'GET',
             credentials: 'include', // Include cookies in the request
             mode : 'cors',
         });
+        // const response = await fetch('http://localhost:9093/getAllUnregisteredDevices', {
+        //     method: 'GET',
+        //     credentials: 'include', // Include cookies in the request
+        //     mode : 'cors',
+        // });
         const data = await response.json();
         this.setState({ pendingDevices: data ,unregisteredDevices: data.length, isLoading: false});
     }

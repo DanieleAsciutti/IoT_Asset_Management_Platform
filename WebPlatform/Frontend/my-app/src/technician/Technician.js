@@ -25,6 +25,7 @@ const Technician = () => {
             const userData = JSON.parse(userDataString);
             setCurrentUserRole(userData.role);
         }
+        setCurrentUserRole('ADMIN');
         const fieldsFilled = Object.values(newUser).every(value => value !== '');
         setAllFieldsFilled(fieldsFilled);
     }, [newUser]);

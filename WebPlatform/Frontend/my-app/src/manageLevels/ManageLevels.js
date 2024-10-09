@@ -74,16 +74,16 @@ const ManageLevels = () => {
 
     const fetchLevel1Data = async () => {
         try {
-            // const response = await fetch('/api/getLevel1', {
-            //     method: 'GET',
-            //     credentials: 'include',
-            //     mode: 'cors',
-            // });
-            const response = await fetch('http://localhost:9093/getLevel1', {
+            const response = await fetch('/api/getLevel1', {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',
             });
+            // const response = await fetch('http://localhost:9093/getLevel1', {
+            //     method: 'GET',
+            //     credentials: 'include',
+            //     mode: 'cors',
+            // });
 
             if (response.ok) {
                 const options = await response.json(); // Parse JSON response
@@ -106,16 +106,16 @@ const ManageLevels = () => {
         const level1 = event.target.value;
         setLevel2('');
         setLevel3('');
-        // const response = await fetch(`/api/getLevel2?level1=${level1}`, {
-        //     method: 'GET',
-        //     credentials: 'include',
-        //     mode: 'cors',
-        // });
-        const response = await fetch(`http://localhost:9093/getLevel2?level1=${level1}`, {
+        const response = await fetch(`/api/getLevel2?level1=${level1}`, {
             method: 'GET',
             credentials: 'include',
             mode: 'cors',
         });
+        // const response = await fetch(`http://localhost:9093/getLevel2?level1=${level1}`, {
+        //     method: 'GET',
+        //     credentials: 'include',
+        //     mode: 'cors',
+        // });
         if (response.ok) {
             const options = await response.json(); // Parse JSON response
             setLevel2Options(options);
@@ -130,16 +130,16 @@ const ManageLevels = () => {
         setLevel2(event.target.value);
         const level2 = event.target.value;
         setLevel3('');
-        // const response = await fetch(`/api/getLevel3?level1=${level1}&level2=${level2}`, {
-        //     method: 'GET',
-        //     credentials: 'include',
-        //     mode: 'cors',
-        // });
-        const response = await fetch(`http://localhost:9093/getLevel3?level1=${level1}&level2=${level2}`, {
+        const response = await fetch(`/api/getLevel3?level1=${level1}&level2=${level2}`, {
             method: 'GET',
             credentials: 'include',
             mode: 'cors',
         });
+        // const response = await fetch(`http://localhost:9093/getLevel3?level1=${level1}&level2=${level2}`, {
+        //     method: 'GET',
+        //     credentials: 'include',
+        //     mode: 'cors',
+        // });
 
         if (response.ok) {
             const options = await response.json(); // Parse JSON response
@@ -157,20 +157,16 @@ const ManageLevels = () => {
 
     const fetchAssets = async (level1, level2, level3) => {
 
-        // let url = `/api/getNodesDataByLevels?l1=${level1}`
-        // if (level2) {
-        //     url += `&l2=${level2}`;
-        //     if (level3) {
-        //         url += `&l3=${level3}`;
-        //     }
-        // }
-        let url = `http://localhost:9093/getNodesDataByLevels?l1=${level1}`
+        let url = `/api/getNodesDataByLevels?l1=${level1}`
+        // let url = `http://localhost:9093/getNodesDataByLevels?l1=${level1}`
+
         if (level2) {
             url += `&l2=${level2}`;
             if (level3) {
                 url += `&l3=${level3}`;
             }
         }
+
         const response = await fetch(url, {
             method: 'GET',
             credentials: 'include',
@@ -192,14 +188,9 @@ const ManageLevels = () => {
 
     const handleConfirmDelete = async () => {
 
+        let url = `/api/deleteNodesByLevels?l1=${level1}`
         // let url = `http://localhost:9093/deleteNodesByLevels?l1=${level1}`
-        // if (level2) {
-        //     url += `&l2=${level2}`;
-        //     if (level3) {
-        //         url += `&l3=${level3}`;
-        //     }
-        // }
-        let url = `http://localhost:9093/deleteNodesByLevels?l1=${level1}`
+
         if (level2) {
             url += `&l2=${level2}`;
             if (level3) {

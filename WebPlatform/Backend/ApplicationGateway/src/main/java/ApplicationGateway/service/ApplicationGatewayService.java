@@ -332,19 +332,22 @@ public class ApplicationGatewayService {
                 .block();
     }
 
-    public ResponseEntity<List<Map<String, Object>>> getNodesDataByLevels(String l1, String l2, String l3){
+    public List<Map<String, Object>> getNodesDataByLevels(String l1, String l2, String l3){
         String url = String.format("http://%s:%d/getNodesDataByLevels", dataManagerAddress, dataManagerPort) + "?l1=" + l1;
         if(l2 != null) {
             url += "&l2=" + l2;
             if(l3 != null)
                 url += "&l3=" + l3;
         }
-        return webClient.get()
+        ResponseEntity<List<Map<String,Object>>> response = webClient.get()
                 .uri(url)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<List<Map<String, Object>>>() {})
                 .block();
+
+        if (Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() && response.getBody() != null) return response.getBody();
+        else return Collections.emptyList();
     }
 
     public ResponseEntity<Void> deleteNodesByLevels(String l1, String l2, String l3){
