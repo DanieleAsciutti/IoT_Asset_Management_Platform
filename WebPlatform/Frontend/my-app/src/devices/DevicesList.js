@@ -1,14 +1,5 @@
 import * as React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import Title from './Title';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import IconButton from '@mui/material/IconButton';
-import CircularProgress from '@mui/material/CircularProgress';
 import SequentialFilter from "../components/SequentialFilter";
 import DevicesTable from "./DevicesTable";
 

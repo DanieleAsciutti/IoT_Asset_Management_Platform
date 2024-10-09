@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
-import {Select, MenuItem, InputLabel, FormControl, Snackbar, LinearProgress} from '@mui/material';
+import {Select, MenuItem, InputLabel, FormControl} from '@mui/material';
 import AppBarComponent from "../components/AppBarComponent";
 import DrawerComponent from '../components/DrawerComponent';
 import CustomThemeProvider from "../components/ThemeProvider";

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Graph from "../components/Graph";
-import { CssBaseline, Box, Toolbar, MenuItem, Fab, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select, InputLabel, FormControl } from '@mui/material';
+import { CssBaseline, Box, MenuItem, Fab, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select} from '@mui/material';
 import AddIcon from "@mui/icons-material/Add";
 import CustomThemeProvider from '../components/ThemeProvider';
 import AppBarComponent from '../components/AppBarComponent';
