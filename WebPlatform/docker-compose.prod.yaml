@@ -87,7 +87,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - postgre-neo4j
-      -
 
   neo4j:
     image: neo4j:5.11.0
