@@ -133,38 +133,53 @@ services:
     depends_on:
       - influxdb
 
-  nginx:
-    depends_on:
-      - b-applicationgateway
-      - f-frontend
-      - grafana
-      - influxdb
-    container_name: nginx
-    image: nginx:latest
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    volumes:
-      - ./nginx/:/etc/nginx/conf.d/
+#  nginx:
+#    depends_on:
+#      - b-applicationgateway
+#      - f-frontend
+#      - grafana
+#      - influxdb
+#    container_name: nginx
+#    image: nginx:latest
+#    build:
+#      context: ./nginx
+#      dockerfile: Dockerfile
+#    volumes:
+#      - ./nginx/:/etc/nginx/conf.d/
+#    ports:
+#      - "3050:80"
+#    networks:
+#      - n-frontend
+#      - backend
+#      - graf-influx
+#
+#  f-frontend:
+#    stdin_open: true
+#    environment:
+#      - CHOKIDAR_USEPOLLING=true
+#    build:
+#      dockerfile: Dockerfile
+#      context: ./Frontend/my-app
+#    image: f-frontend:latest
+#    networks:
+#      - n-frontend
+#    ports:
+#      - "3002:3002"
+
+  f-frontend:
+    #restart: always
+    image: docker.io/library/nginx:alpine
+    container_name: f-frontend
     ports:
-      - "3050:80"
+      - 3000:3000
     networks:
       - n-frontend
       - backend
       - graf-influx
-
-  f-frontend:
-    stdin_open: true
-    environment:
-      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - b-applicationgateway
     build:
-      dockerfile: Dockerfile
-      context: ./Frontend/my-app
-    image: f-frontend:latest
-    networks:
-      - n-frontend
-    ports:
-      - "3002:3002"
+      context: Frontend/vite-frontend
 
 networks:
   backend:
