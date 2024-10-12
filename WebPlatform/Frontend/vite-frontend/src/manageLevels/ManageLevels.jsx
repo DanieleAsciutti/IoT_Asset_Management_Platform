@@ -41,15 +41,15 @@ const ManageLevels = () => {
     const [openDialog, setOpenDialog] = useState(false);
 
 
-    //TODO RIMETTERE IL CONTROLLO SUL LOGIN
-    // const userDataString = sessionStorage.getItem('userData');
-    // const userData = JSON.parse(userDataString);
-    //
-    // // Check if user data exists
-    // if (!userData) {
-    //     // Redirect to sign-in page if user data is not present
-    //     window.location.href = '/';
-    // }
+
+    const userDataString = sessionStorage.getItem('userData');
+    const userData = JSON.parse(userDataString);
+
+    // Check if user data exists
+    if (!userData) {
+        // Redirect to sign-in page if user data is not present
+        window.location.href = '/';
+    }
 
     const toggleDrawer = () => {
         setOpen(!open); // Toggle the value of `open`
