@@ -64,12 +64,12 @@ public class AssetManagementService
     }
 
 
-    public ResponseEntity<Void> deleteAsset(String name) {
+    public ResponseEntity<String> deleteAsset(String name) {
         String url = String.format("http://%s:%d/deleteAsset?",dataControllerAddress,dataControllerPort)+"id="+name;
 
         return webClient.post().uri(url).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
-                .toEntity(Void.class)
+                .toEntity(String.class)
                 .block();
     }
 

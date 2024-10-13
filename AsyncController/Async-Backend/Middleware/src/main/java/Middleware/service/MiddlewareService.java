@@ -21,9 +21,13 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -125,6 +129,25 @@ public class MiddlewareService {
             writer.write(deviceId + "," + deviceName + "\n");
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteDeviceInCSV(String deviceId){
+        try (BufferedReader reader = new BufferedReader(new FileReader(dataPath + csvFileName))){
+            List<String> lines = reader.lines().toList();
+
+            try(FileWriter writer = new FileWriter(dataPath + csvFileName)){
+                for(String line : lines){
+                    String[] data = line.split(",");
+                    if(!data[0].equals(deviceId)){
+                        writer.write(line + "\n");
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

@@ -39,7 +39,7 @@ public class AssetController {
     }
 
     @PostMapping(value = "/deleteAsset")
-    public ResponseEntity<Void> deleteAsset(@RequestParam String id)
+    public ResponseEntity<String> deleteAsset(@RequestParam String id)
     {
         log.info("DeleteAsset endpoint called");
         return assetManagementService.deleteAsset(id);

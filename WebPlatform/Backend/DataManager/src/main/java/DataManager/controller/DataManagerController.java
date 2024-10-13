@@ -16,8 +16,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.influxdb.client.JSON;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.json.JSONObject;
 import org.neo4j.driver.Result;
+import org.neo4j.driver.exceptions.ClientException;
 import org.neo4j.driver.internal.value.MapValue;
 import org.neo4j.driver.Record;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,10 +159,24 @@ public class DataManagerController {
 
 
     @PostMapping(value = "/deleteAsset")
-    public ResponseEntity<Void> deleteAsset(@RequestParam String id) {
+    public ResponseEntity<String> deleteAsset(@RequestParam String id){
         log.info("DeleteAsset endpoint called");
-        assetRepository.deleteAsset(id);
-        return ResponseEntity.ok().build();
+        String assetLabel = assetRepository.getNodeLabelById(id);
+        try {
+            assetRepository.deleteAsset(id);
+        } catch (ClientException e) {
+            return ResponseEntity.notFound().build();
+        }
+        if(assetLabel.equals("Device")){
+            try {
+                FileUtils.deleteDirectory(new File(folderPath + modelsPath + "/" + id));
+            } catch (IOException e) {
+                return ResponseEntity.internalServerError().build();
+            }
+
+        }
+
+        return ResponseEntity.ok(assetLabel);
     }
 
     @PostMapping(value = "/deleteRelationship")

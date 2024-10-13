@@ -26,7 +26,7 @@ public interface AssetRepository extends Neo4jRepository<Device, String>{
     void addAsset(@Param("query") String query, @Param("name") String name, @Param("level1") String level1, @Param("level2") String level2, @Param("level3") String level3);
 
     @Query("MATCH (d) WHERE elementId(d) = $id DELETE d")
-    void deleteAsset(@Param("id") String id);
+    String deleteAsset(@Param("id") String id);
 
     @Query("MATCH () - [r] - () WHERE elementId(r) = $id DELETE r")
     void deleteRelationship(@Param("id") String relId);

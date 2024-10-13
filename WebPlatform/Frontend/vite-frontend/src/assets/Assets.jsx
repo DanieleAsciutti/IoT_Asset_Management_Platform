@@ -444,8 +444,14 @@ function Assets() {
 
             if (response.ok) {
                 console.log('Asset deleted successfully');
-                //fetchData();
-                getFilteredNetwork(level1, level2, level3);
+
+                if(currentFilter === 'filtered' && nodes.length > 1){
+                    getFilteredNetwork(level1, level2, level3);
+                }else{
+                    setCurrentFilter('l3');
+                    getLevel3Options(level1, level2);
+                }
+
 
             } else {
                 const errorMessage = await response.text();

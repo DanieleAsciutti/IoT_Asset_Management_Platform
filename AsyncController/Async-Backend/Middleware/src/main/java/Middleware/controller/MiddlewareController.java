@@ -161,6 +161,18 @@ public class MiddlewareController {
     //----------------------------------------------------------------------------------------------------------------//
     // The following endpoints are called by the other Server
 
+    /**
+     * This endpoint is called by the other server to delete a device
+     * @param deviceId device's unique id
+     * @return a ResponseEntity with no content
+     */
+    @PostMapping("/ser/deleteDevice")
+    public ResponseEntity<Void> ser_DeleteDevice(@RequestParam String deviceId){
+        log.info("Delete device called");
+        middlewareService.deleteDeviceInCSV(deviceId);
+        return ResponseEntity.ok().build();
+    }
+
 
     /**
      * This endpoint is called by the other server to update the model of a device

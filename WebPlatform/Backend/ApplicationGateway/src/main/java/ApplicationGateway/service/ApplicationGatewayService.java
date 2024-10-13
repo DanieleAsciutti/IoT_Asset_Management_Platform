@@ -151,13 +151,30 @@ public class ApplicationGatewayService {
     public ResponseEntity<Void> deleteAsset(String assetId)
     {
         String url = String.format("http://%s:%d/deleteAsset?",assetManagerAddress,assetManagerPort)+"id="+assetId;
-        return webClient
+        ResponseEntity<String> response =webClient
                 .post()
                 .uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
-                .toEntity(Void.class)
+                .toEntity(String.class)
                 .block();
+
+        if(Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() && response.getBody() != null){
+            if(response.getBody().equals("Device")){
+                url = String.format("http://%s:%d/ser/deleteDevice", asyncControllerAddress, asyncControllerPort);
+                url += "?deviceId=" + assetId;
+                return webClient.post()
+                        .uri(url)
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .retrieve()
+                        .toEntity(Void.class)
+                        .block();
+            }
+            else{
+                return ResponseEntity.ok().build();
+            }
+        }
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
 
     public ResponseEntity<Void> deleteRelationship(String relId)
