@@ -100,7 +100,20 @@ class Devices extends React.Component {
         if (response.ok) {
             // Handle successful response
             console.log('Attributes added successfully');
+            this.setState(prevState => ({
+                deviceData: {
+                    ...prevState.deviceData,
+                    asset: {
+                        ...prevState.deviceData.asset,
+                        properties: {
+                            ...prevState.deviceData.asset.properties,
+                            [this.state.label]: this.state.value // Add the new key-value pair here
+                        }
+                    }
+                }
+            }));
             this.setState({dialogOpen: false, label: '', value: ''});
+
         } else {
             // Handle error response
             console.log('Failed to add attributes');
@@ -144,6 +157,23 @@ class Devices extends React.Component {
                 if (response.ok) {
                     // Handle successful response
                     console.log('Model added successfully');
+
+                    // Set new the pendingModel just sent
+                    this.setState(prevState => ({
+                        deviceData: {
+                            ...prevState.deviceData,
+                            asset: {
+                                ...prevState.deviceData.asset,
+                                properties: {
+                                    ...prevState.deviceData.asset.properties,
+                                    pendingModel: file.name
+                                }
+                            }
+                        }
+                    }));
+
+                    // Call the function to get the updated model history
+                    await this.getDeviceModelsHistory();
                 } else {
                     // Handle error response
                     console.log('Failed to add model');
@@ -206,15 +236,7 @@ class Devices extends React.Component {
         }
     }
 
-    async componentDidMount() {
-        const userDataString = sessionStorage.getItem('userData');
-        const userData = JSON.parse(userDataString);
-
-        if (!userData) {
-            // Redirect to sign-in page if user data is not present
-            window.location.href = '/';
-        }
-
+    async getAssetData(){
         const response = await fetch(`/api/getAsset?id=${this.props.deviceId}`, {
             method: 'GET',
             credentials: 'include', // Include cookies in the request
@@ -228,6 +250,9 @@ class Devices extends React.Component {
         const data = await response.json();
         this.setState({deviceData: data,});
 
+    }
+
+    async getDeviceModelsHistory(){
         const resp = await fetch(`/api/getDeviceModelsHistory?deviceId=${this.props.deviceId}`, {
             method: 'GET',
             credentials: 'include', // Include cookies in the request
@@ -248,11 +273,26 @@ class Devices extends React.Component {
         });
         const models = modelsfromUser.concat(modelsfromDevice);
         if (resp.ok) {
-            console.log(data);
+            console.log("Models history retrieved successfully");
         } else {
             console.log('Failed to get device models history');
         }
         this.setState({modelHistory: models});
+    }
+
+
+    async componentDidMount() {
+        const userDataString = sessionStorage.getItem('userData');
+        const userData = JSON.parse(userDataString);
+
+        if (!userData) {
+            // Redirect to sign-in page if user data is not present
+            window.location.href = '/';
+        }
+
+        await this.getAssetData();
+
+        await this.getDeviceModelsHistory();
 
         const response2 = await fetch(`/api/retrieveDeviceDataMeasurements?deviceId=${this.props.deviceId}`, {
             method: 'GET',
@@ -293,11 +333,25 @@ class Devices extends React.Component {
         //     credentials: 'include', // Include cookies in the request
         // });
         if (response.ok) {
+            // Update the pendingData value in the state
+            this.setState(prevState => ({
+                deviceData: {
+                    ...prevState.deviceData,
+                    asset: {
+                        ...prevState.deviceData.asset,
+                        properties: {
+                            ...prevState.deviceData.asset.properties,
+                            pendingData: true
+                        }
+                    }
+                }
+            }));
             console.log('Data updated successfully');
         } else {
             console.log('Failed to update data');
         }
     }
+
     downloadModel = async (modelName) => {
         const response = await fetch(`/api/retrieveModel?deviceId=${this.props.deviceId}&modelName=${modelName}&fromUser=true`, {
             method: 'GET',

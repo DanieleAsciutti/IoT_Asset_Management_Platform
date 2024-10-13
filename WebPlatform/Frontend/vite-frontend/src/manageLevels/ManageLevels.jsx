@@ -244,6 +244,7 @@ const ManageLevels = () => {
         });
 
         if(response.ok){
+            setassets([]);
             toast.success('Levels modified successfully');
             fetchLevel1Data();
         }else{
@@ -373,6 +374,7 @@ const ManageLevels = () => {
                                         </DialogActions>
                                     </Dialog>
 
+                                    {/* Modify Levels Dialog */}
                                     <ModifyLevelsDialogue open={openModifyDialog} onClose={handleCloseModifyDialog} levels={{ level1, level2, level3 }}
                                                           levelOptionsList={{level1Options, level2Options, level3Options}}
                                                           modifyLevels={handleModifyLevels}/>
