@@ -83,7 +83,11 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
             .append('line')
             .attr('class', 'link')
             .attr('stroke', 'black')
-            .attr('stroke-width', 2)
+            .attr('stroke-width', function (data) {
+                // Dynamically adjust stroke width based on number of relationships
+                const relations = data.relations || [];
+                return relations.length > 1 ? relations.length * 2 : 2; // Increase width if more than 1 relationship
+            })
             .on('mouseover', function (event, data) {
                 d3.select(this).transition()
                     .attr('opacity', '.95');

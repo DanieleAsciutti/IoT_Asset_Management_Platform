@@ -146,6 +146,9 @@ public interface AssetRepository extends Neo4jRepository<Device, String>{
     @Query("CALL apoc.cypher.doIt($query, {})")
     void deleteNodesByLevels(@Param("query") String query);
 
+    @Query("CALL apoc.cypher.doIt($query, {})")
+    void modifyLevels(@Param("query") String query);
+
     /**
      * TO DELETE, IT NEEDS ONLY FOR PYTHON SCRIPT //TODO
      */

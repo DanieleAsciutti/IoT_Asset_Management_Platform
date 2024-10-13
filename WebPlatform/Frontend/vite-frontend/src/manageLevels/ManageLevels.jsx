@@ -12,9 +12,7 @@ import {
     DialogContent,
     DialogTitle,
     Grid,
-    MenuItem,
     Paper,
-    Select,
     Toolbar,
     Typography
 } from "@mui/material";
@@ -22,7 +20,7 @@ import Container from "@mui/material/Container";
 import NodeTable from "./NodeTable.jsx";
 import {toast, ToastContainer} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
-
+import ModifyLevelsDialogue from "./ModifyLevelsDialogue.jsx";
 
 const ManageLevels = () => {
 
@@ -39,7 +37,7 @@ const ManageLevels = () => {
     const [assets, setassets] = useState([]);
 
     const [openDialog, setOpenDialog] = useState(false);
-
+    const [openModifyDialog, setOpenModifyDialog] = useState(false);
 
 
     const userDataString = sessionStorage.getItem('userData');
@@ -186,6 +184,14 @@ const ManageLevels = () => {
         setOpenDialog(true);
     }
 
+    const handleOpenModifyDialog = () => {
+        setOpenModifyDialog(true);
+    }
+
+    const handleCloseModifyDialog = () => {
+        setOpenModifyDialog(false);
+    }
+
     const handleConfirmDelete = async () => {
 
         let url = `/api/deleteNodesByLevels?l1=${level1}`
@@ -212,6 +218,39 @@ const ManageLevels = () => {
         }else{
             toast.error('Failed to delete nodes');
         }
+    }
+
+    const handleModifyLevels = async (level, oldLevel1, oldLevel2, oldLevel3, newLevel) => {
+        console.log("handleModifyLevels: ", level.toUpperCase(), oldLevel1, oldLevel2, oldLevel3, newLevel);
+
+        //nel backend devo fare il controllo che oldLevel siano null o no
+        let dto = {
+            level: level.toUpperCase(),
+            oldLevel1: oldLevel1,
+            oldLevel2: oldLevel2,
+            oldLevel3: oldLevel3,
+            newLevel: newLevel
+        }
+
+        const url = `/api/modifyLevels`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dto),
+        });
+
+        if(response.ok){
+            toast.success('Levels modified successfully');
+            fetchLevel1Data();
+        }else{
+            toast.error('Failed to modify levels');
+        }
+        handleCloseModifyDialog();
+
     }
 
     const handleCloseDialog = () => {
@@ -277,15 +316,38 @@ const ManageLevels = () => {
                                         <NodeTable assets={assets} />
                                     )}
 
-                                    {/* Delete Nodes Button */}
-                                    <Button
-                                        variant="contained"
-                                        color="secondary"
-                                        onClick={handleDeleteClick}
-                                        sx={{ mt: 2, ml: 'auto', display: 'block' }}
+                                    {/* Buttons Container */}
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',  // Align buttons to opposite sides
+                                            alignItems: 'center',
+                                            mt: 2  // Add some margin on top
+                                        }}
                                     >
-                                        Delete Nodes
-                                    </Button>
+                                        {/* Modify Level Button */}
+                                        {assets && assets.length > 0 && (
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={handleOpenModifyDialog}
+                                            >
+                                                Modify Level
+                                            </Button>
+                                        )}
+
+                                        {/* Delete Nodes Button */}
+                                        {assets && assets.length > 0 && (
+                                            <Button
+                                                variant="contained"
+                                                color="secondary"
+                                                onClick={handleDeleteClick}
+                                                sx={{ ml: 'auto' }}  // Push button to the right
+                                            >
+                                                Delete Nodes
+                                            </Button>
+                                        )}
+                                    </Box>
 
                                     {/* Delete Confirmation Dialog */}
                                     <Dialog open={openDialog} onClose={handleCloseDialog}>
@@ -310,6 +372,10 @@ const ManageLevels = () => {
                                             </Button>
                                         </DialogActions>
                                     </Dialog>
+
+                                    <ModifyLevelsDialogue open={openModifyDialog} onClose={handleCloseModifyDialog} levels={{ level1, level2, level3 }}
+                                                          levelOptionsList={{level1Options, level2Options, level3Options}}
+                                                          modifyLevels={handleModifyLevels}/>
                                 </Paper>
                             </Grid>
                         </Grid>

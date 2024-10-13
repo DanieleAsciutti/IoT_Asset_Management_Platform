@@ -365,6 +365,17 @@ public class ApplicationGatewayService {
                 .block();
     }
 
+    public ResponseEntity<Void> modifyLevels(ModifyLevelsDTO modifyLevelsDTO){
+        String url = String.format("http://%s:%d/modifyLevels", dataManagerAddress, dataManagerPort);
+        return webClient.post()
+                .uri(url)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(modifyLevelsDTO)
+                .retrieve()
+                .toEntity(Void.class)
+                .block();
+    }
+
     public ResponseEntity<Void> addUser(UserDTO userDTO){
         String url = String.format("http://%s:%d/addUser", dataManagerAddress, dataManagerPort);
         return webClient.post()

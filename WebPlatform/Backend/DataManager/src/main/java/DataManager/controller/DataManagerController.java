@@ -3,10 +3,8 @@ package DataManager.controller;
 import DataManager.dto.UnregisteredDeviceDTO;
 import DataManager.dto.asset.*;
 import DataManager.dto.auth.UserDTO;
-import DataManager.dto.gateway.AddUserDTO;
-import DataManager.dto.gateway.DeviceTagDTO;
-import DataManager.dto.gateway.ModelByTagDTO;
-import DataManager.dto.gateway.MultiplePendingsDTO;
+import DataManager.dto.enums.Levels;
+import DataManager.dto.gateway.*;
 import DataManager.model.Role;
 import DataManager.model.graphDB.Device;
 import DataManager.model.relDB.User;
@@ -145,16 +143,6 @@ public class DataManagerController {
         assetRepository.setPendingModel(assetId, null);
         return ResponseEntity.ok().build();
     }
-
-    /*
-
-    @PostMapping(value = "/addMonitoringTarget")
-    public void addMonitoringTarget(@RequestParam String name){
-        log.info("InsertMonitoringTarget endpoint called");
-        assetRepository.addMonitoringTarget(name);
-    }
-
-     */
 
     @PostMapping(value = "/addAsset")
     public ResponseEntity<Void> addAsset(@RequestBody AddAssetDTO addAssetDTO) {
@@ -308,7 +296,6 @@ public class DataManagerController {
         List<String> assets = assetRepository.getFilteredAssetsForNetwork(l1, l2, l3);
         List<String> relationships = assetRepository.getFilteredRelationsForNetwork(l1, l2, l3);
         String toReturn = "{\"nodes\":" + assets.toString() + ", \"links\":" + relationships.toString() + "}";
-        log.info(toReturn);
         return ResponseEntity.ok(toReturn);
 
     }
@@ -356,14 +343,52 @@ public class DataManagerController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping(value = "/modifyLevels")
+    public ResponseEntity<Void> modifyLevels(@RequestBody ModifyLevelsDTO modifyLevelsDTO) {
+        log.info("ModifyLevels endpoint called");
+        if(modifyLevelsDTO.getOldLevel1() == null || modifyLevelsDTO.getNewLevel() == null){
+            return ResponseEntity.badRequest().build();
+        }
+        String query = "MATCH (d) WHERE d.level1 =\""+ modifyLevelsDTO.getOldLevel1() + "\"";
+        if(modifyLevelsDTO.getOldLevel2() != null && !modifyLevelsDTO.getOldLevel2().isEmpty()){
+            query += " AND d.level2 =\""+ modifyLevelsDTO.getOldLevel2() + "\"";
+            if (modifyLevelsDTO.getOldLevel3() != null && !modifyLevelsDTO.getOldLevel3().isEmpty()){
+                query += " AND d.level3 =\""+ modifyLevelsDTO.getOldLevel3() + "\"";
+            }
+        }
+
+        switch (modifyLevelsDTO.getLevel()){
+            case LEVEL1:
+                query += " SET d.level1 =\""+ modifyLevelsDTO.getNewLevel() + "\"";
+                break;
+            case LEVEL2:
+                if(modifyLevelsDTO.getOldLevel2() == null){
+                    return ResponseEntity.badRequest().build();
+                }
+                query += " SET d.level2 =\""+ modifyLevelsDTO.getNewLevel() + "\"";
+                break;
+            case LEVEL3:
+                if(modifyLevelsDTO.getOldLevel3() == null){
+                    return ResponseEntity.badRequest().build();
+                }
+                query += " SET d.level3 =\""+ modifyLevelsDTO.getNewLevel() + "\"";
+                break;
+        }
+
+        assetRepository.modifyLevels(query);
+        return ResponseEntity.ok().build();
+
+
+    }
+
 
     @PostMapping(value = "/addNewModel")
     public ResponseEntity<Void> addNewModel(@RequestBody ModelDTO modelDTO) {
         log.info("AddNewModel endpoint called");
 
-        log.info(modelDTO.getAssetId());
+
         String path = assetRepository.retrieveModelPath(modelDTO.getAssetId());
-        log.info(path);
+
         if (path == null) {
             path = dataManagerService.createModelFolder(folderPath + modelsPath, modelDTO.getAssetId());
             //TODO: CAPIRE SE SOSTITUIRE getAssetId con getAssetName (se gli asset hanno un nome univoco)

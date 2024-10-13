@@ -352,6 +352,20 @@ public class ApplicationGatewayController {
         return applicationGatewayService.deleteNodesByLevels(l1,l2,l3);
     }
 
+    @PostMapping(value = "/modifyLevels")
+    public ResponseEntity<Void> modifyLevels(
+            @CookieValue (value = "token", defaultValue = "") String accessToken,
+            @RequestBody ModifyLevelsDTO modifyLevelsDTO) {
+        log.info("ModifyLevels endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize(new AuthorizationRequest(accessToken));
+        if (!authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        log.info("User authorized");
+        return applicationGatewayService.modifyLevels(modifyLevelsDTO);
+    }
+
     /**
      * This endpoint is called by the user to save a new model for a specific device
      * @param modelDTO containts the deviceId, the model itself and a boolean to specify if the model is from the user or not
