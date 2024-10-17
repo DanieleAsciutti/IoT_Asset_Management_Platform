@@ -2,24 +2,14 @@ import * as React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import TextField from '@mui/material/TextField';
-import DialogActions from '@mui/material/DialogActions';
 import {useParams} from 'react-router-dom';
-import Network from './DevGraph.jsx';
+import Network from './components/DevGraph.jsx';
 import AppBarComponent from "../components/AppBarComponent.jsx";
 import DrawerComponent from '../components/DrawerComponent.jsx';
 import CustomThemeProvider from "../components/ThemeProvider.jsx";
+import Properties from "./components/Properties.jsx";
+import Description from "./components/Description.jsx";
 
 const handleLogout = () => {
     sessionStorage.removeItem('userData');
@@ -28,30 +18,18 @@ const handleLogout = () => {
 
 export function AssetsWrapper() {
     const {id} = useParams();
-    return <Devices deviceId={id}/>;
+    return <AssetPage deviceId={id}/>;
 }
 
-class Devices extends React.Component {
+class AssetPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             open: false,
             anchorEl: null,
             deviceData: {},
-            dialogOpen: false,
-            label: '',
-            value: '',
-            modelHistory: [],
         };
     }
-
-    handleDialogOpen = () => {
-        this.setState({dialogOpen: true});
-    };
-
-    handleDialogClose = () => {
-        this.setState({dialogOpen: false});
-    };
 
     handleLabelChange = (event) => {
         this.setState({label: event.target.value});
@@ -61,8 +39,8 @@ class Devices extends React.Component {
         this.setState({value: event.target.value});
     };
 
-    handleSubmit = async () => {
-        const attributes = {[this.state.label]: this.state.value};
+    addProperties = async (label, value) => {
+        const attributes = {[label]: value};
 
         const response = await fetch(`/api/addAttributes?assetId=${this.props.deviceId}`, {
             method: 'POST',
@@ -76,107 +54,55 @@ class Devices extends React.Component {
             ),
         });
 
+        // const response = await fetch(`http://localhost:9093/addAttributes?assetId=${this.props.deviceId}`, {
+        //     method: 'POST',
+        //     credentials: 'include', // Include cookies in the request
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({
+        //             attributes
+        //         }
+        //     ),
+        // });
+
         if (response.ok) {
             // Handle successful response
             console.log('Attributes added successfully');
-            this.setState({dialogOpen: false, label: '', value: ''});
+            this.setState(prevState => ({
+                deviceData: {
+                    ...prevState.deviceData,
+                    asset: {
+                        ...prevState.deviceData.asset,
+                        properties: {
+                            ...prevState.deviceData.asset.properties,
+                            [label]: value // Add the new key-value pair here
+                        }
+                    }
+                }
+            }));
+
         } else {
             // Handle error response
             console.error('Failed to add attributes');
         }
     };
 
-    getModel = async () => {
-        const response = await fetch(`/api/getModel?assetId=${this.props.deviceId}`, {
-            method: 'GET',
-            credentials: 'include', // Include cookies in the request
-            mode: 'cors',
-        });
-        const data = await response.json();
-        if (response.ok) {
-            // Handle successful response
-            console.log('Model retrieved successfully');
-            alert('Model retrieved successfully');
+    addDescription = async (descr) => {
+        let url;
+        let  attributes;
+        if(descr === ''){
+            url = `/api/removeAttributes?assetId=${this.props.deviceId}`;
+            attributes = ['description'];
+        }else {
+            url = `/api/addAttributes?assetId=${this.props.deviceId}`;
+            attributes = {description: descr};
         }
 
-    };
 
-    // Funzione per caricare un nuovo modello
-    // aggiornare pendingModel,
-    // apre una finestrina per caricare il modello e dare un nome al modello
-
-    loadNewModel = async () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.pkl';
-        input.onchange = async (event) => {
-            const file = event.target.files[0];
-
-            // Fai qualcosa con il file e il nome del modello qui, ad esempio caricarli su un server
-            // Aggiorna lo stato con il nuovo modello
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-                const arrayBuffer = event.target.result;
-                const model = new Uint8Array(arrayBuffer);
-
-                const modelDTO = {
-                    model: Array.from(model),
-                    assetId: this.props.deviceId,
-                    fromUser: true,
-                };
-
-                const response = await fetch('/api/addNewModel', {
-                    method: 'POST',
-                    credentials: 'include', // Include cookies in the request
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(modelDTO),
-                });
-
-                if (response.ok) {
-                    // Handle successful response
-                    console.log('Model added successfully');
-                } else {
-                    // Handle error response
-                    console.error('Failed to add model');
-                }
-            };
-            reader.readAsArrayBuffer(file);
-
-
-            const attributes = {'pendingModel': file.name};
-
-            const response = await fetch(`/api/addAttributes?assetId=${this.props.deviceId}`, {
-                method: 'POST',
-                credentials: 'include', // Include cookies in the request
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                        attributes
-                    }
-                ),
-            });
-
-            if (response.ok) {
-                // Handle successful response
-                console.log('Attributes added successfully');
-            } else {
-                // Handle error response
-                console.error('Failed to add attributes');
-            }
-
-        };
-        input.click();
-    };
-
-    addDescription = () => {
-        const descr = prompt('Inserisci la descrizione');
-        const attributes = {description: descr};
-        const response = fetch(`/api/addAttributes?assetId=${this.props.deviceId}`, {
+        const response = await fetch(url, {
             method: 'POST',
-            credentials: 'include', // Include cookies in the request
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -188,12 +114,22 @@ class Devices extends React.Component {
 
         if (response.ok) {
             // Handle successful response
-            console.log('Description added successfully');
-            window.location.reload();
+            console.log('Description changed successfully');
+            this.setState(prevState => ({
+                deviceData: {
+                    ...prevState.deviceData,
+                    asset: {
+                        ...prevState.deviceData.asset,
+                        properties: {
+                            ...prevState.deviceData.asset.properties,
+                            description: descr, // Update description
+                        }
+                    }
+                }
+            }));
         } else {
             // Handle error response
-            console.error('Failed to add description');
-            window.location.reload();
+            console.error('Failed to change the description');
         }
     }
 
@@ -214,46 +150,8 @@ class Devices extends React.Component {
         const data = await response.json();
         this.setState({deviceData: data,});
 
-        const resp = await fetch(`/api/getDeviceModelsHistory?deviceId=${this.props.deviceId}`, {
-            method: 'GET',
-            credentials: 'include', // Include cookies in the request
-        });
-
-        const models = await resp.json();
-        if (resp.ok) {
-            console.log('Device models history retrieved successfully');
-        } else {
-            console.error('Failed to get device models history');
-        }
-        this.setState({modelHistory: models});
 
     }
-
-    handleReceiveData = async () => {
-        const response = await fetch(`/api/updateData?deviceId=${this.props.deviceId}`, {
-            method: 'POST',
-            credentials: 'include', // Include cookies in the request
-        });
-        if (response.ok) {
-            console.log('Data updated successfully');
-        } else {
-            console.error('Failed to update data');
-        }
-    }
-    downloadModel = async (modelName) => {
-        const response = await fetch(`/api/retrieveModel?assetId=${this.props.deviceId}&modelName=${modelName}&fromUser=true`, {
-            method: 'GET',
-            credentials: 'include', // Include cookies in the request
-        });
-        const data = await response.blob();
-        const url = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', modelName);
-        document.body.appendChild(link);
-        link.click();
-    }
-
 
     toggleDrawer = () => {
         this.setState(prevState => ({open: !prevState.open}));
@@ -307,21 +205,17 @@ class Devices extends React.Component {
                             <Grid container spacing={6} direction="row">
                                 <Grid item xs={12} md={6} sx={{p: 2}}>
                                     <Grid container spacing={2} direction="column">
+
+                                        {/*description box*/}
                                         <Grid item xs={12}>
                                             <h1>{this.state.deviceData.asset.properties.name}</h1>
-                                            <Box mt={2}>
-                                            {this.state.deviceData.asset.properties.description ? (
-                                                <Typography variant="body1">
-                                                    {this.state.deviceData.asset.properties.description}
-                                                </Typography>
-                                            ) : (
-                                                <Button variant="contained" color="primary"
-                                                        onClick={this.addDescription}>
-                                                    Add Description
-                                                </Button>
-                                            )}
-                                            </Box>
+                                            <Description
+                                                assetDescription={this.state.deviceData.asset.properties.description}
+                                                addDescription={this.addDescription}
+                                            />
                                         </Grid>
+
+                                        {/*network graph box*/}
                                         <Grid item xs={12} style={{
                                             border: '4px solid #2196f3',
                                             maxWidth: '100%',
@@ -340,73 +234,15 @@ class Devices extends React.Component {
                                                 }}/>
                                             </div>
                                         </Grid>
+
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={12} md={6} sx={{p: 2}}>
-                                    <Grid container spacing={2} direction="column">
-                                        <Grid item xs={12}>
-                                            <h2>Properties</h2>
-                                            <div style={{maxHeight: '500px', overflow: 'auto'}}>
-                                                <Table style={{border: '4px solid #2196f3'}}>
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <TableCell>Name</TableCell>
-                                                            <TableCell>Value</TableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        {Object.keys(this.state.deviceData.asset.properties).map(key => (
-                                                            <TableRow key={key}>
-                                                                <TableCell>{key}</TableCell>
-                                                                <TableCell>{this.state.deviceData.asset.properties[key].toString()}</TableCell>
-                                                            </TableRow>
-                                                        ))}
-                                                    </TableBody>
-                                                </Table>
 
-
-                                            </div>
-                                            <div style={{width: '100%'}}>
-                                                <Button variant="contained" color="primary"
-                                                        onClick={this.handleDialogOpen} style={{width: '100%'}}>
-                                                    Add properties
-                                                </Button>
-                                            </div>
-                                            <Dialog open={this.state.dialogOpen} onClose={this.handleDialogClose}>
-                                                <DialogTitle>Add properties</DialogTitle>
-                                                <DialogContent>
-                                                    <TextField
-                                                        autoFocus
-                                                        margin="dense"
-                                                        id="label"
-                                                        label="Label"
-                                                        type="text"
-                                                        fullWidth
-                                                        value={this.state.label}
-                                                        onChange={this.handleLabelChange}
-                                                    />
-                                                    <TextField
-                                                        margin="dense"
-                                                        id="value"
-                                                        label="Value"
-                                                        type="text"
-                                                        fullWidth
-                                                        value={this.state.value}
-                                                        onChange={this.handleValueChange}
-                                                    />
-                                                </DialogContent>
-                                                <DialogActions>
-                                                    <Button onClick={this.handleDialogClose} color="primary">
-                                                        Back
-                                                    </Button>
-                                                    <Button onClick={this.handleSubmit} color="primary">
-                                                        Add
-                                                    </Button>
-                                                </DialogActions>
-                                            </Dialog>
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
+                                {/*Properties box*/}
+                                <Properties
+                                    deviceData={this.state.deviceData}
+                                    handleAddProperty={this.addProperties}
+                                />
                             </Grid>
 
                         )}

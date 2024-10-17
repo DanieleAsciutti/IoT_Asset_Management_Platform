@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEffect, useState, useCallback} from 'react';
-import GraphMini from "../components/GraphMini.jsx";
+import GraphMini from "../../components/GraphMini.jsx";
 
 function Assets({id, l1, l2, l3}) {
 

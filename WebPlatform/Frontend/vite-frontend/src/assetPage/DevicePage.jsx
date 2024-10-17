@@ -12,21 +12,17 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import TextField from '@mui/material/TextField';
-import DialogActions from '@mui/material/DialogActions';
 import {useParams} from 'react-router-dom';
-import Network from './DevGraph.jsx';
+import Network from './components/DevGraph.jsx';
 import DeviceDataReports from '../reports/DeviceDataReports.jsx';
 import AppBarComponent from "../components/AppBarComponent.jsx";
 import DrawerComponent from '../components/DrawerComponent.jsx';
 import CustomThemeProvider from "../components/ThemeProvider.jsx";
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
-import TagButton from "./TagButton.jsx";
-import Description from "./Description.jsx";
+import TagButton from "./components/TagButton.jsx";
+import Description from "./components/Description.jsx";
+import Properties from "./components/Properties.jsx";
 
 const handleLogout = () => {
     sessionStorage.removeItem('userData');
@@ -48,20 +44,9 @@ class Devices extends React.Component {
             deviceData: {},
             hasData: false,
             measurements: [],
-            dialogOpen: false,
-            label: '',
-            value: '',
             modelHistory: [],
         };
     }
-
-    handleDialogOpen = () => {
-        this.setState({dialogOpen: true});
-    };
-
-    handleDialogClose = () => {
-        this.setState({dialogOpen: false});
-    };
 
     handleLabelChange = (event) => {
         this.setState({label: event.target.value});
@@ -71,8 +56,8 @@ class Devices extends React.Component {
         this.setState({value: event.target.value});
     };
 
-    handleSubmit = async () => {
-        const attributes = {[this.state.label]: this.state.value};
+    addProperties = async (label, value) => {
+        const attributes = {[label]: value};
 
         const response = await fetch(`/api/addAttributes?assetId=${this.props.deviceId}`, {
             method: 'POST',
@@ -108,12 +93,11 @@ class Devices extends React.Component {
                         ...prevState.deviceData.asset,
                         properties: {
                             ...prevState.deviceData.asset.properties,
-                            [this.state.label]: this.state.value // Add the new key-value pair here
+                            [label]: value // Add the new key-value pair here
                         }
                     }
                 }
             }));
-            this.setState({dialogOpen: false, label: '', value: ''});
 
         } else {
             // Handle error response
@@ -528,6 +512,8 @@ class Devices extends React.Component {
                             <Grid container spacing={6} direction="row">
                                 <Grid item xs={12} md={6} sx={{p: 2}}>
                                     <Grid container spacing={2} direction="column">
+
+                                        {/*description box*/}
                                         <Grid item xs={12}>
                                             <h1>{this.state.deviceData.asset.properties.name}</h1>
                                             <Description
@@ -535,6 +521,8 @@ class Devices extends React.Component {
                                                 addDescription={this.addDescription}
                                             />
                                         </Grid>
+
+                                        {/*network graph box*/}
                                         <Grid item xs={12} style={{
                                             border: '4px solid #2196f3',
                                             maxWidth: '100%',
@@ -555,72 +543,14 @@ class Devices extends React.Component {
                                         </Grid>
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={12} md={6} sx={{p: 2}}>
-                                    <Grid container spacing={2} direction="column">
-                                        <Grid item xs={12}>
-                                            <h2>Properties</h2>
-                                            <div style={{maxHeight: '500px', overflow: 'auto'}}>
-                                                <Table style={{border: '4px solid #2196f3'}}>
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <TableCell>Name</TableCell>
-                                                            <TableCell>Value</TableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        {Object.keys(this.state.deviceData.asset.properties).map(key => (
-                                                            <TableRow key={key}>
-                                                                <TableCell>{key}</TableCell>
-                                                                <TableCell>{this.state.deviceData.asset.properties[key].toString()}</TableCell>
-                                                            </TableRow>
-                                                        ))}
-                                                    </TableBody>
-                                                </Table>
 
+                                {/*Properties box*/}
+                                <Properties
+                                    deviceData={this.state.deviceData}
+                                    handleAddProperty={this.addProperties}
+                                />
 
-                                            </div>
-                                            <div style={{width: '100%'}}>
-                                                <Button variant="contained" color="primary"
-                                                        onClick={this.handleDialogOpen} style={{width: '100%'}}>
-                                                    Add properties
-                                                </Button>
-                                            </div>
-                                            <Dialog open={this.state.dialogOpen} onClose={this.handleDialogClose}>
-                                                <DialogTitle>Add properties</DialogTitle>
-                                                <DialogContent>
-                                                    <TextField
-                                                        autoFocus
-                                                        margin="dense"
-                                                        id="label"
-                                                        label="Label"
-                                                        type="text"
-                                                        fullWidth
-                                                        value={this.state.label}
-                                                        onChange={this.handleLabelChange}
-                                                    />
-                                                    <TextField
-                                                        margin="dense"
-                                                        id="value"
-                                                        label="Value"
-                                                        type="text"
-                                                        fullWidth
-                                                        value={this.state.value}
-                                                        onChange={this.handleValueChange}
-                                                    />
-                                                </DialogContent>
-                                                <DialogActions>
-                                                    <Button onClick={this.handleDialogClose} color="primary">
-                                                        Back
-                                                    </Button>
-                                                    <Button onClick={this.handleSubmit} color="primary">
-                                                        Add
-                                                    </Button>
-                                                </DialogActions>
-                                            </Dialog>
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
-
+                                {/*Tag box*/}
                                 <Grid item xs={12}>
                                     <TagButton currTag={this.state.deviceData.asset.properties?.tag ? this.state.deviceData.asset.properties.tag : null}
                                                addTag={this.addTag}
