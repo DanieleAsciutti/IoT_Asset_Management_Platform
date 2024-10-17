@@ -100,7 +100,6 @@ const Reports = () => {
                     });
                     const measurements = await response.json();
                     setMeasurements(measurements);
-                    console.log('Measurements:', measurements);
                 } catch (error) {
                     console.error('Error fetching measurements:', error);
                 }
@@ -192,7 +191,6 @@ const Reports = () => {
             if (response.ok) {
                 const options = await response.json(); // Parse JSON response
                 setLevel3Options(options);
-                console.log('Level 3 options:', options)
             } else {
                 console.error('Failed to fetch Level 1 options');
             }
@@ -214,9 +212,9 @@ const Reports = () => {
         if (data == null)
             return;
 
-        console.log(data);
+
         const devices = data.map(deviceString => JSON.parse(deviceString));
-        console.log(devices);
+
         setDevices(devices);
     }
 

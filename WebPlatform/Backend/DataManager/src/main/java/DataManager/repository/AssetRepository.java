@@ -52,10 +52,6 @@ public interface AssetRepository extends Neo4jRepository<Device, String>{
     @Query("MATCH (d:Device) WHERE elementId(d) = $id SET d.isRegistered = true, d.place = $place, d.type = $type, d.status = $status, d.registrationDate = $registrationDate, d.level1 = $level1, d.level2 = $level2, d.level3 = $level3")
     void registerDevice(String id, String place, String type, String status, String registrationDate, String level1, String level2, String level3);
 
-    /*
-    @Query("MATCH (d:Device) WHERE elementId(d) = $id SET d += $value")
-    void setAttributes(String id, Map<String, String> value);ù
-     */
 
     //"MATCH (d:"+label+") WHERE elementId(d) = $assetId SET d += $value"
     @Query("CALL apoc.cypher.doIt($query, {value: $value, assetId: $assetId})")

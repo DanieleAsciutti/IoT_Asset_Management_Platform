@@ -23,7 +23,6 @@ const DeviceDataReports = ({ deviceId }) => {
                 });
                 const measurements = await response.json();
                 setMeasurements(measurements);
-                console.log('Measurements:', measurements);
             } catch (error) {
                 console.error('Error fetching measurements:', error);
             }
@@ -42,7 +41,6 @@ const DeviceDataReports = ({ deviceId }) => {
                 });
                 const data = await response.json();
 
-                console.log('Metadata response:', data);
 
                 setBuckets(data.buckets);
                 setFieldKeys(data.fieldKeys);
@@ -54,8 +52,6 @@ const DeviceDataReports = ({ deviceId }) => {
                     const latestTimestampFormatted = latestTimestamp.toISOString();
                     const defaultFromFormatted = defaultFrom.toISOString();
 
-                    console.log(`Latest Timestamp for bucket ${bucket}:`, latestTimestampFormatted);
-                    console.log(`Default From Timestamp for bucket ${bucket}:`, defaultFromFormatted);
 
                     acc[bucket] = {
                         from: dayjs(defaultFromFormatted),
@@ -65,13 +61,6 @@ const DeviceDataReports = ({ deviceId }) => {
                 }, {});
                 setTimeRanges(initialTimeRanges);
 
-                console.log('Selected Measurement:', selectedMeasurement);
-                console.log('Metadata Fetched:', metadataFetched);
-                console.log('Measurements:', measurements);
-                console.log('Buckets:', buckets);
-                console.log('Field Keys:', fieldKeys);
-                console.log('Time Ranges:', initialTimeRanges);
-                console.log('Metadata:', data);
 
                 setMetadataFetched(true);
             } catch (error) {
@@ -96,7 +85,6 @@ const DeviceDataReports = ({ deviceId }) => {
                 ...prev,
                 [bucket]: range
             };
-            console.log(`Time range changed for bucket ${bucket}:`, newTimeRanges[bucket]);
             return newTimeRanges;
         });
     };

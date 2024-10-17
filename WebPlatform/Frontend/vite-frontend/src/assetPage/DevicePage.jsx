@@ -26,6 +26,7 @@ import CustomThemeProvider from "../components/ThemeProvider.jsx";
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import TagButton from "./TagButton.jsx";
+import Description from "./Description.jsx";
 
 const handleLogout = () => {
     sessionStorage.removeItem('userData');
@@ -116,7 +117,7 @@ class Devices extends React.Component {
 
         } else {
             // Handle error response
-            console.log('Failed to add attributes');
+            console.error('Failed to add attributes');
         }
     };
 
@@ -176,7 +177,7 @@ class Devices extends React.Component {
                     await this.getDeviceModelsHistory();
                 } else {
                     // Handle error response
-                    console.log('Failed to add model');
+                    console.error('Failed to add model');
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -210,12 +211,21 @@ class Devices extends React.Component {
         input.click();
     };
 
-    addDescription = () => {
-        const descr = prompt('Inserisci la descrizione');
-        const attributes = {description: descr};
-        const response = fetch(`/api/addAttributes?assetId=${this.props.deviceId}`, {
+    addDescription = async (descr) => {
+        let url;
+        let  attributes;
+        if(descr === ''){
+            url = `/api/removeAttributes?assetId=${this.props.deviceId}`;
+            attributes = ['description'];
+        }else {
+            url = `/api/addAttributes?assetId=${this.props.deviceId}`;
+            attributes = {description: descr};
+        }
+
+
+        const response = await fetch(url, {
             method: 'POST',
-            credentials: 'include', // Include cookies in the request
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -227,12 +237,22 @@ class Devices extends React.Component {
 
         if (response.ok) {
             // Handle successful response
-            console.log('Description added successfully');
-            window.location.reload();
+            console.log('Description changed successfully');
+            this.setState(prevState => ({
+                deviceData: {
+                    ...prevState.deviceData,
+                    asset: {
+                        ...prevState.deviceData.asset,
+                        properties: {
+                            ...prevState.deviceData.asset.properties,
+                            description: descr, // Update description
+                        }
+                    }
+                }
+            }));
         } else {
             // Handle error response
-            console.log('Failed to add description');
-            window.location.reload();
+            console.error('Failed to change the description');
         }
     }
 
@@ -275,7 +295,7 @@ class Devices extends React.Component {
         if (resp.ok) {
             console.log("Models history retrieved successfully");
         } else {
-            console.log('Failed to get device models history');
+            console.error('Failed to get device models history');
         }
         this.setState({modelHistory: models});
     }
@@ -316,7 +336,6 @@ class Devices extends React.Component {
                 this.setState({hasData: true,});
                 this.setState({measurements: measurements,});
             }
-            console.log('Measurements:', measurements);
         } else {
             console.error('Error fetching measurements:');
         }
@@ -348,7 +367,7 @@ class Devices extends React.Component {
             }));
             console.log('Data updated successfully');
         } else {
-            console.log('Failed to update data');
+            console.error('Failed to update data');
         }
     }
 
@@ -392,7 +411,7 @@ class Devices extends React.Component {
         if (response.ok) {
             console.log('Model updated successfully');
         } else {
-            console.log('Failed to update Model');
+            console.error('Failed to update Model');
         }
     }
 
@@ -511,18 +530,10 @@ class Devices extends React.Component {
                                     <Grid container spacing={2} direction="column">
                                         <Grid item xs={12}>
                                             <h1>{this.state.deviceData.asset.properties.name}</h1>
-                                            <Box mt={2}>
-                                            {this.state.deviceData.asset.properties.description ? (
-                                                <Typography variant="body1">
-                                                    {this.state.deviceData.asset.properties.description}
-                                                </Typography>
-                                            ) : (
-                                                <Button variant="contained" color="primary"
-                                                        onClick={this.addDescription}>
-                                                    Add Description
-                                                </Button>
-                                            )}
-                                            </Box>
+                                            <Description
+                                                assetDescription={this.state.deviceData.asset.properties.description}
+                                                addDescription={this.addDescription}
+                                            />
                                         </Grid>
                                         <Grid item xs={12} style={{
                                             border: '4px solid #2196f3',
@@ -530,7 +541,6 @@ class Devices extends React.Component {
                                             maxHeight: '500px'
                                         }}>
                                             <div style={{maxWidth: '100%', maxHeight: '450px', overflow: 'hidden'}}>
-                                                {console.log(this.state.deviceData.elementId)}
                                                 <Network
                                                     id={this.state.deviceData.elementId}
                                                     l1={this.state.deviceData.asset.properties.level1}

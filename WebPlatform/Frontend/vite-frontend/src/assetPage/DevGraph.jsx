@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEffect, useState, useCallback} from 'react';
-import GraphMini from "../components/GraphMini";
+import GraphMini from "../components/GraphMini.jsx";
 
 function Assets({id, l1, l2, l3}) {
 
@@ -17,10 +17,8 @@ function Assets({id, l1, l2, l3}) {
         const jsonData = await response.json();
 
         const unchecked_links = jsonData.links;
-        console.log(jsonData);
         const nodes = jsonData.nodes;
         const nodeIds = nodes.map(node => node.id);
-        console.log(nodeIds);
 
         // Creare un oggetto per tracciare i nodi visitati
         const visited = {};
@@ -42,11 +40,9 @@ function Assets({id, l1, l2, l3}) {
             }
 
             const linkedNodes = unchecked_links.filter(link => link.source === nodeId || link.target === nodeId);
-            console.log(linkedNodes)
             for (let link of linkedNodes) {
                 reachableLinks.push(link);
                 const nextNodeId = link.source === nodeId ? link.target : link.source;
-                console.log(nextNodeId);
                 if (!visited[nextNodeId]) {
                     dfs(nextNodeId);
                 }
@@ -55,8 +51,6 @@ function Assets({id, l1, l2, l3}) {
 
         // Esegui DFS a partire dal nodo con l'ID passato
         dfs(id);
-        console.log(reachableNodes);
-        console.log(reachableLinks);
         setNodes(reachableNodes);
         setLinks(reachableLinks);
     },[id]);

@@ -11,5 +11,5 @@ import java.util.List;
 @ToString
 @Getter
 public class NamesDTO {
-    private List<String> attributesName;
+    private List<String> attributes;
 }

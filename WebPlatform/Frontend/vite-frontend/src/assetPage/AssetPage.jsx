@@ -4,11 +4,9 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Button from '@mui/material/Button';
@@ -19,7 +17,6 @@ import TextField from '@mui/material/TextField';
 import DialogActions from '@mui/material/DialogActions';
 import {useParams} from 'react-router-dom';
 import Network from './DevGraph.jsx';
-import DeviceDataReports from '../reports/DeviceDataReports.jsx';
 import AppBarComponent from "../components/AppBarComponent.jsx";
 import DrawerComponent from '../components/DrawerComponent.jsx';
 import CustomThemeProvider from "../components/ThemeProvider.jsx";
@@ -31,7 +28,6 @@ const handleLogout = () => {
 
 export function AssetsWrapper() {
     const {id} = useParams();
-    console.log(id);
     return <Devices deviceId={id}/>;
 }
 
@@ -86,7 +82,7 @@ class Devices extends React.Component {
             this.setState({dialogOpen: false, label: '', value: ''});
         } else {
             // Handle error response
-            console.log('Failed to add attributes');
+            console.error('Failed to add attributes');
         }
     };
 
@@ -100,7 +96,6 @@ class Devices extends React.Component {
         if (response.ok) {
             // Handle successful response
             console.log('Model retrieved successfully');
-            console.log(data);
             alert('Model retrieved successfully');
         }
 
@@ -144,7 +139,7 @@ class Devices extends React.Component {
                     console.log('Model added successfully');
                 } else {
                     // Handle error response
-                    console.log('Failed to add model');
+                    console.error('Failed to add model');
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -169,7 +164,7 @@ class Devices extends React.Component {
                 console.log('Attributes added successfully');
             } else {
                 // Handle error response
-                console.log('Failed to add attributes');
+                console.error('Failed to add attributes');
             }
 
         };
@@ -190,7 +185,6 @@ class Devices extends React.Component {
             }),
         });
 
-        console.log(response);
 
         if (response.ok) {
             // Handle successful response
@@ -198,7 +192,7 @@ class Devices extends React.Component {
             window.location.reload();
         } else {
             // Handle error response
-            console.log('Failed to add description');
+            console.error('Failed to add description');
             window.location.reload();
         }
     }
@@ -212,14 +206,12 @@ class Devices extends React.Component {
             window.location.href = '/';
         }
 
-        console.log(this.props.deviceId);
         const response = await fetch(`/api/getAsset?id=${this.props.deviceId}`, {
             method: 'GET',
             credentials: 'include', // Include cookies in the request
 
         });
         const data = await response.json();
-        console.log(data);
         this.setState({deviceData: data,});
 
         const resp = await fetch(`/api/getDeviceModelsHistory?deviceId=${this.props.deviceId}`, {
@@ -229,9 +221,9 @@ class Devices extends React.Component {
 
         const models = await resp.json();
         if (resp.ok) {
-            console.log(data);
+            console.log('Device models history retrieved successfully');
         } else {
-            console.log('Failed to get device models history');
+            console.error('Failed to get device models history');
         }
         this.setState({modelHistory: models});
 
@@ -245,7 +237,7 @@ class Devices extends React.Component {
         if (response.ok) {
             console.log('Data updated successfully');
         } else {
-            console.log('Failed to update data');
+            console.error('Failed to update data');
         }
     }
     downloadModel = async (modelName) => {
@@ -336,7 +328,6 @@ class Devices extends React.Component {
                                             maxHeight: '500px'
                                         }}>
                                             <div style={{maxWidth: '100%', maxHeight: '450px', overflow: 'hidden'}}>
-                                                {console.log(this.state.deviceData.elementId)}
                                                 <Network
                                                     id={this.state.deviceData.elementId}
                                                     l1={this.state.deviceData.asset.properties.level1}
@@ -416,7 +407,7 @@ class Devices extends React.Component {
                                         </Grid>
                                     </Grid>
                                 </Grid>
-                                </Grid>
+                            </Grid>
 
                         )}
                     </Box>

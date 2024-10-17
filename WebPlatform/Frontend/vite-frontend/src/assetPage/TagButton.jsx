@@ -13,7 +13,6 @@ const TagButton = ({currTag, addTag}) => {
         } else {
             setTag(''); // Reset the tag if currTag is null
         }
-        console.log('currTag:', currTag)
     }, [currTag]);
 
     const handleDialogOpen = () => {
@@ -31,7 +30,6 @@ const TagButton = ({currTag, addTag}) => {
 
     const handleSubmit = (del) => {
         // Submit tag logic
-        console.log(del);
         if(del){
             setTag(''); // Reset tag if delete is true
             addTag(null);
@@ -39,7 +37,6 @@ const TagButton = ({currTag, addTag}) => {
             setTag(newTag);
             addTag(newTag);
         }
-        console.log('Tag submitted:', newTag);
         setNewTag('');
         setDialogOpen(false);
     };

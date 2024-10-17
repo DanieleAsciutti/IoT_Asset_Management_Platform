@@ -3,7 +3,6 @@ package DataManager.controller;
 import DataManager.dto.UnregisteredDeviceDTO;
 import DataManager.dto.asset.*;
 import DataManager.dto.auth.UserDTO;
-import DataManager.dto.enums.Levels;
 import DataManager.dto.gateway.*;
 import DataManager.model.Role;
 import DataManager.model.graphDB.Device;
@@ -12,22 +11,14 @@ import DataManager.repository.AssetRepository;
 import DataManager.repository.InfluxRepository;
 import DataManager.repository.UserRepository;
 import DataManager.service.DataManagerService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.influxdb.client.JSON;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.json.JSONObject;
-import org.neo4j.driver.Result;
 import org.neo4j.driver.exceptions.ClientException;
-import org.neo4j.driver.internal.value.MapValue;
-import org.neo4j.driver.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.data.neo4j.core.mapping.EntityInstanceWithSource;
-import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -238,7 +229,7 @@ public class DataManagerController {
         log.info("RemoveAttributes endpoint called");
         String assetLabel = assetRepository.getNodeLabelById(assetId);
         String query = "MATCH (d:" + assetLabel + ") REMOVE";
-        for (String attribute : namesDTO.getAttributesName()) {
+        for (String attribute : namesDTO.getAttributes()) {
             query += " d." + attribute + ",";
         }
         query = query.substring(0, query.length() - 1);

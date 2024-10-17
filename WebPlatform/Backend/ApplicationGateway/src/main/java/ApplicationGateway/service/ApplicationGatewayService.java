@@ -201,11 +201,12 @@ public class ApplicationGatewayService {
     }
 
     public ResponseEntity<Void> removeAttributes(String assetId, NamesDTO names) {
-        String url = String.format("http://%s:%d/addAttributes?",assetManagerAddress,assetManagerPort)+"assetId="+assetId;
+        String url = String.format("http://%s:%d/removeAttributes?",dataManagerAddress, dataManagerPort)+"assetId="+assetId;
         return webClient
                 .post()
                 .uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(names)
                 .retrieve()
                 .toEntity(Void.class)
                 .block();
