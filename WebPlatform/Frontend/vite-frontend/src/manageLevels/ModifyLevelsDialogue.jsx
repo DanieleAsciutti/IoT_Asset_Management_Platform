@@ -125,7 +125,7 @@ const ModifyLevelsDialogue = ({ open, onClose, levels , levelOptionsList, modify
             <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
                 <DialogTitle>{`Modify ${levelDialog}`}</DialogTitle>
                 <DialogContent>
-                    <LevelSelect label={levelDialog} value={currentLevel} levelOptions={levelOptions} setLevel={handleLevelChange} />
+                    <LevelSelect label={levelDialog} value={currentLevel} levelOptions={levelOptions} setLevel={handleLevelChange} undisable={true}/>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseDialog} color="primary" variant="contained">Close</Button>

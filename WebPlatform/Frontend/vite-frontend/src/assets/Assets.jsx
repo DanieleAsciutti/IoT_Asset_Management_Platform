@@ -6,6 +6,7 @@ import CustomThemeProvider from '../components/ThemeProvider.jsx';
 import AppBarComponent from '../components/AppBarComponent.jsx';
 import DrawerComponent from '../components/DrawerComponent.jsx';
 import SequentialFilter from "../components/SequentialFilter.jsx";
+import LevelSelect from "../manageLevels/LevelSelect.jsx";
 
 function Assets() {
 
@@ -150,6 +151,7 @@ function Assets() {
 
             if (response.ok) {
                 const options = await response.json(); // Parse JSON response
+                setLevel1Options([]);
                 setLevel1Options(options); // Assuming options is an array of strings
                 setNodes(options.map((str, index) => ({
                     id: index + 1,
@@ -282,10 +284,18 @@ function Assets() {
         getFilteredNetwork(level1, level2, level3);
     };
 
-    // Part used to add a new asset
 
+    // Part used to add a new asset
     const openModal = () => {
         setAddOpen(true);
+
+        // setup the level options
+        setAddL1(level1);
+        setAddL2(level2);
+        setAddL3(level3);
+        setAddL2Options(level2Options);
+        setAddL3Options(level3Options);
+
         getAddL1Options();
     };
 
@@ -422,6 +432,7 @@ function Assets() {
         setAddL1Options([]);
         setAddL2Options([]);
         setAddL3Options([]);
+        setName('');
     };
 
 
@@ -445,11 +456,25 @@ function Assets() {
             if (response.ok) {
                 console.log('Asset deleted successfully');
 
-                if(currentFilter === 'filtered' && nodes.length > 1){
+                if (currentFilter === 'filtered' && nodes.length > 1) {
                     getFilteredNetwork(level1, level2, level3);
-                }else{
-                    setCurrentFilter('l3');
-                    getLevel3Options(level1, level2);
+                } else {
+                    if (level3Options.length > 1) {
+                        setCurrentFilter('l3');
+                        setLevel3('');
+                        getLevel3Options(level1, level2);
+                    } else if (level2Options.length > 1) {
+                        setCurrentFilter('l2');
+                        setLevel3('');
+                        setLevel2('');
+                        getLevel2Options(level1);
+                    } else {
+                        setCurrentFilter('l1');
+                        setLevel3('');
+                        setLevel2('');
+                        setLevel1('');
+                        getLevel1Options();
+                    }
                 }
 
 
@@ -490,6 +515,21 @@ function Assets() {
             console.error('Error deleting asset:', error);
         }
     };
+
+
+    const handleAddL1Change = (e) => {
+        setAddL1(e);
+        getAddL2Options(e);
+    }
+
+    const handleAddL2Change = (e) => {
+        setAddL2(e);
+        getAddL3Options(addL1, e);
+    }
+
+    const handleAddL3Change = (e) => {
+        setAddL3(e);
+    }
 
     return (
         <CustomThemeProvider>
@@ -582,160 +622,20 @@ function Assets() {
                         <MenuItem value="Sensor">Sensor</MenuItem>
                         <MenuItem value="Gateway">Gateway</MenuItem>
                     </Select>
-                    <Select
-                        value={addL1}
-                        onChange={(e) => {
-                            if (e.target.value === 'new') {
-                                setNewL1DialogOpen(true);  // Open dialog to add new label
-                            } else {
-                                setAddL1(e.target.value);
-                                getAddL2Options(e.target.value);
-                            }
-                        }}
-                        fullWidth
-                        label="Level 1"
-                    >
-                        {addL1Options.map((option, index) => (
-                            <MenuItem key={index} value={option}>
-                                {option}
-                            </MenuItem>
-                        ))}
-                        <MenuItem value="new">+ Add New Level 1</MenuItem>
-                    </Select>
-                    <Select
-                        value={addL2}
-                        onChange={(e) => {
-                            if (e.target.value === 'new') {
-                                setNewL2DialogOpen(true);  // Open dialog to add new Level 2
-                            } else {
-                                setAddL2(e.target.value);
-                                getAddL3Options(addL1, e.target.value);  // Fetch options for Level 3 based on Level 1 and 2
-                            }
-                        }}
-                        fullWidth
-                        label="Level 2"
-                        disabled={!addL1}
-                    >
-                        {addL2Options.map((option, index) => (
-                            <MenuItem key={index} value={option}>
-                                {option}
-                            </MenuItem>
-                        ))}
-                        <MenuItem value="new">+ Add New Level 2</MenuItem>
-                    </Select>
-                    <Select
-                        value={addL3}
-                        onChange={(e) => {
-                            if (e.target.value === 'new') {
-                                setNewL3DialogOpen(true);  // Open dialog to add new Level 3
-                            } else {
-                                setAddL3(e.target.value);
-                            }
-                        }}
-                        fullWidth
-                        label="Level 3"
-                        disabled={!addL2}
-                    >
-                        {addL3Options.map((option, index) => (
-                            <MenuItem key={index} value={option}>
-                                {option}
-                            </MenuItem>
-                        ))}
-                        <MenuItem value="new">+ Add New Level 3</MenuItem>
-                    </Select>
+
+                    {/*Level1 Options and new dialog*/}
+                    <LevelSelect label={'Level1'} value={level1} levelOptions={addL1Options} setLevel={handleAddL1Change} undisable={true} />
+
+                    {/*Level2 Options and new dialog*/}
+                    <LevelSelect label={'Level2'} value={level2} levelOptions={addL2Options} setLevel={handleAddL2Change} undisable={addL1}/>
+
+                    {/*Level3 Options and new dialog*/}
+                    <LevelSelect label={'Level3'} value={level3} levelOptions={addL3Options} setLevel={handleAddL3Change} undisable={addL2}/>
+
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseAdd}>Cancel</Button>
                     <Button onClick={handleAddAsset}>Add</Button>
-                </DialogActions>
-            </Dialog>
-            {/* Dialog to add a new Level 1 label */}
-            <Dialog open={newL1DialogOpen} onClose={() => setNewL1DialogOpen(false)}>
-                <DialogTitle>Add New Level 1</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="new-l1"
-                        label="New Level 1"
-                        type="text"
-                        fullWidth
-                        value={newL1}
-                        onChange={(e) => setNewL1(e.target.value)}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setNewL1DialogOpen(false)}>Cancel</Button>
-                    <Button
-                        onClick={() => {
-                            setAddL1Options([...addL1Options, newL1]);  // Add the new label to the options list
-                            setAddL1(newL1);  // Set the new label as the selected value
-                            setNewL1DialogOpen(false);  // Close the dialog
-                            setNewL1(''); // Clear the input field
-                        }}
-                        color="primary"
-                    >
-                        Add
-                    </Button>
-                </DialogActions>
-            </Dialog>
-            <Dialog open={newL2DialogOpen} onClose={() => setNewL2DialogOpen(false)}>
-                <DialogTitle>Add New Level 2</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="new-l2"
-                        label="New Level 2"
-                        type="text"
-                        fullWidth
-                        value={newL2}
-                        onChange={(e) => setNewL2(e.target.value)}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setNewL2DialogOpen(false)}>Cancel</Button>
-                    <Button
-                        onClick={() => {
-                            setAddL2Options([...addL2Options, newL2]);  // Add the new Level 2 label to the list
-                            setAddL2(newL2);  // Set the new label as the selected value
-                            setNewL2DialogOpen(false);  // Close the dialog
-                            getAddL3Options(addL1, newL2);  // Update Level 3 options based on new Level 2
-                            setNewL2(''); // Clear the input field
-                        }}
-                        color="primary"
-                    >
-                        Add
-                    </Button>
-                </DialogActions>
-            </Dialog>
-            <Dialog open={newL3DialogOpen} onClose={() => setNewL3DialogOpen(false)}>
-                <DialogTitle>Add New Level 3</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="new-l3"
-                        label="New Level 3"
-                        type="text"
-                        fullWidth
-                        value={newL3}
-                        onChange={(e) => setNewL3(e.target.value)}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setNewL3DialogOpen(false)}>Cancel</Button>
-                    <Button
-                        onClick={() => {
-                            setAddL3Options([...addL3Options, newL3]);  // Add the new Level 3 label to the list
-                            setAddL3(newL3);  // Set the new label as the selected value
-                            setNewL3DialogOpen(false);  // Close the dialog
-                            setNewL3(''); // Clear the input field
-                        }}
-                        color="primary"
-                    >
-                        Add
-                    </Button>
                 </DialogActions>
             </Dialog>
 

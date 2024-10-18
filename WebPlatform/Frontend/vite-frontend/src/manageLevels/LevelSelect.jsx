@@ -19,8 +19,9 @@ import Button from "@mui/material/Button";
  * @param value the current value of the level
  * @param levelOptions the available options for the level
  * @param setLevel function to update the level value
+ * @param undisable flag to disable the level selection, if is true
  */
-const LevelSelect = ({ label, value, levelOptions, setLevel }) => {
+const LevelSelect = ({ label, value, levelOptions, setLevel, undisable }) => {
 
     const [openDialogue, setOpenDialogue] = useState(false);
     const [newLevelValue, setNewLevelValue] = useState('');
@@ -31,6 +32,7 @@ const LevelSelect = ({ label, value, levelOptions, setLevel }) => {
     }
 
     const handleCloseDialogue = () => {
+        setNewLevelValue('');
         setOpenDialogue(false);
     }
 
@@ -63,6 +65,7 @@ const LevelSelect = ({ label, value, levelOptions, setLevel }) => {
                         }
                     }}
                     label={label}
+                    disabled={!undisable}
                 >
                     {levelOptions.map((option, index) => (
                         <MenuItem key={index} value={option}>{option}</MenuItem>
