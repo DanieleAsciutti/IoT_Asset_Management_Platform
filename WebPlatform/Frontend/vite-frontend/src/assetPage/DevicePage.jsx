@@ -23,6 +23,9 @@ import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import TagButton from "./components/TagButton.jsx";
 import Description from "./components/Description.jsx";
 import Properties from "./components/Properties.jsx";
+import DataComponent from "./components/DataComponent.jsx";
+import {toast, ToastContainer} from "react-toastify";
+import ManageModels from "./components/ManageModels.jsx";
 
 const handleLogout = () => {
     sessionStorage.removeItem('userData');
@@ -344,13 +347,14 @@ class Devices extends React.Component {
                         ...prevState.deviceData.asset,
                         properties: {
                             ...prevState.deviceData.asset.properties,
-                            pendingData: true
+                            pendingData: true,
                         }
                     }
                 }
             }));
             console.log('Data updated successfully');
         } else {
+            toast.error('Failed to update data');
             console.error('Failed to update data');
         }
     }
@@ -394,7 +398,20 @@ class Devices extends React.Component {
         });
         if (response.ok) {
             console.log('Model updated successfully');
+            this.setState(prevState => ({
+                deviceData: {
+                    ...prevState.deviceData,
+                    asset: {
+                        ...prevState.deviceData.asset,
+                        properties: {
+                            ...prevState.deviceData.asset.properties,
+                            pendingRetrieve: true,
+                        }
+                    }
+                }
+            }));
         } else {
+            toast.error('Failed to update Model');
             console.error('Failed to update Model');
         }
     }
@@ -557,129 +574,47 @@ class Devices extends React.Component {
                                     />
                                 </Grid>
 
+                                {/*Reports box*/}
                                 <Grid item xs={12} sx={{p: 2}}>
                                     <Grid container spacing={2} direction="column">
-                                        <Grid item xs={12}>
-                                            <h1>ML Model</h1>
-                                            {this.state.deviceData.asset.properties.currentModel ? (
-                                                <div>
-                                                        <div style={{display: 'flex', alignItems: 'center'}}>
-                                                            <Typography variant="body1" color="textSecondary">
-                                                                <strong>currentModel:</strong> {this.state.deviceData.asset.properties.currentModel}
-                                                            </Typography>
-                                                            <Box ml={2}>
-                                                                {!this.state.deviceData.asset.properties.pendingRetrieve ? (
-                                                                    
-                                                                        <Button variant="contained" color="primary"
-                                                                            onClick={() => this.getModel()}>
-                                                                                get lastest version of current Model
-                                                                        </Button>
-                                                                    
-                                                                    ) 
-                                                                    : 
-                                                                    (
-                                                                        <Typography variant="body1" color="error">
-                                                                            Pending current model requested
-                                                                        </Typography>
-                                                                    )
-                                                                }
-                                                            </Box>
-                                                        </div>
-                                                        {!this.state.deviceData.asset.properties.pendingModel ? (
-                                                        <Button variant="contained" color="primary"
-                                                                onClick={this.loadNewModel}>upload new Model
-                                                        </Button>
 
-                                                    ) : (
-                                                        <div>
-                                                            <Typography variant="body1" color="textSecondary">
-                                                                <strong>pendingModel:</strong> {this.state.deviceData.asset.properties.pendingModel}
-                                                            </Typography>
-                                                        </div>
-                                                    )}
-                                                    { this.state.modelHistory.length > 0 ? (
-                                                    <Box mt={2}>
-                                                    <TableContainer component={Paper}>
-                                                        <Table>
-                                                            <TableHead>
-                                                                <TableRow>
-                                                                    <TableCell>ModelName</TableCell>
-                                                                    <TableCell>CreationDate</TableCell>
-                                                                    <TableCell>From</TableCell>
-                                                                    <TableCell>Download</TableCell>
-                                                                </TableRow>
-                                                            </TableHead>
-                                                            <TableBody>
-                                                                {this.state.modelHistory.map((model) => (
-                                                                    <TableRow key={model.modelname}>
-                                                                        <TableCell>{model.modelname}</TableCell>
-                                                                        <TableCell>{model.creationDate}</TableCell>
-                                                                        <TableCell>{model.from}</TableCell>
-                                                                        <TableCell>
-                                                                            <Button variant="contained" color="primary"
-                                                                                    onClick={() => this.downloadModel(model.modelname)}>
-                                                                                Download
-                                                                            </Button>
-                                                                        </TableCell>
-                                                                    </TableRow>
-                                                                ))}
-                                                            </TableBody>
-                                                        </Table>
-                                                    </TableContainer>
-                                                    </Box>
-                                                    ) : (
-                                                        <Typography variant="body1" color="error">
-                                                            No model history available
-                                                        </Typography>
-                                                    )
-                                                    }
-                                                    </div>
-                                            ) : (
-                                                <div>
-                                                    <Typography variant="h6" color="error">
-                                                        Device has not a current model
-                                                    </Typography>
-                                                    {!this.state.deviceData.asset.properties.pendingModel ? (
-                                                        <Button variant="contained" color="primary"
-                                                                onClick={this.loadNewModel}>upload new Model</Button>
-                                                    ) : (
-                                                        <div>
-                                                            <Typography variant="body1" color="textSecondary">
-                                                                <strong>pendingModel:</strong> {this.state.deviceData.asset.properties.pendingModel}
-                                                            </Typography>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <h1>Device Data</h1>
-                                            { !this.state.deviceData.asset.properties.pendingData ? (
-                                                <Button variant="contained" color="primary"
-                                                        onClick={this.handleReceiveData}>
-                                                    New Data Request
-                                                </Button>
-                                            ) : (
-                                                <div>
-                                                    <Typography variant="h6" color="error">
-                                                        Pending Request
-                                                    </Typography>
-                                                </div>
-                                            )}
+                                        {/*Models box*/}
+                                        <ManageModels
+                                            deviceData={[
+                                                this.state.deviceData.asset.properties.currentModel,
+                                                this.state.deviceData.asset.properties.pendingModel,
+                                                this.state.deviceData.asset.properties.pendingModel
+                                            ]}
+                                            modelHistory={this.state.modelHistory}
+                                            getModel={this.getModel}
+                                            loadNewModel={this.loadNewModel}
+                                            downloadModel={this.downloadModel}
+                                        />
 
-                                            { !this.state.hasData ? (
-                                                <Typography variant="body1" color="textSecondary">
-                                                    No data available, please request or wait for new data
-                                                </Typography>
-                                            ) : (
-                                                <DeviceDataReports deviceId={this.props.deviceId} measurements={this.state.measurements} />
-                                            )}
-                                        </Grid>
+                                        {/*Data box*/}
+                                        <DataComponent
+                                            pendingData={this.state.deviceData.asset.properties.pendingData}
+                                            hasData={this.state.hasData}
+                                            handleReceiveData={this.handleReceiveData}
+                                            deviceId={this.props.deviceId}
+                                            measurements={this.state.measurements}
+                                        />
                                     </Grid>
                                 </Grid>
                             </Grid>
                         )}
                     </Box>
+                    <ToastContainer
+                        position="top-center"
+                        autoClose={3000}
+                        hideProgressBar={false}
+                        newestOnTop={false}
+                        closeOnClick
+                        rtl={false}
+                        pauseOnFocusLoss
+                        draggable={false}
+                        pauseOnHover={false}
+                    />
                 </Box>
                </LocalizationProvider>
             </CustomThemeProvider>
