@@ -9,6 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
+import {TextField} from "@mui/material";
 
 
 const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLevel, currentFilter, style }) => {
@@ -23,6 +24,12 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
     const linkSourceId= useRef(null);
     const [linkSelectionPopupOpen, setLinkSelectionPopupOpen] = useState(false);
     const [relationsToDelete, setRelationsToDelete] = useState([]);
+
+    // New state for relation dialog
+    const [relDialogOpen, setRelDialogOpen] = useState(false);
+    const [newRelName, setNewRelName] = useState('');
+    const [newRelSource, setNewRelSource] = useState('');
+    const [newRelTarget, setNewRelTarget] = useState('');
 
     useEffect(() => {
         if (!nodes) return;
@@ -307,7 +314,10 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
         if (linkSourceId.current) {
             const sourceId = linkSourceId.current;
             console.log("Linking from "+sourceId+" to "+targetId);
-            linkAnotherNode(sourceId, targetId);
+            //linkAnotherNode(sourceId, targetId);
+            setNewRelTarget(targetId);
+            setNewRelSource(sourceId);
+            openRelDialog();
         }
     };
 
@@ -320,7 +330,8 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
     };
 
     const linkAnotherNode = async (sourceId, targetId) => {
-        const connectionName = prompt("Enter the connection name:");
+        //const connectionName = prompt("Enter the connection name:");
+        const connectionName = newRelName;
 
         if (!connectionName) {
             return;
@@ -333,6 +344,7 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
         await addRelationship(sourceId, relationships);
         linkSourceId.current = null;
         setLinkingMode(null);
+        closeRelDialog();
     };
 
 
@@ -342,6 +354,21 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
             setLinkingMode(null);
         }
     };
+
+    const openRelDialog = () => {
+        setRelDialogOpen(true);
+    }
+
+    const closeRelDialog = () => {
+        setRelDialogOpen(false);
+        setNewRelSource('');
+        setNewRelTarget('');
+        setNewRelName('');
+    }
+
+    const handleNewRelName = (e) => {
+        setNewRelName(e.target.value);
+    }
 
 
     return (
@@ -401,7 +428,8 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
                     <ul>
                         {relationsToDelete.map((rel, index) => (
                             <li key={index}>
-                                <Button onClick={() => handleSelectLinkToDelete(rel.relId)}>
+                                <Button onClick={() => handleSelectLinkToDelete(rel.relId)}
+                                        variant="contained">
                                     {rel.label}
                                 </Button>
                             </li>
@@ -409,7 +437,33 @@ const Graph = ({ nodes, links, addRelationship, deleteNode, deleteLink, updateLe
                     </ul>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setLinkSelectionPopupOpen(false)}>Cancel</Button>
+                    <Button onClick={() => setLinkSelectionPopupOpen(false)}
+                            variant="contained">
+                        Cancel
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog open={relDialogOpen} onClose={closeRelDialog}>
+                <DialogTitle>Enter the connection name</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="relName"
+                        label="name"
+                        type="text"
+                        fullWidth
+                        value={newRelName}
+                        onChange={handleNewRelName}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeRelDialog} color="primary" variant="contained">
+                        Back
+                    </Button>
+                    <Button onClick={() => linkAnotherNode(newRelSource, newRelTarget)} color="primary" variant="contained">
+                        Confirm
+                    </Button>
                 </DialogActions>
             </Dialog>
         </div>

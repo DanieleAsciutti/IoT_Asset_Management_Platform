@@ -71,13 +71,13 @@ const TagButton = ({currTag, addTag}) => {
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleDialogClose} color="primary">
+                    <Button onClick={handleDialogClose} color="primary" variant="contained">
                         Back
                     </Button>
-                    <Button onClick={() => handleSubmit(false)} color="primary">
+                    <Button onClick={() => handleSubmit(false)} color="primary" variant="contained" >
                         Add
                     </Button>
-                    <Button onClick={() => handleSubmit(true)} color="primary">
+                    <Button onClick={() => handleSubmit(true)} color="primary" variant="contained">
                         Delete
                     </Button>
                 </DialogActions>
