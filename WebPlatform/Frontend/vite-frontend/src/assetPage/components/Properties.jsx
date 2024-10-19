@@ -81,10 +81,10 @@ const Properties = ({ deviceData, handleAddProperty }) => {
                             />
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={handleDialogClose} color="primary">
+                            <Button onClick={handleDialogClose} color="primary" variant={"contained"}>
                                 Back
                             </Button>
-                            <Button onClick={handleSubmit} color="primary">
+                            <Button onClick={handleSubmit} color="primary" variant={"contained"}>
                                 Add
                             </Button>
                         </DialogActions>

@@ -11,6 +11,7 @@ import {
     DialogActions
 } from '@mui/material';
 import Button from "@mui/material/Button";
+import {toast, ToastContainer} from "react-toastify";
 
 
 /**
@@ -37,8 +38,14 @@ const LevelSelect = ({ label, value, levelOptions, setLevel, undisable }) => {
     }
 
     const handleAddNewLevel = () => {
+        if(newLevelValue === '') {
+            toast.error('Can\'t insert an empty value');
+            return;
+        }
         setCurrValue(newLevelValue);
-        levelOptions.push(newLevelValue);
+        if(!levelOptions.includes(newLevelValue)){
+            levelOptions.push(newLevelValue);
+        }
         setLevel(newLevelValue);
         setNewLevelValue('');
         handleCloseDialogue();
@@ -90,12 +97,23 @@ const LevelSelect = ({ label, value, levelOptions, setLevel, undisable }) => {
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseDialogue}>Cancel</Button>
-                    <Button onClick={handleAddNewLevel} color="primary">
+                    <Button onClick={handleCloseDialogue} variant={"contained"}>Cancel</Button>
+                    <Button onClick={handleAddNewLevel} color="primary" variant={"contained"}>
                         Add
                     </Button>
                 </DialogActions>
             </Dialog>
+            <ToastContainer
+                position="top-center"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable={false}
+                pauseOnHover={false}
+            />
     </>
     );
 };

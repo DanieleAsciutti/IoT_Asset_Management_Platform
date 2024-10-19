@@ -246,6 +246,9 @@ public class DataManagerController {
         } else {
             query = "MATCH (d:Device) WHERE elementId(d) = $id SET d.tag=\"" + deviceTagDTO.getTag() + "\"";
         }
+        if(deviceTagDTO.getTag() != null && deviceTagDTO.getTag().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
         assetRepository.modifyDeviceTag(deviceTagDTO.getDeviceId(), query);
         return ResponseEntity.ok().build();
     }

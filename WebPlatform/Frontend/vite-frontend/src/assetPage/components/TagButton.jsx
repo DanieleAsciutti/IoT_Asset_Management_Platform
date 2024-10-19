@@ -1,11 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Box } from '@mui/material';
 import Typography from "@mui/material/Typography";
+import LevelSelect from "../../manageLevels/LevelSelect.jsx";
 
 const TagButton = ({currTag, addTag}) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [tag, setTag] = useState(currTag || '');
     const [newTag, setNewTag] = useState('');
+    const [tagOptions, setTagOptions] = useState([]);
 
     useEffect(() => {
         if (currTag !== null) {
@@ -14,6 +16,29 @@ const TagButton = ({currTag, addTag}) => {
             setTag(''); // Reset the tag if currTag is null
         }
     }, [currTag]);
+
+    useEffect(() => {
+        const fetchTags = async () => {
+            try {
+                const response = await fetch(`/api/getAllDeviceTags`, {
+                    method: 'GET',
+                    credentials: 'include',
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setTagOptions(data);
+                } else {
+                    console.log("Failed to fetch tag options");
+                }
+            } catch (error) {
+                console.error('Error fetching tags:', error);
+            }
+        };
+
+        fetchTags();
+    }, [dialogOpen]);
+
 
     const handleDialogOpen = () => {
         setNewTag(tag);
@@ -25,7 +50,7 @@ const TagButton = ({currTag, addTag}) => {
     };
 
     const handleTagChange = (event) => {
-        setNewTag(event.target.value);
+        setNewTag(event);
     };
 
     const handleSubmit = (del) => {
@@ -59,29 +84,22 @@ const TagButton = ({currTag, addTag}) => {
             <Dialog open={dialogOpen} onClose={handleDialogClose}>
                 <DialogTitle>Add or Modify the Tag</DialogTitle>
                 <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="tag"
-                        label="Tag"
-                        type="text"
-                        fullWidth
-                        value={newTag}
-                        onChange={handleTagChange}
-                    />
+                    <LevelSelect label={'Tag'} value={newTag} levelOptions={tagOptions} setLevel={handleTagChange} undisable={true}/>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose} color="primary" variant="contained">
                         Back
                     </Button>
-                    <Button onClick={() => handleSubmit(false)} color="primary" variant="contained" >
-                        Add
-                    </Button>
                     <Button onClick={() => handleSubmit(true)} color="primary" variant="contained">
                         Delete
                     </Button>
+                    <Button onClick={() => handleSubmit(false)} color="primary" variant="contained" >
+                        Add
+                    </Button>
                 </DialogActions>
             </Dialog>
+
+
         </Box>
     );
 };
