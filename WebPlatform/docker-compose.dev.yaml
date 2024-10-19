@@ -26,17 +26,17 @@ services:
     depends_on:
       - b-datamanager
 
-  b-assetmanager:
-    build:
-      context: Backend/
-      dockerfile: assetManager.containerfile
-    image: b-assetmanager:latest
-    ports:
-      - "9092:9092"
-    networks:
-      - backend
-    depends_on:
-      - b-datamanager
+#  b-assetmanager:
+#    build:
+#      context: Backend/
+#      dockerfile: assetManager.containerfile
+#    image: b-assetmanager:latest
+#    ports:
+#      - "9092:9092"
+#    networks:
+#      - backend
+#    depends_on:
+#      - b-datamanager
 
   b-applicationgateway:
     build:
@@ -53,7 +53,7 @@ services:
     depends_on:
       - b-datamanager
       - b-authenticationmanager
-      - b-assetmanager
+#      - b-assetmanager
 
   influxdb:
     image: influxdb:2.6-alpine

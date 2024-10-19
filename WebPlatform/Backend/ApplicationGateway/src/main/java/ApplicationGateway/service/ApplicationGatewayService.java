@@ -116,7 +116,7 @@ public class ApplicationGatewayService {
     // Asset Management
 
     public ResponseEntity<String> addDevice(String name) {
-        String url = String.format("http://%s:%d/addDevice?", assetManagerAddress, assetManagerPort) + "name=" + name;
+        String url = String.format("http://%s:%d/addDevice?", dataManagerAddress, dataManagerPort) + "name=" + name;
         return webClient.post().uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
@@ -125,7 +125,7 @@ public class ApplicationGatewayService {
     }
 
     public ResponseEntity<String> getAsset(String id) {
-        String url = String.format("http://%s:%d/getAsset?", assetManagerAddress, assetManagerPort)+"id="+id;
+        String url = String.format("http://%s:%d/getAsset?", dataManagerAddress, dataManagerPort)+"id="+id;
 
         return webClient.get()  // Using GET to fetch data
                 .uri(url)
@@ -150,7 +150,7 @@ public class ApplicationGatewayService {
 
     public ResponseEntity<Void> deleteAsset(String assetId)
     {
-        String url = String.format("http://%s:%d/deleteAsset?",assetManagerAddress,assetManagerPort)+"id="+assetId;
+        String url = String.format("http://%s:%d/deleteAsset?", dataManagerAddress, dataManagerPort)+"id="+assetId;
         ResponseEntity<String> response =webClient
                 .post()
                 .uri(url)
@@ -179,7 +179,7 @@ public class ApplicationGatewayService {
 
     public ResponseEntity<Void> deleteRelationship(String relId)
     {
-        String url = String.format("http://%s:%d/deleteRelationship?",assetManagerAddress,assetManagerPort)+"relId="+relId;
+        String url = String.format("http://%s:%d/deleteRelationship?", dataManagerAddress, dataManagerPort)+"relId="+relId;
         return webClient
                 .post()
                 .uri(url)
@@ -191,7 +191,7 @@ public class ApplicationGatewayService {
 
     public ResponseEntity<Void> addAttributes(String assetId, AttributesDTO attributes)
     {
-        String url = String.format("http://%s:%d/addAttributes?",assetManagerAddress,assetManagerPort)+"assetId="+assetId;
+        String url = String.format("http://%s:%d/addAttributes?", dataManagerAddress, dataManagerPort)+"assetId="+assetId;
         return webClient.post().uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .bodyValue(attributes)
@@ -252,7 +252,7 @@ public class ApplicationGatewayService {
     }
 
     public List<UnregisteredDeviceDTO> getAllUnregisteredDevices() {
-        String url = String.format("http://%s:%d/getAllUnregisteredDevices",assetManagerAddress,assetManagerPort);
+        String url = String.format("http://%s:%d/getAllUnregisteredDevices", dataManagerAddress, dataManagerPort);
         ResponseEntity<List<UnregisteredDeviceDTO>> response = webClient
                 .get()
                 .uri(url).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -266,7 +266,7 @@ public class ApplicationGatewayService {
     }
 
     public List<String> getAllRegisteredDevices() {
-        String url = String.format("http://%s:%d/getAllRegisteredDevices",assetManagerAddress,assetManagerPort);
+        String url = String.format("http://%s:%d/getAllRegisteredDevices",dataManagerAddress,dataManagerPort);
         ResponseEntity<List<String>> response = webClient
                 .get().uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -307,7 +307,7 @@ public class ApplicationGatewayService {
     }
 
     public ResponseEntity<Void> addRelationships(String assetId, RelationshipsDTO relationships) {
-        String url = String.format("http://%s:%d/addRelationships?",assetManagerAddress,assetManagerPort)+"assetId="+assetId;
+        String url = String.format("http://%s:%d/addRelationships?",dataManagerAddress,dataManagerPort)+"assetId="+assetId;
         return webClient
                 .post()
                 .uri(url)
@@ -320,7 +320,7 @@ public class ApplicationGatewayService {
 
 
     public ResponseEntity<Void> removeRelationships(RelationshipsDTO relationships) {
-        String url = String.format("http://%s:%d/removeRelationships",assetManagerAddress,assetManagerPort);
+        String url = String.format("http://%s:%d/removeRelationships",dataManagerAddress,dataManagerPort);
         return webClient
                 .post()
                 .uri(url).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -331,7 +331,7 @@ public class ApplicationGatewayService {
     }
 
     public ResponseEntity<String> getNetwork(){
-        String url = String.format("http://%s:%d/getNetwork", assetManagerAddress, assetManagerPort);
+        String url = String.format("http://%s:%d/getNetwork", dataManagerAddress, dataManagerPort);
         return webClient.get()  // Using GET to fetch data
                 .uri(url)
                 .accept(MediaType.APPLICATION_JSON)  // Setting Accept header as application/json
@@ -439,7 +439,7 @@ public class ApplicationGatewayService {
                 .fromUser(true)
                 .build();
 
-        String url = String.format("http://%s:%d/addNewModel", assetManagerAddress, assetManagerPort);
+        String url = String.format("http://%s:%d/addNewModel", dataManagerAddress, dataManagerPort);
         ResponseEntity<Void> response =  webClient.post()
                 .uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -492,7 +492,7 @@ public class ApplicationGatewayService {
 
     public ResponseEntity<Void> sendModel(ModelDTO modelDTO){
         NewModelDTO newModelDTO = new NewModelDTO(modelDTO.getModel(), modelDTO.getModelName(), modelDTO.getAssetId(), false);
-        String url = String.format("http://%s:%d/addNewModel", assetManagerAddress, assetManagerPort);
+        String url = String.format("http://%s:%d/addNewModel", dataManagerAddress, dataManagerPort);
         return webClient.post()
                 .uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -629,7 +629,7 @@ public class ApplicationGatewayService {
     }
 
     public ResponseEntity<Void> saveDeviceData(DeviceDataDTO deviceDataDTO){
-        String url = String.format("http://%s:%d/saveDeviceData", assetManagerAddress, assetManagerPort);
+        String url = String.format("http://%s:%d/saveDeviceData", dataManagerAddress, dataManagerPort);
         return webClient.post()
                 .uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -640,7 +640,7 @@ public class ApplicationGatewayService {
     }
 
     public ResponseEntity<String> getDeviceModelsHistory(String deviceId){
-        String url = String.format("http://%s:%d/getDeviceModelsHistory?", assetManagerAddress, assetManagerPort) + "deviceId=" + deviceId;
+        String url = String.format("http://%s:%d/getDeviceModelsHistory?", dataManagerAddress, dataManagerPort) + "deviceId=" + deviceId;
         return webClient.get()
                 .uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -650,7 +650,7 @@ public class ApplicationGatewayService {
     }
 
     public ResponseEntity<byte[]> retrieveModel(String deviceId, String modelName, Boolean fromUser){
-        String url = String.format("http://%s:%d/retrieveModel?", assetManagerAddress, assetManagerPort) + "deviceId=" + deviceId + "&modelName=" + modelName + "&fromUser=" + fromUser;
+        String url = String.format("http://%s:%d/retrieveModel?", dataManagerAddress, dataManagerPort) + "deviceId=" + deviceId + "&modelName=" + modelName + "&fromUser=" + fromUser;
         return webClient.get()
                 .uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -660,7 +660,7 @@ public class ApplicationGatewayService {
     }
 
     public boolean checkPendings(String deviceId, String toCheck){
-        String url = String.format("http://%s:%d/getDevicePendings?", assetManagerAddress, assetManagerPort) + "deviceId=" + deviceId;
+        String url = String.format("http://%s:%d/getDevicePendings?", dataManagerAddress, dataManagerPort) + "deviceId=" + deviceId;
         ResponseEntity<PendingDeviceDTO> response = webClient.get()
                 .uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -682,7 +682,7 @@ public class ApplicationGatewayService {
     }
 
     public ResponseEntity<String> retrieveDeviceDataMetadata(String deviceId, String measurement) {
-        String url = String.format("http://%s:%d/retrieveDeviceDataMetadata?", assetManagerAddress, assetManagerPort) + "deviceId=" + deviceId + "&measurement=" + measurement;
+        String url = String.format("http://%s:%d/retrieveDeviceDataMetadata?", dataManagerAddress, dataManagerPort) + "deviceId=" + deviceId + "&measurement=" + measurement;
 
         return  webClient.get()
                 .uri(url)
@@ -693,7 +693,7 @@ public class ApplicationGatewayService {
     }
 
     public ResponseEntity<String> retrieveDeviceDataMeasurements(String deviceId) {
-        String url = String.format("http://%s:%d/retrieveDeviceDataMeasurements?", assetManagerAddress, assetManagerPort) + "deviceId=" + deviceId;
+        String url = String.format("http://%s:%d/retrieveDeviceDataMeasurements?", dataManagerAddress, dataManagerPort) + "deviceId=" + deviceId;
 
         return  webClient.get()
                 .uri(url)
@@ -705,7 +705,7 @@ public class ApplicationGatewayService {
 
 
     public ResponseEntity<InputStreamResource> downloadDeviceData(String deviceId) {
-        String url = String.format("http://%s:%d/downloadDeviceData?deviceId=%s", assetManagerAddress, assetManagerPort, deviceId);
+        String url = String.format("http://%s:%d/downloadDeviceData?deviceId=%s", dataManagerAddress, dataManagerPort, deviceId);
 
         InputStreamResource resource = webClient.get()
                 .uri(url)
