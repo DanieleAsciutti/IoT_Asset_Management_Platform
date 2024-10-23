@@ -107,6 +107,13 @@ public class MiddlewareController {
         return ResponseEntity.ok(request);
     }
 
+    @PostMapping("/dev/sendWarning")
+    public ResponseEntity<Void> sendError(@RequestParam String deviceName){
+        log.info("Send error called");
+        middlewareService.asyncSendWarning(deviceName);
+        return ResponseEntity.ok().build();
+    }
+
     /*
     @PostMapping("/removeDevice")
     public ResponseEntity<Void> removeDevice(@RequestParam String deviceName){

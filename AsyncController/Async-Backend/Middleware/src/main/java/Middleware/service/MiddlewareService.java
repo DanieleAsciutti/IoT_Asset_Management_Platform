@@ -21,13 +21,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -71,6 +68,21 @@ public class MiddlewareService {
             return;
         }
         updateCSV(response.getBody(), deviceName);
+    }
+
+    @Async
+    public void asyncSendWarning(String deviceName){
+        String deviceId = findIdByName(deviceName);
+        if(deviceId == null){
+            log.error("Device not found");
+            return;
+        }
+        String uri = String.format("http://%s:%d/sendDeviceWarning?deviceId=%s", gatewayAddress, gatewayPort, deviceId);
+        webClient.post()
+                .uri(uri)
+                .retrieve()
+                .toEntity(Void.class)
+                .block();
     }
 
     @Async

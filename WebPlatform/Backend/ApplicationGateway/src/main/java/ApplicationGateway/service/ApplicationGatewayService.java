@@ -5,10 +5,7 @@ import ApplicationGateway.dto.AsyncControllerDTO.AsyncMultipleModelsDTO;
 import ApplicationGateway.dto.AsyncControllerDTO.DeviceDataDTO;
 import ApplicationGateway.dto.assetManDTO.*;
 import ApplicationGateway.dto.auth_AuthDTO.*;
-import ApplicationGateway.dto.dataManagerDTO.AddAssetDTO;
-import ApplicationGateway.dto.dataManagerDTO.DeviceTagDTO;
-import ApplicationGateway.dto.dataManagerDTO.MultiplePendingsDTO;
-import ApplicationGateway.dto.dataManagerDTO.UserInfoDTO;
+import ApplicationGateway.dto.dataManagerDTO.*;
 import ApplicationGateway.dto.enums.Pendings;
 import ApplicationGateway.dto.frontend.*;
 import lombok.RequiredArgsConstructor;
@@ -757,6 +754,38 @@ public class ApplicationGatewayService {
                 .block();
         if (Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() && response.getBody() != null) return response.getBody();
         else return Collections.emptyList();
+    }
+
+    public ResponseEntity<Void> sendDeviceWarning(String deviceId){
+        String url = String.format("http://%s:%d/sendDeviceWarning?", dataManagerAddress, dataManagerPort) + "deviceId=" + deviceId;
+        return webClient.post()
+                .uri(url)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .retrieve()
+                .toEntity(Void.class)
+                .block();
+    }
+
+    public List<WarningCaseDTO> getCaseWarnings(){
+        String url = String.format("http://%s:%d/getCaseWarnings", dataManagerAddress, dataManagerPort);
+        ResponseEntity<List<WarningCaseDTO>> response = webClient.get()
+                .uri(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<WarningCaseDTO>>() {})
+                .block();
+        if (Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() && response.getBody() != null) return response.getBody();
+        else return Collections.emptyList();
+    }
+
+    public ResponseEntity<Void> deleteWarningCase(long id){
+        String url = String.format("http://%s:%d/deleteWarningCase?", dataManagerAddress, dataManagerPort) + "id=" + id;
+        return webClient.post()
+                .uri(url)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .retrieve()
+                .toEntity(Void.class)
+                .block();
     }
 
 }

@@ -6,6 +6,7 @@ import ApplicationGateway.dto.assetManDTO.*;
 import ApplicationGateway.dto.auth_AuthDTO.*;
 import ApplicationGateway.dto.dataManagerDTO.AddAssetDTO;
 import ApplicationGateway.dto.dataManagerDTO.DeviceTagDTO;
+import ApplicationGateway.dto.dataManagerDTO.WarningCaseDTO;
 import ApplicationGateway.dto.frontend.*;
 import ApplicationGateway.service.ApplicationGatewayService;
 import jakarta.servlet.http.Cookie;
@@ -602,6 +603,40 @@ public class ApplicationGatewayController {
         return ResponseEntity.ok(applicationGatewayService.getLevel3(level1, level2));
     }
 
+
+    /**
+     * This endpoint is called by the asyncController to send the case warning created by a device
+     */
+    @PostMapping(value = "/sendDeviceWarning")
+    public ResponseEntity<Void> sendDeviceWarning(@RequestParam String deviceId){
+        log.info("SendDeviceWarning endpoint called");
+        return applicationGatewayService.sendDeviceWarning(deviceId);
+    }
+
+    @GetMapping(value = "/getWarnings")
+    public ResponseEntity<List<WarningCaseDTO>> getDeviceWarnings(
+            @CookieValue(value = "token", defaultValue = "") String accessToken){
+        log.info("GetDeviceWarnings endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize(new AuthorizationRequest(accessToken));
+        if (!authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(applicationGatewayService.getCaseWarnings());
+    }
+
+    @PostMapping(value = "/deleteWarningCase")
+    public ResponseEntity<Void> deleteWarningCase(
+            @CookieValue(value = "token", defaultValue = "") String accessToken,
+            @RequestParam long id){
+        log.info("DeleteWarningCase endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize(new AuthorizationRequest(accessToken));
+        if (!authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        return applicationGatewayService.deleteWarningCase(id);
+    }
 
 
 

@@ -7,9 +7,11 @@ import DataManager.dto.gateway.*;
 import DataManager.model.Role;
 import DataManager.model.graphDB.Device;
 import DataManager.model.relDB.User;
+import DataManager.model.relDB.WarningCase;
 import DataManager.repository.AssetRepository;
 import DataManager.repository.InfluxRepository;
 import DataManager.repository.UserRepository;
+import DataManager.repository.WarningCaseRepository;
 import DataManager.service.DataManagerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,7 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 
@@ -41,6 +44,9 @@ public class DataManagerController {
 
     @Autowired
     private final UserRepository userRepository;
+
+    @Autowired
+    private final WarningCaseRepository warningCaseRepository;
 
     private final InfluxRepository influxRepository;
 
@@ -573,6 +579,65 @@ public class DataManagerController {
     }
 
 
+    @GetMapping(value = "/getAllNodesId")
+    @ResponseBody
+    public ResponseEntity<List<String>> getAllNodesId() {
+        log.info("GetAllNodesId endpoint called");
+        return ResponseEntity.ok(assetRepository.getAllNodesId());
+    }
+
+    @GetMapping(value = "/retrieveDeviceDataMetadata")
+    @ResponseBody
+    public ResponseEntity<String> retrieveDeviceDataMetadata(@RequestParam String deviceId, @RequestParam String measurement) {
+        log.info("RetrieveDeviceDataMetadata endpoint called");
+
+        return ResponseEntity.ok(influxRepository.getMetadataForDevice(deviceId, measurement));
+    }
+
+    @GetMapping(value = "/retrieveDeviceDataMeasurements")
+    @ResponseBody
+    public ResponseEntity<String> retrieveDeviceDataMeasurements(@RequestParam String deviceId) {
+        log.info("RetrieveDeviceDataMeasurements endpoint called");
+
+        return ResponseEntity.ok(influxRepository.getMeasurementsForDevice(deviceId));
+    }
+
+    @GetMapping("/downloadDeviceData")
+    public ResponseEntity<InputStreamResource> downloadDeviceData(@RequestParam String deviceId) throws IOException {
+        InputStreamResource resource = influxRepository.getDeviceDataAsZip(deviceId);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=device_data.zip")
+                .header("X-Accel-Buffering", "no")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
+    }
+
+    @PostMapping(value = "/sendDeviceWarning")
+    public ResponseEntity<Void> sendDeviceWarning(@RequestParam String deviceId) {
+        log.info("SendDeviceWarning endpoint called");
+        String caseTitle = "Segnalazione";
+        JSONObject levels = new JSONObject(assetRepository.getLevels(deviceId));
+
+        WarningCase warningCase = new WarningCase(caseTitle, deviceId, LocalDateTime.now(), levels.getString("l1"),
+                levels.getString("l2"), levels.getString("l3"));
+        warningCaseRepository.save(warningCase);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(value = "/getCaseWarnings")
+    public ResponseEntity<List<WarningCase>> getCaseWarnings() {
+        log.info("GetDeviceWarnings endpoint called");
+        return ResponseEntity.ok(warningCaseRepository.findAll());
+    }
+
+    @PostMapping(value = "/deleteWarningCase")
+    public ResponseEntity<Void> deleteWarningCase(@RequestParam long id) {
+        log.info("DeleteDeviceWarning endpoint called");
+        warningCaseRepository.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+
     //------- USER MANAGEMENT -------//
 
     @GetMapping(value = "/user")
@@ -622,39 +687,6 @@ public class DataManagerController {
             return ResponseEntity.ok().build();
         } else
             return ResponseEntity.notFound().build();
-    }
-
-    @GetMapping(value = "/getAllNodesId")
-    @ResponseBody
-    public ResponseEntity<List<String>> getAllNodesId() {
-        log.info("GetAllNodesId endpoint called");
-        return ResponseEntity.ok(assetRepository.getAllNodesId());
-    }
-
-    @GetMapping(value = "/retrieveDeviceDataMetadata")
-    @ResponseBody
-    public ResponseEntity<String> retrieveDeviceDataMetadata(@RequestParam String deviceId, @RequestParam String measurement) {
-        log.info("RetrieveDeviceDataMetadata endpoint called");
-
-        return ResponseEntity.ok(influxRepository.getMetadataForDevice(deviceId, measurement));
-    }
-
-    @GetMapping(value = "/retrieveDeviceDataMeasurements")
-    @ResponseBody
-    public ResponseEntity<String> retrieveDeviceDataMeasurements(@RequestParam String deviceId) {
-        log.info("RetrieveDeviceDataMeasurements endpoint called");
-
-        return ResponseEntity.ok(influxRepository.getMeasurementsForDevice(deviceId));
-    }
-
-    @GetMapping("/downloadDeviceData")
-    public ResponseEntity<InputStreamResource> downloadDeviceData(@RequestParam String deviceId) throws IOException {
-        InputStreamResource resource = influxRepository.getDeviceDataAsZip(deviceId);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=device_data.zip")
-                .header("X-Accel-Buffering", "no")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
     }
 
 
