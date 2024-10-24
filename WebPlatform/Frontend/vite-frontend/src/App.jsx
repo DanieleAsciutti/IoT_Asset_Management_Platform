@@ -9,6 +9,7 @@ import DevicesWrapper from "./assetPage/DevicePage.jsx";
 import AssetsWrapper from './assetPage/AssetPage.jsx';
 import ManageDevices from "./manageDevices/ManageDevices.jsx";
 import ManageLevels from "./manageLevels/ManageLevels.jsx";
+import WarningCasePage from "./warningCases/WarningCasePage.jsx";
 
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
                 <Route path="/assets/:id" element={<AssetsWrapper/>}/>
                 <Route path="/managedevices" element={<ManageDevices />}/>
                 <Route path="/managelevels" element={<ManageLevels />}/>
+                <Route path="warningcases" element={<WarningCasePage />} />
             </Routes>
         </Router>
     );

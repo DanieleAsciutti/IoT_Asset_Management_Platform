@@ -1,4 +1,4 @@
-package ApplicationGateway.dto.dataManagerDTO;
+package DataManager.dto.gateway;
 
 import lombok.*;
 
@@ -27,6 +27,4 @@ public class WarningCaseDTO {
     private String level2;
 
     private String level3;
-
-
 }

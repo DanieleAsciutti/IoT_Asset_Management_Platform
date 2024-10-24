@@ -5,7 +5,7 @@ import SimpleTooltip from "./SimpleTooltip";
 import './ContextMenu.css';
 import './LinkingMode.css'
 
-const GraphMini = ({ nodes, links }) => {
+const GraphMini = ({ nodes, links, nodesClickable = true}) => {
     const svgRef = useRef();
     const graphRef = useRef();
     const tooltipRef = useRef();
@@ -47,16 +47,21 @@ const GraphMini = ({ nodes, links }) => {
             .attr('class', 'link')
             .attr('stroke', 'black')
             .attr('stroke-width', 2)
-            .on('mouseover', function (event, data) {
+
+        if(nodesClickable) {
+            link
+                .on('mouseover', function (event, data) {
                 d3.select(this).transition()
                     .attr('opacity', '.95');
-                setSimpleTooltipData({ ...data, x: event.x, y: event.y });
-            })
-            .on('mouseout', function (event, data) {
-                d3.select(this).transition()
-                    .attr('opacity', '1');
-                setSimpleTooltipData(null);
-            })
+                setSimpleTooltipData({...data, x: event.x, y: event.y});
+                })
+                .on('mouseout', function (event, data) {
+                    d3.select(this).transition()
+                        .attr('opacity', '1');
+                    setSimpleTooltipData(null);
+                })
+        }
+
 
         const node = graphGroup.selectAll('.node')
             .data(nodes)
@@ -75,23 +80,25 @@ const GraphMini = ({ nodes, links }) => {
             .attr('font-weight', '400')
             .text(d => d.name ? d.name : "");
 
-        node
-            .on('mouseover', function (event, data) {
-                d3.select(this).transition()
-                    .attr('opacity', '.95');
-                setTooltipData({ ...data, x: event.clientX, y: event.clientY });
-            })
-            .on('mouseout', function (event, data) {
-                d3.select(this).transition()
-                    .attr('opacity', '1');
-                setTooltipData(null);
-            })
-            .on('dblclick', function (event, data) {
-                const assetId = data.id;
-                window.location.href = data.label === 'Device'
-                    ? `/devices/${assetId}`
-                    : `/assets/${assetId}`;
-            })
+        if(nodesClickable) {
+            node
+                .on('mouseover', function (event, data) {
+                    d3.select(this).transition()
+                        .attr('opacity', '.95');
+                    setTooltipData({...data, x: event.clientX, y: event.clientY});
+                })
+                .on('mouseout', function (event, data) {
+                    d3.select(this).transition()
+                        .attr('opacity', '1');
+                    setTooltipData(null);
+                })
+                .on('dblclick', function (event, data) {
+                    const assetId = data.id;
+                    window.location.href = data.label === 'Device'
+                        ? `/devices/${assetId}`
+                        : `/assets/${assetId}`;
+                });
+        }
 
 
         node.call(d3.drag()

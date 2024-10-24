@@ -1,14 +1,5 @@
 import * as React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import Title from './Title.jsx';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import IconButton from '@mui/material/IconButton';
-import CircularProgress from '@mui/material/CircularProgress';
 import SequentialFilter from "../components/SequentialFilter.jsx";
 import DevicesTable from "./DevicesTable.jsx";
 
@@ -201,43 +192,6 @@ export default class DevicePage extends React.Component {
                     handleRowHover={this.handleRowHover}
                     handleRowLeave={this.handleRowLeave}
                 />
-
-                {/* Devices Table */}
-                {/*{!this.state.isLoading && this.state.Devices.length > 0 && (*/}
-                {/*    <Table size="small">*/}
-                {/*        <TableHead>*/}
-                {/*            <TableRow>*/}
-                {/*                <TableCell><strong>Name</strong></TableCell>*/}
-                {/*                <TableCell><strong>Registration Date</strong></TableCell>*/}
-                {/*                <TableCell><strong>Status</strong></TableCell>*/}
-                {/*                <TableCell><strong>Place</strong></TableCell>*/}
-                {/*                <TableCell><strong>Type</strong></TableCell>*/}
-                {/*                <TableCell align="right"><strong>Details</strong></TableCell>*/}
-                {/*            </TableRow>*/}
-                {/*        </TableHead>*/}
-                {/*        <TableBody>*/}
-                {/*            {this.state.Devices.map((device, index) => (*/}
-                {/*                <TableRow*/}
-                {/*                    key={device.id}*/}
-                {/*                    onMouseEnter={() => this.setState({ hoveredRow: index })}*/}
-                {/*                    onMouseLeave={() => this.setState({ hoveredRow: null })}*/}
-                {/*                    style={{ backgroundColor: this.state.hoveredRow === index ? '#f5f5f5' : 'inherit' }}*/}
-                {/*                >*/}
-                {/*                    <TableCell>{device.name}</TableCell>*/}
-                {/*                    <TableCell>{device.regDate}</TableCell>*/}
-                {/*                    <TableCell>{device.status}</TableCell>*/}
-                {/*                    <TableCell>{device.place}</TableCell>*/}
-                {/*                    <TableCell>{device.type}</TableCell>*/}
-                {/*                    <TableCell align="right">*/}
-                {/*                        <IconButton color="primary" component={RouterLink} to={`/devices/${device.id}`}>*/}
-                {/*                            <KeyboardArrowRightIcon />*/}
-                {/*                        </IconButton>*/}
-                {/*                    </TableCell>*/}
-                {/*                </TableRow>*/}
-                {/*            ))}*/}
-                {/*        </TableBody>*/}
-                {/*    </Table>*/}
-                {/*)}*/}
             </React.Fragment>
         );
     }

@@ -625,9 +625,19 @@ public class DataManagerController {
     }
 
     @GetMapping(value = "/getCaseWarnings")
-    public ResponseEntity<List<WarningCase>> getCaseWarnings() {
+    public ResponseEntity<List<WarningCaseDTO>> getCaseWarnings() {
         log.info("GetDeviceWarnings endpoint called");
-        return ResponseEntity.ok(warningCaseRepository.findAll());
+        List<WarningCase> warningCases = warningCaseRepository.findAll();
+        List<WarningCaseDTO> result = new ArrayList<>();
+        for(WarningCase warningCase : warningCases){
+            String deviceName = new JSONObject(assetRepository.getAsset(warningCase.getDeviceId()))
+                    .getJSONObject("asset")
+                    .getJSONObject("properties")
+                    .getString("name");
+            result.add(new WarningCaseDTO(warningCase.getId(), warningCase.getCaseTitle(), warningCase.getDeviceId(), deviceName,
+                    warningCase.getTimestamp(), warningCase.getLevel1(), warningCase.getLevel2(), warningCase.getLevel3()));
+        }
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping(value = "/deleteWarningCase")

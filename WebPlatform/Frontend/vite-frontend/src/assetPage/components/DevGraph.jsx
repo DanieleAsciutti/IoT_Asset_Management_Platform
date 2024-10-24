@@ -2,7 +2,7 @@ import React from 'react';
 import { useEffect, useState, useCallback} from 'react';
 import GraphMini from "../../components/GraphMini.jsx";
 
-function Assets({id, l1, l2, l3}) {
+function Assets({id, l1, l2, l3, nodesClickable = true}) {
 
     const [nodes, setNodes] = useState([]);
     const [links, setLinks] = useState([]);
@@ -63,7 +63,7 @@ function Assets({id, l1, l2, l3}) {
         <div>
             <div>
                 {nodes.length > 0 ? (
-                    <GraphMini nodes={nodes} links={links}/>
+                    <GraphMini nodes={nodes} links={links} nodesClickable={nodesClickable}/>
                 ) : (
                     <p>Loading...</p>
                 )}

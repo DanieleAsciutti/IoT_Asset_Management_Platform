@@ -9,10 +9,9 @@ const Tooltip = React.forwardRef(({ data, x, y }, ref) => {
     };
 
     return (
-        <div ref={ref}className="tooltip" style={tooltipStyle}>
+        <div ref={ref} className="tooltip" style={tooltipStyle}>
             <h3>{data.name}</h3>
             <p>Label: {data.label}</p>
-            {/*<p>ID: {data.id}</p>*/}
             <p>Place: {data.place}</p>
             <p>Type: {data.type}</p>
         </div>
