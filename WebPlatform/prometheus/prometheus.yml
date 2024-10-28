@@ -13,7 +13,3 @@ scrape_configs:
   - job_name: 'cadvisor'
     static_configs:
       - targets: ['cadvisor:8080']
-#
-#  - job_name: 'alertmanager'
-#    static_configs:
-#      - targets: ['alertmanager:9098']  # Updated to 9098

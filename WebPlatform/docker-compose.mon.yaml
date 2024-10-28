@@ -150,7 +150,6 @@ services:
     depends_on:
       - node-exporter
       - cadvisor
-#      - alertmanager
     command:
       - '--web.listen-address=:9097'  # Configure Prometheus to listen on 9097 internally
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -174,18 +173,6 @@ services:
       - /:/rootfs:ro
     networks:
       - graf-influx
-
-#  alertmanager:
-#    image: prom/alertmanager:latest
-#    container_name: alertmanager
-#    ports:
-#      - "9098:9098"  # Host:Container both on 9098
-#    volumes:
-#      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
-#    networks:
-#      - graf-influx
-#    command:
-#      - '--web.listen-address=:9098'  # Configure Alertmanager to listen on 9098 internally
 
 networks:
   backend:
