@@ -26,18 +26,6 @@ services:
     depends_on:
       - b-datamanager
 
-#  b-assetmanager:
-#    build:
-#      context: Backend/
-#      dockerfile: assetManager.containerfile
-#    image: b-assetmanager:latest
-#    ports:
-#      - "9092:9092"
-#    networks:
-#      - backend
-#    depends_on:
-#      - b-datamanager
-
   b-applicationgateway:
     build:
       context: Backend/
@@ -53,7 +41,6 @@ services:
     depends_on:
       - b-datamanager
       - b-authenticationmanager
-#      - b-assetmanager
 
   influxdb:
     image: influxdb:2.6-alpine
@@ -95,17 +82,33 @@ services:
     container_name: neo4j-db
     environment:
       NEO4J_AUTH: neo4j/password
-      NEO4JLABS_PLUGINS: '["apoc"]'  # This line installs the APOC plugin
-      NEO4J_apoc_export_file_enabled: "true"  # Enable exporting files using APOC
-      NEO4J_apoc_import_file_enabled: "true"  # Enable importing files using APOC
+      NEO4JLABS_PLUGINS: '["apoc"]'
+      NEO4J_apoc_export_file_enabled: "true"
+      NEO4J_apoc_import_file_enabled: "true"
     ports:
-      - "7474:7474"   # HTTP access to Neo4j browser
-      - "7687:7687"   # Bolt protocol for connecting with drivers
+      - "7474:7474"
+      - "7687:7687"
     volumes:
       - neo4j_data:/data
-      - ./plugins:/var/lib/neo4j/plugins  # Mount plugin directory
+      - ./plugins:/var/lib/neo4j/plugins
     networks:
       - postgre-neo4j
+
+  f-frontend:
+    image: docker.io/library/nginx:alpine
+    container_name: f-frontend
+    ports:
+      - 3000:3000
+    networks:
+      - n-frontend
+      - backend
+      - graf-influx
+    depends_on:
+      - b-applicationgateway
+      - grafana
+    build:
+      context: Frontend/vite-frontend
+
 
   grafana:
     image: grafana/grafana-oss
@@ -134,53 +137,55 @@ services:
     depends_on:
       - influxdb
 
-#  nginx:
-#    depends_on:
-#      - b-applicationgateway
-#      - f-frontend
-#      - grafana
-#      - influxdb
-#    container_name: nginx
-#    image: nginx:latest
-#    build:
-#      context: ./nginx
-#      dockerfile: Dockerfile
-#    volumes:
-#      - ./nginx/:/etc/nginx/conf.d/
-#    ports:
-#      - "3050:80"
-#    networks:
-#      - n-frontend
-#      - backend
-#      - graf-influx
-#
-#  f-frontend:
-#    stdin_open: true
-#    environment:
-#      - CHOKIDAR_USEPOLLING=true
-#    build:
-#      dockerfile: Dockerfile
-#      context: ./Frontend/my-app
-#    image: f-frontend:latest
-#    networks:
-#      - n-frontend
-#    ports:
-#      - "3002:3002"
 
-  f-frontend:
-    #restart: always
-    image: docker.io/library/nginx:alpine
-    container_name: f-frontend
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - 3000:3000
+      - "9097:9097"
     networks:
-      - n-frontend
-      - backend
       - graf-influx
     depends_on:
-      - b-applicationgateway
-    build:
-      context: Frontend/vite-frontend
+      - node-exporter
+      - cadvisor
+#      - alertmanager
+    command:
+      - '--web.listen-address=:9097'  # Configure Prometheus to listen on 9097 internally
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - graf-influx
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - graf-influx
+
+#  alertmanager:
+#    image: prom/alertmanager:latest
+#    container_name: alertmanager
+#    ports:
+#      - "9098:9098"  # Host:Container both on 9098
+#    volumes:
+#      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+#    networks:
+#      - graf-influx
+#    command:
+#      - '--web.listen-address=:9098'  # Configure Alertmanager to listen on 9098 internally
 
 networks:
   backend:

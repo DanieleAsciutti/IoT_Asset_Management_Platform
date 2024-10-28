@@ -15,3 +15,9 @@ datasources:
       tlsSkipVerify: true
     secureJsonData:
       token: mytoken
+
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9097
+    uid: prometheus
