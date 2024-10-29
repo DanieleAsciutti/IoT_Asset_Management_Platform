@@ -1,12 +1,13 @@
 package ApplicationGateway.controller;
 
 import ApplicationGateway.dto.AsyncControllerDTO.DeviceDataDTO;
+import ApplicationGateway.dto.AsyncControllerDTO.WarningDTO;
 import ApplicationGateway.dto.SecurityResponse;
 import ApplicationGateway.dto.assetManDTO.*;
 import ApplicationGateway.dto.auth_AuthDTO.*;
 import ApplicationGateway.dto.dataManagerDTO.AddAssetDTO;
 import ApplicationGateway.dto.dataManagerDTO.DeviceTagDTO;
-import ApplicationGateway.dto.dataManagerDTO.WarningCaseDTO;
+import ApplicationGateway.dto.dataManagerDTO.warnings.WarnCasesDTO;
 import ApplicationGateway.dto.frontend.*;
 import ApplicationGateway.service.ApplicationGatewayService;
 import jakarta.servlet.http.Cookie;
@@ -608,13 +609,13 @@ public class ApplicationGatewayController {
      * This endpoint is called by the asyncController to send the case warning created by a device
      */
     @PostMapping(value = "/sendDeviceWarning")
-    public ResponseEntity<Void> sendDeviceWarning(@RequestParam String deviceId){
+    public ResponseEntity<Void> sendDeviceWarning(@RequestBody WarningDTO warningDTO){
         log.info("SendDeviceWarning endpoint called");
-        return applicationGatewayService.sendDeviceWarning(deviceId);
+        return applicationGatewayService.sendDeviceWarning(warningDTO);
     }
 
     @GetMapping(value = "/getWarnings")
-    public ResponseEntity<List<WarningCaseDTO>> getDeviceWarnings(
+    public ResponseEntity<WarnCasesDTO> getDeviceWarnings(
             @CookieValue(value = "token", defaultValue = "") String accessToken){
         log.info("GetDeviceWarnings endpoint called");
         ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize(new AuthorizationRequest(accessToken));
@@ -625,17 +626,31 @@ public class ApplicationGatewayController {
         return ResponseEntity.ok(applicationGatewayService.getCaseWarnings());
     }
 
-    @PostMapping(value = "/deleteWarningCase")
-    public ResponseEntity<Void> deleteWarningCase(
+    @PostMapping(value = "/assignWarningCase")
+    public ResponseEntity<Void> assignWarningCase(
             @CookieValue(value = "token", defaultValue = "") String accessToken,
-            @RequestParam long id){
-        log.info("DeleteWarningCase endpoint called");
+            @RequestBody AssignCaseDTO assignCaseDTO){
+        log.info("AssignWarningCase endpoint called");
         ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize(new AuthorizationRequest(accessToken));
         if (!authorization.getBody().getIsAuthorized()) {
             log.info("User unauthorized");
             return ResponseEntity.status(401).build();
         }
-        return applicationGatewayService.deleteWarningCase(id);
+        return applicationGatewayService.assignWarningCase(assignCaseDTO);
+    }
+
+    @PostMapping(value = "/processWarningCase")
+    public ResponseEntity<Void> processWarningCase(
+            @CookieValue(value = "token", defaultValue = "") String accessToken,
+            @RequestBody ProcessCaseDTO processCaseDTO){
+        log.info("ProcessWarningCase endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize(new AuthorizationRequest(accessToken));
+        if (!authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+
+        return applicationGatewayService.processWarningCase(processCaseDTO);
     }
 
 

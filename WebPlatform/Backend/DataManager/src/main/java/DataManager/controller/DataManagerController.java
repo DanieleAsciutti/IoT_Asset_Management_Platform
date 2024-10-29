@@ -3,15 +3,15 @@ package DataManager.controller;
 import DataManager.dto.UnregisteredDeviceDTO;
 import DataManager.dto.asset.*;
 import DataManager.dto.auth.UserDTO;
+import DataManager.dto.enums.Warning;
 import DataManager.dto.gateway.*;
+import DataManager.dto.gateway.warnings.*;
 import DataManager.model.Role;
 import DataManager.model.graphDB.Device;
+import DataManager.model.relDB.AnomalyWarningCase;
+import DataManager.model.relDB.RLUWarningCase;
 import DataManager.model.relDB.User;
-import DataManager.model.relDB.WarningCase;
-import DataManager.repository.AssetRepository;
-import DataManager.repository.InfluxRepository;
-import DataManager.repository.UserRepository;
-import DataManager.repository.WarningCaseRepository;
+import DataManager.repository.*;
 import DataManager.service.DataManagerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +46,10 @@ public class DataManagerController {
     private final UserRepository userRepository;
 
     @Autowired
-    private final WarningCaseRepository warningCaseRepository;
+    private final AnomalyWarningCaseRepository anomalyWarningCaseRepository;
+
+    @Autowired
+    private final RLUWarningCaseRepository rluWarningCaseRepository;
 
     private final InfluxRepository influxRepository;
 
@@ -613,38 +616,140 @@ public class DataManagerController {
     }
 
     @PostMapping(value = "/sendDeviceWarning")
-    public ResponseEntity<Void> sendDeviceWarning(@RequestParam String deviceId) {
+    public ResponseEntity<Void> sendDeviceWarning(@RequestBody DeviceWarningDTO deviceWarningDTO) {
         log.info("SendDeviceWarning endpoint called");
         String caseTitle = "Segnalazione";
-        JSONObject levels = new JSONObject(assetRepository.getLevels(deviceId));
 
-        WarningCase warningCase = new WarningCase(caseTitle, deviceId, LocalDateTime.now(), levels.getString("l1"),
-                levels.getString("l2"), levels.getString("l3"));
-        warningCaseRepository.save(warningCase);
-        return ResponseEntity.ok().build();
+        JSONObject levels = new JSONObject(assetRepository.getLevels(deviceWarningDTO.getDeviceId()));
+
+        if(deviceWarningDTO.getWarning() == null){
+            return ResponseEntity.badRequest().build();
+        }
+
+        if(deviceWarningDTO.getWarning() == Warning.ANOMALY){
+            AnomalyWarningCase anomalyWarningCase = new AnomalyWarningCase(caseTitle, deviceWarningDTO.getDeviceId(), LocalDateTime.now(), levels.getString("l1"),
+                    levels.getString("l2"), levels.getString("l3"), deviceWarningDTO.getMessage());
+            anomalyWarningCaseRepository.save(anomalyWarningCase);
+            return ResponseEntity.ok().build();
+        }
+
+        if(deviceWarningDTO.getWarning() == Warning.RLU){
+            RLUWarningCase rluWarningCase = new RLUWarningCase(caseTitle, deviceWarningDTO.getDeviceId(), LocalDateTime.now(), levels.getString("l1"),
+                    levels.getString("l2"), levels.getString("l3"), deviceWarningDTO.getMessage());
+            rluWarningCaseRepository.save(rluWarningCase);
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.badRequest().build();
     }
 
     @GetMapping(value = "/getCaseWarnings")
-    public ResponseEntity<List<WarningCaseDTO>> getCaseWarnings() {
+    public ResponseEntity<WarningCasesDTO> getCaseWarnings() {
         log.info("GetDeviceWarnings endpoint called");
-        List<WarningCase> warningCases = warningCaseRepository.findAll();
-        List<WarningCaseDTO> result = new ArrayList<>();
-        for(WarningCase warningCase : warningCases){
-            String deviceName = new JSONObject(assetRepository.getAsset(warningCase.getDeviceId()))
+
+        List<AnomalyWarningCase> anomalyWarningCases = anomalyWarningCaseRepository.findAllByProcessed(false);
+        List<RLUWarningCase> rluWarningCases = rluWarningCaseRepository.findAllByProcessed(false);
+
+        List<AnomalyWarningDTO> anomalyWarningDTOS = new ArrayList<>();
+        for(AnomalyWarningCase c : anomalyWarningCases){
+            String deviceName = new JSONObject(assetRepository.getAsset(c.getDeviceId()))
                     .getJSONObject("asset")
                     .getJSONObject("properties")
                     .getString("name");
-            result.add(new WarningCaseDTO(warningCase.getId(), warningCase.getCaseTitle(), warningCase.getDeviceId(), deviceName,
-                    warningCase.getTimestamp(), warningCase.getLevel1(), warningCase.getLevel2(), warningCase.getLevel3()));
+            anomalyWarningDTOS.add(new AnomalyWarningDTO(c.getId(), c.getCaseTitle(), c.getDeviceId(), deviceName, c.getTimestamp(),
+                    c.getLevel1(), c.getLevel2(), c.getLevel3(), null, c.getAnomaly_description()));
         }
-        return ResponseEntity.ok(result);
+
+        List<RLUWarningDTO> rluWarningDTOS = new ArrayList<>();
+        for(RLUWarningCase c : rluWarningCases){
+            String deviceName = new JSONObject(assetRepository.getAsset(c.getDeviceId()))
+                    .getJSONObject("asset")
+                    .getJSONObject("properties")
+                    .getString("name");
+            rluWarningDTOS.add(new RLUWarningDTO(c.getId(), c.getCaseTitle(), c.getDeviceId(), deviceName, c.getTimestamp(),
+                    c.getLevel1(), c.getLevel2(), c.getLevel3(), null, c.getDevice_rlu()));
+        }
+
+        WarningCasesDTO warningCasesDTO = new WarningCasesDTO(anomalyWarningDTOS, rluWarningDTOS);
+        return ResponseEntity.ok(warningCasesDTO);
     }
 
-    @PostMapping(value = "/deleteWarningCase")
-    public ResponseEntity<Void> deleteWarningCase(@RequestParam long id) {
-        log.info("DeleteDeviceWarning endpoint called");
-        warningCaseRepository.deleteById(id);
-        return ResponseEntity.ok().build();
+
+    @PostMapping(value = "/assignWarningCase")
+    public ResponseEntity<Void> assignWarningCase(@RequestBody AssignCaseDTO assignCaseDTO) {
+        log.info("AssignWarningCase endpoint called");
+
+        if(assignCaseDTO.getWarning() == Warning.ANOMALY){
+            Optional<AnomalyWarningCase> anomalyWarningCase = anomalyWarningCaseRepository.findById(assignCaseDTO.getId());
+            if(anomalyWarningCase.isEmpty()){
+                return ResponseEntity.notFound().build();
+            }
+            anomalyWarningCase.get().setAssignedTo(assignCaseDTO.getTag());
+            anomalyWarningCaseRepository.save(anomalyWarningCase.get());
+            return ResponseEntity.ok().build();
+        }
+
+        if(assignCaseDTO.getWarning() == Warning.RLU){
+            Optional<RLUWarningCase> rluWarningCase = rluWarningCaseRepository.findById(assignCaseDTO.getId());
+            if(rluWarningCase.isEmpty()){
+                return ResponseEntity.notFound().build();
+            }
+            rluWarningCase.get().setAssignedTo(assignCaseDTO.getTag());
+            rluWarningCaseRepository.save(rluWarningCase.get());
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.notFound().build();
+    }
+
+
+    @PostMapping(value = "/processWarningCase")
+    public ResponseEntity<Void> processWarningCase(@RequestBody ProcessCaseDTO processCaseDTO){
+        log.info("ProcessWarningCase endpoint called");
+
+        if(processCaseDTO.getWarning() == Warning.ANOMALY){
+            Optional<AnomalyWarningCase> anomalyWarningCase = anomalyWarningCaseRepository.findById(processCaseDTO.getId());
+
+            if(anomalyWarningCase.isEmpty()){
+                return ResponseEntity.notFound().build();
+            }
+
+            if(anomalyWarningCase.get().getAssignedTo() == null){
+                return ResponseEntity.badRequest().build();
+            }
+
+            anomalyWarningCase.get().setIs_anomaly_correct(processCaseDTO.getIs_correct());
+            if(!processCaseDTO.getIs_correct()){
+                anomalyWarningCase.get().setTechnician_anomaly(processCaseDTO.getDescription());
+            }
+            anomalyWarningCase.get().setNote(processCaseDTO.getNote());
+            anomalyWarningCase.get().setProcessed(true);
+            anomalyWarningCaseRepository.save(anomalyWarningCase.get());
+            return ResponseEntity.ok().build();
+        }
+
+        if(processCaseDTO.getWarning() == Warning.RLU){
+            Optional<RLUWarningCase> rluWarningCase = rluWarningCaseRepository.findById(processCaseDTO.getId());
+
+            if(rluWarningCase.isEmpty()){
+                return ResponseEntity.notFound().build();
+            }
+
+            if(rluWarningCase.get().getAssignedTo() == null){
+                return ResponseEntity.badRequest().build();
+            }
+
+            rluWarningCase.get().setIs_rlu_correct(processCaseDTO.getIs_correct());
+            if(!processCaseDTO.getIs_correct()){
+                rluWarningCase.get().setTechnician_rlu(processCaseDTO.getDescription());
+            }
+            rluWarningCase.get().setNote(processCaseDTO.getNote());
+            rluWarningCase.get().setProcessed(true);
+            rluWarningCaseRepository.save(rluWarningCase.get());
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
 

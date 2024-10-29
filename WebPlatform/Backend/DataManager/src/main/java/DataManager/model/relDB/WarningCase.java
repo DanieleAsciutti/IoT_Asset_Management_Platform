@@ -5,13 +5,14 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "warning_case")
+//@Entity
+//@Table(name = "warning_case")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@MappedSuperclass
 public class WarningCase {
 
     @Id
@@ -36,6 +37,14 @@ public class WarningCase {
     @Column(name = "level_3", nullable = false)
     private String level3;
 
+    @Column(name = "processed")
+    private Boolean processed;
+
+    @Column(name = "note")
+    private String note;
+
+    @Column(name = "assigned_to")
+    private String assignedTo;
 
     public WarningCase(String caseTitle, String deviceId, LocalDateTime timestamp, String level1, String level2, String level3) {
         this.caseTitle = caseTitle;
@@ -44,6 +53,7 @@ public class WarningCase {
         this.level1 = level1;
         this.level2 = level2;
         this.level3 = level3;
+        this.processed = false;
     }
 
 }

@@ -2,7 +2,9 @@ package Middleware.service;
 
 import Middleware.dto.devices.SendDataDTO;
 import Middleware.dto.devices.SendModelDTO;
+import Middleware.dto.devices.WarningDTO;
 import Middleware.dto.server.DeviceDataDTO;
+import Middleware.dto.server.DeviceWarningDTO;
 import Middleware.dto.server.ModelDTO;
 import Middleware.dto.server.NewModelDTO;
 import Middleware.model.Request;
@@ -71,15 +73,19 @@ public class MiddlewareService {
     }
 
     @Async
-    public void asyncSendWarning(String deviceName){
-        String deviceId = findIdByName(deviceName);
+    public void asyncSendWarning(WarningDTO warningDTO){
+        String deviceId = findIdByName(warningDTO.getDeviceName());
         if(deviceId == null){
             log.error("Device not found");
             return;
         }
-        String uri = String.format("http://%s:%d/sendDeviceWarning?deviceId=%s", gatewayAddress, gatewayPort, deviceId);
+
+        DeviceWarningDTO deviceWarningDTO = new DeviceWarningDTO(deviceId, warningDTO.getWarning(), warningDTO.getMessage());
+
+        String uri = String.format("http://%s:%d/sendDeviceWarning", gatewayAddress, gatewayPort);
         webClient.post()
                 .uri(uri)
+                .bodyValue(deviceWarningDTO)
                 .retrieve()
                 .toEntity(Void.class)
                 .block();

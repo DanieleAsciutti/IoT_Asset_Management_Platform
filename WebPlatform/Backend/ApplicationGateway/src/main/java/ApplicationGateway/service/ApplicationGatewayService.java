@@ -3,9 +3,11 @@ package ApplicationGateway.service;
 import ApplicationGateway.dto.AsyncControllerDTO.AsyncModelDTO;
 import ApplicationGateway.dto.AsyncControllerDTO.AsyncMultipleModelsDTO;
 import ApplicationGateway.dto.AsyncControllerDTO.DeviceDataDTO;
+import ApplicationGateway.dto.AsyncControllerDTO.WarningDTO;
 import ApplicationGateway.dto.assetManDTO.*;
 import ApplicationGateway.dto.auth_AuthDTO.*;
 import ApplicationGateway.dto.dataManagerDTO.*;
+import ApplicationGateway.dto.dataManagerDTO.warnings.WarnCasesDTO;
 import ApplicationGateway.dto.enums.Pendings;
 import ApplicationGateway.dto.frontend.*;
 import lombok.RequiredArgsConstructor;
@@ -756,33 +758,49 @@ public class ApplicationGatewayService {
         else return Collections.emptyList();
     }
 
-    public ResponseEntity<Void> sendDeviceWarning(String deviceId){
-        String url = String.format("http://%s:%d/sendDeviceWarning?", dataManagerAddress, dataManagerPort) + "deviceId=" + deviceId;
+    public ResponseEntity<Void> sendDeviceWarning(WarningDTO warningDTO){
+        String url = String.format("http://%s:%d/sendDeviceWarning", dataManagerAddress, dataManagerPort);
         return webClient.post()
                 .uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(warningDTO)
                 .retrieve()
                 .toEntity(Void.class)
                 .block();
     }
 
-    public List<WarningCaseDTO> getCaseWarnings(){
+    public WarnCasesDTO getCaseWarnings(){
         String url = String.format("http://%s:%d/getCaseWarnings", dataManagerAddress, dataManagerPort);
-        ResponseEntity<List<WarningCaseDTO>> response = webClient.get()
+        ResponseEntity<WarnCasesDTO> response =  webClient.get()
                 .uri(url)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .toEntity(new ParameterizedTypeReference<List<WarningCaseDTO>>() {})
+                .toEntity(new ParameterizedTypeReference<WarnCasesDTO>() {})
                 .block();
+
         if (Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() && response.getBody() != null) return response.getBody();
-        else return Collections.emptyList();
+        else return null;
+
+
     }
 
-    public ResponseEntity<Void> deleteWarningCase(long id){
-        String url = String.format("http://%s:%d/deleteWarningCase?", dataManagerAddress, dataManagerPort) + "id=" + id;
+    public ResponseEntity<Void> assignWarningCase(AssignCaseDTO assignCaseDTO){
+        String url = String.format("http://%s:%d/assignWarningCase", dataManagerAddress, dataManagerPort);
         return webClient.post()
                 .uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(assignCaseDTO)
+                .retrieve()
+                .toEntity(Void.class)
+                .block();
+    }
+
+    public ResponseEntity<Void> processWarningCase(ProcessCaseDTO processCaseDTO){
+        String url = String.format("http://%s:%d/processWarningCase", dataManagerAddress, dataManagerPort);
+        return webClient.post()
+                .uri(url)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(processCaseDTO)
                 .retrieve()
                 .toEntity(Void.class)
                 .block();

@@ -1,16 +1,16 @@
-package DataManager.dto.gateway;
+package ApplicationGateway.dto.dataManagerDTO.warnings;
 
 import lombok.*;
 
 import java.time.LocalDateTime;
 
+
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
+@AllArgsConstructor
 @ToString
 @Getter
-public class WarningCaseDTO {
+public class RLUWarningDTO{
 
     private Long id;
 
@@ -27,4 +27,8 @@ public class WarningCaseDTO {
     private String level2;
 
     private String level3;
+
+    private String assignedTo;
+
+    private String device_rlu;
 }

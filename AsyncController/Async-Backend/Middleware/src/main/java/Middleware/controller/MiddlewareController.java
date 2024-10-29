@@ -2,6 +2,7 @@ package Middleware.controller;
 
 import Middleware.dto.devices.SendDataDTO;
 import Middleware.dto.devices.SendModelDTO;
+import Middleware.dto.devices.WarningDTO;
 import Middleware.dto.server.DeviceIdsDTO;
 import Middleware.dto.server.ModelDTO;
 import Middleware.dto.server.MultipleModelsDTO;
@@ -108,9 +109,9 @@ public class MiddlewareController {
     }
 
     @PostMapping("/dev/sendWarning")
-    public ResponseEntity<Void> sendError(@RequestParam String deviceName){
+    public ResponseEntity<Void> sendError(@RequestBody WarningDTO warningDTO){
         log.info("Send error called");
-        middlewareService.asyncSendWarning(deviceName);
+        middlewareService.asyncSendWarning(warningDTO);
         return ResponseEntity.ok().build();
     }
 
