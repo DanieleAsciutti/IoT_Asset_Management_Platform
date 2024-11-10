@@ -129,6 +129,7 @@ services:
       - GF_USERS_AUTO_ASSIGN_ORG_ID=1
       - GF_USERS_AUTO_ASSIGN_ORG_ROLE=Admin
       - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
     depends_on:
       - influxdb
 

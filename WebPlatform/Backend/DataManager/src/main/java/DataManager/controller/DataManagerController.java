@@ -657,7 +657,7 @@ public class DataManagerController {
                     .getJSONObject("properties")
                     .getString("name");
             anomalyWarningDTOS.add(new AnomalyWarningDTO(c.getId(), c.getCaseTitle(), c.getDeviceId(), deviceName, c.getTimestamp(),
-                    c.getLevel1(), c.getLevel2(), c.getLevel3(), null, c.getAnomaly_description()));
+                    c.getLevel1(), c.getLevel2(), c.getLevel3(), c.getAssignedTo(), c.getAnomaly_description()));
         }
 
         List<RLUWarningDTO> rluWarningDTOS = new ArrayList<>();
@@ -667,7 +667,7 @@ public class DataManagerController {
                     .getJSONObject("properties")
                     .getString("name");
             rluWarningDTOS.add(new RLUWarningDTO(c.getId(), c.getCaseTitle(), c.getDeviceId(), deviceName, c.getTimestamp(),
-                    c.getLevel1(), c.getLevel2(), c.getLevel3(), null, c.getDevice_rlu()));
+                    c.getLevel1(), c.getLevel2(), c.getLevel3(), c.getAssignedTo(), c.getDevice_rlu()));
         }
 
         WarningCasesDTO warningCasesDTO = new WarningCasesDTO(anomalyWarningDTOS, rluWarningDTOS);

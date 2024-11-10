@@ -6,9 +6,9 @@ const FieldKeyDashboard = ({ fieldKey, deviceId, measurement, bucket, timeRange 
     const to = timeRange.to.valueOf();
     const grafanaUrl = `${grafanaBaseUrl}${deviceId}&var-field_key=${fieldKey}&var-bucket=${bucket}&var-measurement=${measurement}&from=${from}&to=${to}&theme=light&panelId=1`;
 
-    useEffect(() => {
-        console.log(`Grafana URL for fieldKey ${fieldKey}, bucket ${bucket}: ${grafanaUrl}`);
-    }, [grafanaUrl, fieldKey, bucket]);
+    // useEffect(() => {
+    //     console.log(`Grafana URL for fieldKey ${fieldKey}, bucket ${bucket}: ${grafanaUrl}`);
+    // }, [grafanaUrl, fieldKey, bucket]);
 
     return (
         <div style={{ marginBottom: '20px' }}>

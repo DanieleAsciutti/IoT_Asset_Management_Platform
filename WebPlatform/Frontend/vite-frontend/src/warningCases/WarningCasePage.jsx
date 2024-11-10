@@ -7,9 +7,9 @@ import DrawerComponent from "../components/DrawerComponent.jsx";
 import Toolbar from "@mui/material/Toolbar";
 import {toast, ToastContainer} from "react-toastify";
 import CustomThemeProvider from "../components/ThemeProvider.jsx";
-import CasesTable from "./CasesTable.jsx";
+import CasesTable from "./components/CasesTable.jsx";
 import Typography from "@mui/material/Typography";
-import CaseDialogue from "./CaseDialogue.jsx";
+import CaseDialogue from "./components/CaseDialogue.jsx";
 
 
 const WarningCasePage = () => {
@@ -18,19 +18,19 @@ const WarningCasePage = () => {
     const [open, setOpen] = useState(false);
 
 
-    const [cases, setCases] = useState([]);
+    const [cases, setCases] = useState({});
     const [hoveredRow, setHoveredRow] = useState(null);
     const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
     const [selectedCase, setSelectedCase] = useState(null);
 
-    // const userDataString = sessionStorage.getItem('userData');
-    // const userData = JSON.parse(userDataString);
-    //
-    // // Check if user data exists
-    // if (!userData) {
-    //     // Redirect to sign-in page if user data is not present
-    //     window.location.href = '/';
-    // }
+    const userDataString = sessionStorage.getItem('userData');
+    const userData = JSON.parse(userDataString);
+
+    // Check if user data exists
+    if (!userData) {
+        // Redirect to sign-in page if user data is not present
+        window.location.href = '/';
+    }
 
     const toggleDrawer = () => {
         setOpen(!open); // Toggle the value of `open`
@@ -76,7 +76,7 @@ const WarningCasePage = () => {
                 mode: 'cors',
             });
             const data = await response.json();
-            console.log(data);
+
             setCases(data);
         } catch (error) {
             toast.error('Failed to fetch warning cases.')
@@ -85,13 +85,27 @@ const WarningCasePage = () => {
     }
 
 
-    const processCase = async () => {
+    const closeCase = async (closeData) => {
         try {
-            const response = await fetch(`/api/deleteWarningCase?id=${selectedCase.id}`, {
+            const body = {
+                "id": selectedCase.id,
+                "warning": selectedCase.type.toUpperCase(),
+                "is_correct": closeData.isCorrect,
+                "description": closeData.explanation,
+                "note": closeData.note,
+            }
+            const response = await fetch(`/api/processWarningCase`, {
                 method: 'POST',
                 credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body),
                 mode: 'cors',
             });
+            if (response.status < 200 || response.status >= 300) {
+                throw new Error('Failed to close case. Response status: ' + response.status);
+            }
             toast.success('Case processed successfully.');
             handleCloseDetails();
             getWarnings();
@@ -100,6 +114,36 @@ const WarningCasePage = () => {
             console.error(error);
         }
     }
+
+    const assignCase = async (assignedTo) => {
+        try{
+            const body = {
+                "id": selectedCase.id,
+                "warning": selectedCase.type.toUpperCase(),
+                "tag": assignedTo,
+            }
+
+            const response = await fetch(`/api/assignWarningCase`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body),
+                mode: 'cors',
+            });
+            if (response.status < 200 || response.status >= 300) {
+                throw new Error('Failed to assign case. Response status: ' + response.status);
+            }
+            toast.success('Case assigned successfully.');
+            handleCloseDetails();
+            getWarnings();
+        }catch (error) {
+            toast.error('Failed to assign case.')
+            console.error(error);
+        }
+    }
+
 
 
     return (
@@ -144,7 +188,7 @@ const WarningCasePage = () => {
                 </Box>
 
                 {openDetailsDialog &&
-                    <CaseDialogue open={openDetailsDialog}  handleClose={handleCloseDetails} selectedCase={selectedCase} processCase={processCase}/>
+                    <CaseDialogue open={openDetailsDialog}  handleCloseDialog={handleCloseDetails} selectedCase={selectedCase} closeCase={closeCase} assignCase={assignCase}/>
                 }
 
                 <ToastContainer
