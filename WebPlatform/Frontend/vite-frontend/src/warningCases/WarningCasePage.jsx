@@ -70,7 +70,7 @@ const WarningCasePage = () => {
 
     const getWarnings = async () => {
         try {
-            const response = await fetch('/api/getWarnings', {
+            const response = await fetch('/api/getCaseWarnings', {
                 method: 'GET',
                 credentials: 'include',
                 mode: 'cors',

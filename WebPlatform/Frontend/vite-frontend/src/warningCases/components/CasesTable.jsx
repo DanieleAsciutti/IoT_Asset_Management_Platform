@@ -8,7 +8,7 @@ import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight.js";
 
 const CasesTable = ({ cases, hoveredRow, handleRowHover, handleRowLeave, handleOpenDetails }) => {
 
-    const [combinedCases, setCombinedCases] = useState([]); // [anomaly, RLU]
+    const [combinedCases, setCombinedCases] = useState([]); // [anomaly, RUL]
 
     const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
 
@@ -19,18 +19,18 @@ const CasesTable = ({ cases, hoveredRow, handleRowHover, handleRowLeave, handleO
 
     useEffect(() => {
         // Check if cases is an object with the required properties
-        if (cases && cases.anomalyWarningDTOList && cases.rluWarningDTOList) {
+        if (cases && cases.anomalyWarningDTOList && cases.rulWarningDTOList) {
             const anomalyList = cases.anomalyWarningDTOList.map(item => ({
                 ...item,
                 type: "Anomaly"
             }));
 
-            const rluList = cases.rluWarningDTOList.map(item => ({
+            const rulList = cases.rulWarningDTOList.map(item => ({
                 ...item,
-                type: "RLU"
+                type: "RUL"
             }));
 
-            const combinedList = [...anomalyList, ...rluList].sort(
+            const combinedList = [...anomalyList, ...rulList].sort(
                 (a, b) => new Date(b.timestamp) - new Date(a.timestamp) // Corrected the sort logic
             );
 
@@ -72,7 +72,7 @@ const CasesTable = ({ cases, hoveredRow, handleRowHover, handleRowLeave, handleO
                             <TableCell>{warnCase.deviceId.split(':')[2]}</TableCell>
                             <TableCell>{warnCase.deviceName}</TableCell>
                             <TableCell>{warnCase.type}</TableCell>
-                            <TableCell>{makeDate(warnCase.timestamp)}</TableCell>
+                            <TableCell>{makeDate(warnCase.creationDateTime)}</TableCell>
                             <TableCell>{warnCase.assignedTo ? warnCase.assignedTo : 'None'}</TableCell>
                             <TableCell align="right">
                                 <IconButton color="primary"  onClick={() => handleOpenDetails(warnCase)} >

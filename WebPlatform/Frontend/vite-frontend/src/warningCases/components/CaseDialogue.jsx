@@ -95,7 +95,7 @@ const CaseDialogue = ({open, handleCloseDialog, selectedCase, assignCase, closeC
                             {[
                                 { label: 'Device ID:', value: selectedCase.deviceId.split(':')[2] },
                                 { label: 'Device Name:', value: selectedCase.deviceName },
-                                { label: 'Creation Date:', value: makeDate(selectedCase.timestamp) },
+                                { label: 'Creation Date:', value: makeDate(selectedCase.creationDateTime) },
                                 { label: 'Level 1:', value: selectedCase.level1 },
                                 { label: 'Level 2:', value: selectedCase.level2 },
                                 { label: 'Level 3:', value: selectedCase.level3 },
@@ -104,8 +104,8 @@ const CaseDialogue = ({open, handleCloseDialog, selectedCase, assignCase, closeC
                                     label: 'Anomaly Description:',
                                     value: selectedCase.anomaly_description,
                                 },
-                                selectedCase.type === "RLU" && {
-                                    label: 'Device RLU:',
+                                selectedCase.type === "RUL" && {
+                                    label: 'Device RUL:',
                                     value: selectedCase.device_rlu,
                                 },
                             ].filter(Boolean).map(({ label, value }, index) => (

@@ -38,7 +38,7 @@ const ProcessCaseDialog = ({ openDialog, handleCloseDialog, selectedCase, handle
             <DialogContent>
                 <Box display="flex" alignItems="center" mb={2}>
                     <Typography variant="body1" style={{ marginRight: '10px' }}>
-                        {isAnomaly ? 'Is the Anomaly correct?' : 'Is the RLU correct?'}
+                        {isAnomaly ? 'Is the Anomaly correct?' : 'Is the RUL correct?'}
                     </Typography>
                     <FormControlLabel
                         control={
@@ -69,7 +69,7 @@ const ProcessCaseDialog = ({ openDialog, handleCloseDialog, selectedCase, handle
                 {isCorrect === false && (
                     <TextField
                         margin="dense"
-                        label={isAnomaly ? "Reason why it wasn't an anomaly" : "Correct RLU"}
+                        label={isAnomaly ? "Reason why it wasn't an anomaly" : "Correct RUL"}
                         type="text"
                         fullWidth
                         multiline
