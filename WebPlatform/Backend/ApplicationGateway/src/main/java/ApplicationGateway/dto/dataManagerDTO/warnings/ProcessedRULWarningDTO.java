@@ -39,8 +39,8 @@ public class ProcessedRULWarningDTO{
 
     private String note;
 
-    private Boolean is_rlu_correct;
+    private Boolean is_warning_correct;
 
-    private String technician_rlu;
+    private String technician_description;
 
 }

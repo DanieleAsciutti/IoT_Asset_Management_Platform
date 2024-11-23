@@ -9,6 +9,7 @@ import ApplicationGateway.dto.dataManagerDTO.AddAssetDTO;
 import ApplicationGateway.dto.dataManagerDTO.DeviceTagDTO;
 import ApplicationGateway.dto.dataManagerDTO.warnings.ProcessedWarnCasesDTO;
 import ApplicationGateway.dto.dataManagerDTO.warnings.WarnCasesDTO;
+import ApplicationGateway.dto.enums.Warning;
 import ApplicationGateway.dto.frontend.*;
 import ApplicationGateway.service.ApplicationGatewayService;
 import jakarta.servlet.http.Cookie;
@@ -636,7 +637,7 @@ public class ApplicationGatewayController {
             log.info("User unauthorized");
             return ResponseEntity.status(401).build();
         }
-        return applicationGatewayService.getProcessedCaseWarnings();
+        return ResponseEntity.ok(applicationGatewayService.getProcessedCaseWarnings());
     }
 
     @PostMapping(value = "/assignWarningCase")
@@ -664,6 +665,20 @@ public class ApplicationGatewayController {
         }
 
         return applicationGatewayService.processWarningCase(processCaseDTO);
+    }
+
+    @PostMapping(value = "/deleteWarningCase")
+    public ResponseEntity<Void> deleteWarningCase(
+            @CookieValue(value = "token", defaultValue = "") String accessToken,
+            @RequestParam long caseId, @RequestParam Warning warning){
+        log.info("DeleteWarningCase endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize(new AuthorizationRequest(accessToken));
+        if (!authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+
+        return applicationGatewayService.deleteWarningCase(caseId, warning);
     }
 
 

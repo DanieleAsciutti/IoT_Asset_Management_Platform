@@ -39,7 +39,7 @@ public class ProcessedAnomalyWarningDTO{
 
     private String note;
 
-    private Boolean is_anomaly_correct;
+    private Boolean is_warning_correct;
 
-    private String technician_anomaly;
+    private String technician_description;
 }

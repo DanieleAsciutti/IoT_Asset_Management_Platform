@@ -6,7 +6,7 @@ import {IconButton, Table, TableBody, TableCell, TableHead, TableRow} from "@mui
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight.js";
 
 
-const CasesTable = ({ cases, hoveredRow, handleRowHover, handleRowLeave, handleOpenDetails }) => {
+const CasesTable = ({ cases, hoveredRow, handleRowHover, handleRowLeave, handleOpenDetails, isProcessed }) => {
 
     const [combinedCases, setCombinedCases] = useState([]); // [anomaly, RUL]
 
@@ -30,9 +30,13 @@ const CasesTable = ({ cases, hoveredRow, handleRowHover, handleRowLeave, handleO
                 type: "RUL"
             }));
 
-            const combinedList = [...anomalyList, ...rulList].sort(
-                (a, b) => new Date(b.timestamp) - new Date(a.timestamp) // Corrected the sort logic
-            );
+            const combinedList = [...anomalyList, ...rulList].sort((a, b) => {
+                // Decide the sorting key based on isProcessed
+                const dateKey = isProcessed ? 'processed_date_time' : 'creationDateTime';
+
+                // Perform the sort
+                return new Date(b[dateKey]) - new Date(a[dateKey]);
+            });
 
             setCombinedCases(combinedList);
         }
@@ -41,7 +45,7 @@ const CasesTable = ({ cases, hoveredRow, handleRowHover, handleRowLeave, handleO
     if(combinedCases.length === 0) {
         return (
             <Typography variant="h6" color="textSecondary" align="center" sx={{ my: 2 }}>
-                No warning cases available.
+                {isProcessed? "No processed cases available." : "No warning cases available."}
             </Typography>
         );
     }
@@ -55,7 +59,7 @@ const CasesTable = ({ cases, hoveredRow, handleRowHover, handleRowLeave, handleO
                         <TableCell><strong>DeviceId</strong></TableCell>
                         <TableCell><strong>Device Name</strong></TableCell>
                         <TableCell><strong>Case Type</strong></TableCell>
-                        <TableCell><strong>Creation Date</strong></TableCell>
+                        <TableCell><strong>{isProcessed? "Processed Date": "Creation Date" }</strong></TableCell>
                         <TableCell><strong>Assigned to</strong></TableCell>
                         <TableCell align="right"><strong>Details</strong></TableCell>
                     </TableRow>
@@ -72,7 +76,7 @@ const CasesTable = ({ cases, hoveredRow, handleRowHover, handleRowLeave, handleO
                             <TableCell>{warnCase.deviceId.split(':')[2]}</TableCell>
                             <TableCell>{warnCase.deviceName}</TableCell>
                             <TableCell>{warnCase.type}</TableCell>
-                            <TableCell>{makeDate(warnCase.creationDateTime)}</TableCell>
+                            <TableCell>{isProcessed?  makeDate( warnCase.processed_date_time) : makeDate(warnCase.creationDateTime)}</TableCell>
                             <TableCell>{warnCase.assignedTo ? warnCase.assignedTo : 'None'}</TableCell>
                             <TableCell align="right">
                                 <IconButton color="primary"  onClick={() => handleOpenDetails(warnCase)} >

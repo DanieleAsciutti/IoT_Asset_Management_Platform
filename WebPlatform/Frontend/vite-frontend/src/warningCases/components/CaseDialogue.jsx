@@ -8,10 +8,12 @@ import TextField from "@mui/material/TextField";
 import ProcessCaseDialog from "./ProcessCaseDialog.jsx";
 
 
-const CaseDialogue = ({open, handleCloseDialog, selectedCase, assignCase, closeCase}) => {
+const CaseDialogue = ({open, handleCloseDialog, selectedCase, assignCase, closeCase, isProcessed, handleDeleteCase}) => {
 
     const [openAssignDialog, setOpenAssignDialog] = useState(false);
     const [assignTo, setAssignTo] = useState('');
+
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
     const [openProcessCaseDialog, setOpenProcessCaseDialog] = useState(false);
 
@@ -26,7 +28,6 @@ const CaseDialogue = ({open, handleCloseDialog, selectedCase, assignCase, closeC
         setOpenAssignDialog(true);
         setAssignTo(''); // Clear input when opening the dialog
     };
-
     const handleCloseAssignDialog = () => {
         setOpenAssignDialog(false);
         setAssignTo(''); // Clear input when closing the dialog
@@ -49,6 +50,15 @@ const CaseDialogue = ({open, handleCloseDialog, selectedCase, assignCase, closeC
     const handleProcessCase = (data) => {
         closeCase(data);
         handleCloseProcessCaseDialog();
+        handleCloseDialog();
+    }
+
+    const handleCloseDeleteDialog = () => {
+        setOpenDeleteDialog(false);
+    }
+    const handleConfirmDelete = () => {
+        handleCloseDeleteDialog();
+        handleDeleteCase();
         handleCloseDialog();
     }
 
@@ -96,18 +106,20 @@ const CaseDialogue = ({open, handleCloseDialog, selectedCase, assignCase, closeC
                                 { label: 'Device ID:', value: selectedCase.deviceId.split(':')[2] },
                                 { label: 'Device Name:', value: selectedCase.deviceName },
                                 { label: 'Creation Date:', value: makeDate(selectedCase.creationDateTime) },
+                                isProcessed && { label: 'Processed Date:', value: makeDate(selectedCase.processed_date_time) },
                                 { label: 'Level 1:', value: selectedCase.level1 },
                                 { label: 'Level 2:', value: selectedCase.level2 },
                                 { label: 'Level 3:', value: selectedCase.level3 },
                                 { label: 'Assigned to:', value: selectedCase.assignedTo || 'None' },
-                                selectedCase.type === "Anomaly" && {
-                                    label: 'Anomaly Description:',
-                                    value: selectedCase.anomaly_description,
-                                },
+                                selectedCase.type === "Anomaly" &&
+                                    {label: 'Anomaly Description:', value: selectedCase.anomaly_description},
                                 selectedCase.type === "RUL" && {
-                                    label: 'Device RUL:',
-                                    value: selectedCase.device_rlu,
-                                },
+                                    label: 'Device RUL:', value: selectedCase.device_rlu},
+                                ...(isProcessed ? [
+                                    { label: 'Warning Correct:', value: selectedCase.is_warning_correct ? 'Yes' : 'No'},
+                                    !selectedCase.is_warning_correct && { label: 'Technician Description', value: selectedCase.technician_description},
+                                    { label: 'Note:' , value: selectedCase.note},
+                                ] : [])
                             ].filter(Boolean).map(({ label, value }, index) => (
                                 <Typography variant="body1" key={index}>
                                     <Typography component="span" variant="body1" fontWeight="bold">{label}</Typography> {value}
@@ -122,15 +134,20 @@ const CaseDialogue = ({open, handleCloseDialog, selectedCase, assignCase, closeC
                     <Button onClick={handleCloseDialog} color="primary" variant="contained">
                         Back
                     </Button>
-                    {selectedCase.assignedTo ? (
-                        <Button onClick={handleOpenProcessCaseDialog} color="secondary" variant="contained">
-                            Close case
+                    {!isProcessed ? (
+                        selectedCase.assignedTo ? (
+                            <Button onClick={handleOpenProcessCaseDialog} color="secondary" variant="contained">
+                                Close case
+                            </Button>
+                        ) : (
+                            <Button onClick={handleOpenAssignDialog} color="secondary" variant="contained">
+                                Assign case
+                            </Button>
+                        )) : (
+                        <Button onClick={() => setOpenDeleteDialog(true)} color="secondary" variant="contained">
+                            Delete case
                         </Button>
-                    ) : (
-                        <Button onClick={handleOpenAssignDialog} color="secondary" variant="contained">
-                            Assign case
-                        </Button>
-                    )}
+                        )}
                 </DialogActions>
             </Dialog>
 
@@ -154,6 +171,30 @@ const CaseDialogue = ({open, handleCloseDialog, selectedCase, assignCase, closeC
                     </Button>
                     <Button onClick={handleAssignCase} color="secondary" variant="contained">
                         Assign
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+                <DialogTitle>Confirm Delete</DialogTitle>
+                <DialogContent>
+                    <Typography>Are you sure you want to delete the selected case?</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={handleCloseDeleteDialog}
+                        variant="contained"
+                        color="primary"
+                    >
+                        Back
+                    </Button>
+                    <Button
+                        onClick={handleConfirmDelete}
+                        color="secondary"
+                        variant="contained"
+                    >
+                        Confirm Delete
                     </Button>
                 </DialogActions>
             </Dialog>

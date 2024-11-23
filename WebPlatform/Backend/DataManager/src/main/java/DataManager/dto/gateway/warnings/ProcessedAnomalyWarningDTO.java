@@ -18,9 +18,9 @@ public class ProcessedAnomalyWarningDTO extends AnomalyWarningDTO{
 
     private String note;
 
-    private Boolean is_anomaly_correct;
+    private Boolean is_warning_correct;
 
-    private String technician_anomaly;
+    private String technician_description;
 
     public ProcessedAnomalyWarningDTO(Long id, String caseTitle, String deviceId, String deviceName, LocalDateTime creationDateTime, String level1, String level2, String level3, String assignedTo, String anomaly_description) {
         super(id, caseTitle, deviceId, deviceName, creationDateTime, level1, level2, level3, assignedTo, anomaly_description);
@@ -35,7 +35,7 @@ public class ProcessedAnomalyWarningDTO extends AnomalyWarningDTO{
         this.processed_date_time = processed_date_time;
         this.processed = processed;
         this.note = note;
-        this.is_anomaly_correct = is_anomaly_correct;
-        this.technician_anomaly = technician_anomaly;
+        this.is_warning_correct = is_anomaly_correct;
+        this.technician_description = technician_anomaly;
     }
 }

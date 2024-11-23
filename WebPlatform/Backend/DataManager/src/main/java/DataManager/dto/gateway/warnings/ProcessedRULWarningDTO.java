@@ -17,9 +17,9 @@ public class ProcessedRULWarningDTO extends RULWarningDTO{
 
     private String note;
 
-    private Boolean is_rlu_correct;
+    private Boolean is_warning_correct;
 
-    private String technician_rlu;
+    private String technician_description;
 
     public ProcessedRULWarningDTO(Long id, String caseTitle, String deviceId, String deviceName, LocalDateTime creationDateTime, String level1, String level2, String level3, String assignedTo, String device_rlu) {
         super(id, caseTitle, deviceId, deviceName, creationDateTime, level1, level2, level3, assignedTo, device_rlu);
@@ -34,7 +34,7 @@ public class ProcessedRULWarningDTO extends RULWarningDTO{
         this.processed_date_time = processed_date_time;
         this.processed = processed;
         this.note = note;
-        this.is_rlu_correct = is_rlu_correct;
-        this.technician_rlu = technician_rlu;
+        this.is_warning_correct = is_rlu_correct;
+        this.technician_description = technician_rlu;
     }
 }

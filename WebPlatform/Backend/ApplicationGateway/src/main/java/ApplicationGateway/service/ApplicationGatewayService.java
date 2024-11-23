@@ -10,6 +10,7 @@ import ApplicationGateway.dto.dataManagerDTO.*;
 import ApplicationGateway.dto.dataManagerDTO.warnings.ProcessedWarnCasesDTO;
 import ApplicationGateway.dto.dataManagerDTO.warnings.WarnCasesDTO;
 import ApplicationGateway.dto.enums.Pendings;
+import ApplicationGateway.dto.enums.Warning;
 import ApplicationGateway.dto.frontend.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -784,27 +785,17 @@ public class ApplicationGatewayService {
 
     }
 
-//    public WarnCasesDTO getProcessedCaseWarnings(){
-//        String url = String.format("http://%s:%d/getProcessedCaseWarnings", dataManagerAddress, dataManagerPort);
-//        ResponseEntity<WarnCasesDTO> response =  webClient.get()
-//                .uri(url)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .retrieve()
-//                .toEntity(new ParameterizedTypeReference<WarnCasesDTO>() {})
-//                .block();
-//
-//        if (Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() && response.getBody() != null) return response.getBody();
-//        else return null;
-//    }
-
-    public ResponseEntity<ProcessedWarnCasesDTO> getProcessedCaseWarnings(){
+    public ProcessedWarnCasesDTO getProcessedCaseWarnings(){
         String url = String.format("http://%s:%d/getProcessedCaseWarnings", dataManagerAddress, dataManagerPort);
-        return webClient.get()
+        ResponseEntity<ProcessedWarnCasesDTO> response = webClient.get()
                 .uri(url)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .toEntity(ProcessedWarnCasesDTO.class)
                 .block();
+
+        if (Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() && response.getBody() != null) return response.getBody();
+        else return null;
 
     }
 
@@ -825,6 +816,16 @@ public class ApplicationGatewayService {
                 .uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .bodyValue(processCaseDTO)
+                .retrieve()
+                .toEntity(Void.class)
+                .block();
+    }
+
+    public ResponseEntity<Void> deleteWarningCase(long caseId, Warning warning){
+        String url = String.format("http://%s:%d/deleteWarningCase?", dataManagerAddress, dataManagerPort) + "caseId=" + caseId + "&warning=" + warning;
+        return webClient.post()
+                .uri(url)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
                 .toEntity(Void.class)
                 .block();

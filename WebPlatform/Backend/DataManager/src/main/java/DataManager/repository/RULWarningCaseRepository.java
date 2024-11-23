@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface RLUWarningCaseRepository extends JpaRepository<RULWarningCase, Long> {
+public interface RULWarningCaseRepository extends JpaRepository<RULWarningCase, Long> {
 
     @Query("SELECT a FROM RULWarningCase a WHERE a.processed = ?1")
     List<RULWarningCase> findAllByProcessed(Boolean processed);

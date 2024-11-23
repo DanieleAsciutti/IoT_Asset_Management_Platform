@@ -17,20 +17,17 @@ const WarningCasePage = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [open, setOpen] = useState(false);
 
+    const [userRule, setUserRule] = useState(''); // [ADMIN, TECHNICIAN, USER]
 
     const [cases, setCases] = useState({});
     const [hoveredRow, setHoveredRow] = useState(null);
     const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
     const [selectedCase, setSelectedCase] = useState(null);
 
-    const userDataString = sessionStorage.getItem('userData');
-    const userData = JSON.parse(userDataString);
-
-    // Check if user data exists
-    if (!userData) {
-        // Redirect to sign-in page if user data is not present
-        window.location.href = '/';
-    }
+    const [processedCases, setProcessedCases] = useState({});
+    const [procHoveredRow, setProcHoveredRow] = useState(null);
+    const [openProcDetailsDialog, setOpenProcDetailsDialog] = useState(false);
+    const [selectedProcCase, setSelectedProcCase] = useState(null);
 
     const toggleDrawer = () => {
         setOpen(!open); // Toggle the value of `open`
@@ -52,9 +49,25 @@ const WarningCasePage = () => {
     const handleRowHover = (warnCase) => setHoveredRow(warnCase);
     const handleRowLeave = () => setHoveredRow(null);
 
+    const handleProcRowHover = (warnCase) => setProcHoveredRow(warnCase);
+    const handleProcRowLeave = () => setProcHoveredRow(null);
+
 
     useEffect(() => {
+        const userDataString = sessionStorage.getItem('userData');
+        const userData = JSON.parse(userDataString);
+
+        // Check if user data exists
+        if (!userData) {
+            // Redirect to sign-in page if user data is not present
+            window.location.href = '/';
+        }
+        setUserRule(userData.role);
+
         getWarnings();
+        if(userData.role === 'ADMIN'){
+            getProcessedWarnings();
+        }
     }, []);
 
 
@@ -62,10 +75,18 @@ const WarningCasePage = () => {
         setSelectedCase(warnCase);
         setOpenDetailsDialog(true);
     }
-
     const handleCloseDetails = () => {
         setSelectedCase(null);
         setOpenDetailsDialog(false);
+    }
+
+    const handleOpenProcDetails = (warnCase) => {
+        setSelectedProcCase(warnCase);
+        setOpenProcDetailsDialog(true);
+    }
+    const handleCloseProcDetails = () => {
+        setSelectedProcCase(null);
+        setOpenProcDetailsDialog(false);
     }
 
     const getWarnings = async () => {
@@ -144,6 +165,42 @@ const WarningCasePage = () => {
         }
     }
 
+    const getProcessedWarnings = async () => {
+        try {
+            const response = await fetch('/api/getProcessedCaseWarnings', {
+                method: 'GET',
+                credentials: 'include',
+                mode: 'cors',
+            });
+            const data = await response.json();
+
+            setProcessedCases(data);
+        } catch (error) {
+            toast.error('Failed to fetch processed warning cases.')
+            console.error(error);
+        }
+    }
+
+    const deleteProcessedCase = async () => {
+        try {
+            const url = '/api/deleteWarningCase' + "?caseId=" + selectedProcCase.id + "&warning=" + selectedProcCase.type.toUpperCase();
+            const response = await fetch(url, {
+                method: 'POST',
+                credentials: 'include',
+                mode: 'cors',
+            });
+            if(response.status >= 200 && response.status < 300){
+                getProcessedWarnings();
+                handleCloseProcDetails();
+            }else{
+                toast.error('Failed to delete the selected processed case.');
+            }
+        } catch (error) {
+            toast.error('Failed to delete the selected processed case.');
+            console.error(error);
+        }
+    }
+
 
 
     return (
@@ -183,12 +240,26 @@ const WarningCasePage = () => {
                         Cases
                     </Typography>
                     <CasesTable cases={cases} hoveredRow={hoveredRow} handleRowHover={handleRowHover}
-                            handleRowLeave={handleRowLeave} handleOpenDetails={handleOpenDetails}/>
+                            handleRowLeave={handleRowLeave} handleOpenDetails={handleOpenDetails} isProcessed={false}/>
+
+                    <Typography variant="h4" sx={{ mb: 2 }} style={{marginTop:"30px"}}>
+                        Processed Cases
+                    </Typography>
+
+                    <CasesTable cases={processedCases} hoveredRow={procHoveredRow} handleRowHover={handleProcRowHover}
+                                handleRowLeave={handleProcRowLeave} handleOpenDetails={handleOpenProcDetails}
+                                isProcessed={true}/>
 
                 </Box>
 
                 {openDetailsDialog &&
-                    <CaseDialogue open={openDetailsDialog}  handleCloseDialog={handleCloseDetails} selectedCase={selectedCase} closeCase={closeCase} assignCase={assignCase}/>
+                    <CaseDialogue open={openDetailsDialog}  handleCloseDialog={handleCloseDetails} selectedCase={selectedCase}
+                                  closeCase={closeCase} assignCase={assignCase} isProcessed={false}/>
+                }
+
+                {openProcDetailsDialog &&
+                    <CaseDialogue open={openProcDetailsDialog}  handleCloseDialog={handleCloseProcDetails}
+                                  selectedCase={selectedProcCase} isProcessed={true} handleDeleteCase={deleteProcessedCase}/>
                 }
 
                 <ToastContainer

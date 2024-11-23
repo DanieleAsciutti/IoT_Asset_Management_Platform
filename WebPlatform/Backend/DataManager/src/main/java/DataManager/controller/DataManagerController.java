@@ -49,7 +49,7 @@ public class DataManagerController {
     private final AnomalyWarningCaseRepository anomalyWarningCaseRepository;
 
     @Autowired
-    private final RLUWarningCaseRepository rluWarningCaseRepository;
+    private final RULWarningCaseRepository rulWarningCaseRepository;
 
     private final InfluxRepository influxRepository;
 
@@ -636,7 +636,7 @@ public class DataManagerController {
         if(deviceWarningDTO.getWarning() == Warning.RUL){
             RULWarningCase RULWarningCase = new RULWarningCase(caseTitle, deviceWarningDTO.getDeviceId(), LocalDateTime.now(), levels.getString("l1"),
                     levels.getString("l2"), levels.getString("l3"), deviceWarningDTO.getMessage());
-            rluWarningCaseRepository.save(RULWarningCase);
+            rulWarningCaseRepository.save(RULWarningCase);
             return ResponseEntity.ok().build();
         }
 
@@ -653,7 +653,7 @@ public class DataManagerController {
         log.info("GetDeviceWarnings endpoint called");
 
         List<AnomalyWarningCase> anomalyWarningCases = anomalyWarningCaseRepository.findAllByProcessed(false);
-        List<RULWarningCase> RULWarningCases = rluWarningCaseRepository.findAllByProcessed(false);
+        List<RULWarningCase> RULWarningCases = rulWarningCaseRepository.findAllByProcessed(false);
 
         List<AnomalyWarningDTO> anomalyWarningDTOS = new ArrayList<>();
         for(AnomalyWarningCase c : anomalyWarningCases){
@@ -684,7 +684,7 @@ public class DataManagerController {
         log.info("GetProcessedCaseWarnings endpoint called");
 
         List<AnomalyWarningCase> anomalyWarningCases = anomalyWarningCaseRepository.findAllByProcessed(true);
-        List<RULWarningCase> RULWarningCases = rluWarningCaseRepository.findAllByProcessed(true);
+        List<RULWarningCase> RULWarningCases = rulWarningCaseRepository.findAllByProcessed(true);
 
         List<ProcessedAnomalyWarningDTO> processedAnomalyWarningDTOS = new ArrayList<>();
         for(AnomalyWarningCase c : anomalyWarningCases){
@@ -730,12 +730,12 @@ public class DataManagerController {
         }
 
         if(assignCaseDTO.getWarning() == Warning.RUL){
-            Optional<RULWarningCase> rluWarningCase = rluWarningCaseRepository.findById(assignCaseDTO.getId());
+            Optional<RULWarningCase> rluWarningCase = rulWarningCaseRepository.findById(assignCaseDTO.getId());
             if(rluWarningCase.isEmpty()){
                 return ResponseEntity.notFound().build();
             }
             rluWarningCase.get().setAssignedTo(assignCaseDTO.getTag());
-            rluWarningCaseRepository.save(rluWarningCase.get());
+            rulWarningCaseRepository.save(rluWarningCase.get());
             return ResponseEntity.ok().build();
         }
 
@@ -770,7 +770,7 @@ public class DataManagerController {
         }
 
         if(processCaseDTO.getWarning() == Warning.RUL){
-            Optional<RULWarningCase> rluWarningCase = rluWarningCaseRepository.findById(processCaseDTO.getId());
+            Optional<RULWarningCase> rluWarningCase = rulWarningCaseRepository.findById(processCaseDTO.getId());
 
             if(rluWarningCase.isEmpty()){
                 return ResponseEntity.notFound().build();
@@ -787,11 +787,37 @@ public class DataManagerController {
             rluWarningCase.get().setNote(processCaseDTO.getNote());
             rluWarningCase.get().setProcessed(true);
             rluWarningCase.get().setProcessed_date_time(LocalDateTime.now());
-            rluWarningCaseRepository.save(rluWarningCase.get());
+            rulWarningCaseRepository.save(rluWarningCase.get());
             return ResponseEntity.ok().build();
         }
 
         return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping(value = "/deleteWarningCase")
+    public ResponseEntity<Void> deleteWarningCase(@RequestParam long caseId, @RequestParam Warning warning){
+        log.info("DeleteWarningCase endpoint called");
+
+        if(warning == Warning.ANOMALY){
+            Optional<AnomalyWarningCase> anomalyWarningCase = anomalyWarningCaseRepository.findById(caseId);
+            if(anomalyWarningCase.isEmpty()){
+                return ResponseEntity.notFound().build();
+            }
+            anomalyWarningCaseRepository.delete(anomalyWarningCase.get());
+            return ResponseEntity.ok().build();
+        }
+
+        if(warning == Warning.RUL){
+            Optional<RULWarningCase> rluWarningCase = rulWarningCaseRepository.findById(caseId);
+            if(rluWarningCase.isEmpty()){
+                return ResponseEntity.notFound().build();
+            }
+            rulWarningCaseRepository.delete(rluWarningCase.get());
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.notFound().build();
+
     }
 
 
