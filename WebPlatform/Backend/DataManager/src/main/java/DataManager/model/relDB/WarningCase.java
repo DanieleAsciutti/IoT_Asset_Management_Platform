@@ -2,6 +2,7 @@ package DataManager.model.relDB;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 
@@ -25,8 +26,12 @@ public class WarningCase {
     @Column(name = "device_id", nullable = false)
     private String deviceId;
 
-    @Column(name = "date_time", nullable = false)
-    private LocalDateTime timestamp;
+    @Column(name = "creation_date_time", nullable = false)
+    private LocalDateTime creation_date_time;
+
+    @Column(name = "processed_date_time")
+    @ColumnDefault("null")
+    private LocalDateTime processed_date_time;
 
     @Column(name = "level_1", nullable = false)
     private String level1;
@@ -46,10 +51,10 @@ public class WarningCase {
     @Column(name = "assigned_to")
     private String assignedTo;
 
-    public WarningCase(String caseTitle, String deviceId, LocalDateTime timestamp, String level1, String level2, String level3) {
+    public WarningCase(String caseTitle, String deviceId, LocalDateTime creation_date_time, String level1, String level2, String level3) {
         this.caseTitle = caseTitle;
         this.deviceId = deviceId;
-        this.timestamp = timestamp;
+        this.creation_date_time = creation_date_time;
         this.level1 = level1;
         this.level2 = level2;
         this.level3 = level3;

@@ -12,7 +12,7 @@ import java.util.List;
 @Getter
 public class WarningCasesDTO {
 
-    List<AnomalyWarningDTO> anomalyWarningDTOList;
+    List<? extends AnomalyWarningDTO> anomalyWarningDTOList;
 
-    List<RLUWarningDTO> rluWarningDTOList;
+    List<? extends RULWarningDTO> rulWarningDTOList;
 }

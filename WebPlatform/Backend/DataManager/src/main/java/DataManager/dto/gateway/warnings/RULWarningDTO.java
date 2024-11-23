@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString
 @Getter
-public class RLUWarningDTO{
+public class RULWarningDTO {
 
     private Long id;
 
@@ -19,7 +19,7 @@ public class RLUWarningDTO{
 
     private String deviceName;
 
-    private LocalDateTime timestamp;
+    private LocalDateTime creationDateTime;
 
     private String level1;
 

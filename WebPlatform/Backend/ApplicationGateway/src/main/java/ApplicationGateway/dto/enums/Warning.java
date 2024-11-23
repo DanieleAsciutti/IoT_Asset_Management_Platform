@@ -5,5 +5,5 @@ import lombok.Getter;
 @Getter
 public enum Warning {
     ANOMALY,
-    RLU
+    RUL
 }

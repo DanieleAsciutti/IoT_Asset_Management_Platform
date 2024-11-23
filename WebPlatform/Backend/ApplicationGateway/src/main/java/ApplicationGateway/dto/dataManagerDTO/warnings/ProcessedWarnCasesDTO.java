@@ -10,9 +10,9 @@ import java.util.List;
 @Builder
 @ToString
 @Getter
-public class WarnCasesDTO {
+public class ProcessedWarnCasesDTO {
 
-    List<AnomalyWarningDTO> anomalyWarningDTOList;
+    List<ProcessedAnomalyWarningDTO> anomalyWarningDTOList;
 
-    List<RULWarningDTO> rulWarningDTOList;
+    List<ProcessedRULWarningDTO> rulWarningDTOList;
 }

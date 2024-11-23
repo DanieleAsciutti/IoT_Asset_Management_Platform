@@ -7,6 +7,7 @@ import ApplicationGateway.dto.assetManDTO.*;
 import ApplicationGateway.dto.auth_AuthDTO.*;
 import ApplicationGateway.dto.dataManagerDTO.AddAssetDTO;
 import ApplicationGateway.dto.dataManagerDTO.DeviceTagDTO;
+import ApplicationGateway.dto.dataManagerDTO.warnings.ProcessedWarnCasesDTO;
 import ApplicationGateway.dto.dataManagerDTO.warnings.WarnCasesDTO;
 import ApplicationGateway.dto.frontend.*;
 import ApplicationGateway.service.ApplicationGatewayService;
@@ -614,7 +615,7 @@ public class ApplicationGatewayController {
         return applicationGatewayService.sendDeviceWarning(warningDTO);
     }
 
-    @GetMapping(value = "/getWarnings")
+    @GetMapping(value = "/getCaseWarnings")
     public ResponseEntity<WarnCasesDTO> getDeviceWarnings(
             @CookieValue(value = "token", defaultValue = "") String accessToken){
         log.info("GetDeviceWarnings endpoint called");
@@ -624,6 +625,18 @@ public class ApplicationGatewayController {
             return ResponseEntity.status(401).build();
         }
         return ResponseEntity.ok(applicationGatewayService.getCaseWarnings());
+    }
+
+    @GetMapping(value = "/getProcessedCaseWarnings")
+    public ResponseEntity<ProcessedWarnCasesDTO> getProcessedWarnings(
+            @CookieValue(value = "token", defaultValue = "") String accessToken){
+        log.info("GetProcessedWarnings endpoint called");
+        ResponseEntity<AuthorizationResponse> authorization = applicationGatewayService.authorize(new AuthorizationRequest(accessToken));
+        if (!authorization.getBody().getIsAuthorized()) {
+            log.info("User unauthorized");
+            return ResponseEntity.status(401).build();
+        }
+        return applicationGatewayService.getProcessedCaseWarnings();
     }
 
     @PostMapping(value = "/assignWarningCase")

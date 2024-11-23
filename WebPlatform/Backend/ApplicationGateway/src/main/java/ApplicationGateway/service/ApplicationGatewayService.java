@@ -7,6 +7,7 @@ import ApplicationGateway.dto.AsyncControllerDTO.WarningDTO;
 import ApplicationGateway.dto.assetManDTO.*;
 import ApplicationGateway.dto.auth_AuthDTO.*;
 import ApplicationGateway.dto.dataManagerDTO.*;
+import ApplicationGateway.dto.dataManagerDTO.warnings.ProcessedWarnCasesDTO;
 import ApplicationGateway.dto.dataManagerDTO.warnings.WarnCasesDTO;
 import ApplicationGateway.dto.enums.Pendings;
 import ApplicationGateway.dto.frontend.*;
@@ -781,6 +782,29 @@ public class ApplicationGatewayService {
         if (Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() && response.getBody() != null) return response.getBody();
         else return null;
 
+    }
+
+//    public WarnCasesDTO getProcessedCaseWarnings(){
+//        String url = String.format("http://%s:%d/getProcessedCaseWarnings", dataManagerAddress, dataManagerPort);
+//        ResponseEntity<WarnCasesDTO> response =  webClient.get()
+//                .uri(url)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .retrieve()
+//                .toEntity(new ParameterizedTypeReference<WarnCasesDTO>() {})
+//                .block();
+//
+//        if (Objects.requireNonNull(response).getStatusCode().is2xxSuccessful() && response.getBody() != null) return response.getBody();
+//        else return null;
+//    }
+
+    public ResponseEntity<ProcessedWarnCasesDTO> getProcessedCaseWarnings(){
+        String url = String.format("http://%s:%d/getProcessedCaseWarnings", dataManagerAddress, dataManagerPort);
+        return webClient.get()
+                .uri(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntity(ProcessedWarnCasesDTO.class)
+                .block();
 
     }
 

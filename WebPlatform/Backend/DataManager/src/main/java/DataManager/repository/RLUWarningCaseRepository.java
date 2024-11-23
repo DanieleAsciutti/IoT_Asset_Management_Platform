@@ -1,13 +1,13 @@
 package DataManager.repository;
 
-import DataManager.model.relDB.RLUWarningCase;
+import DataManager.model.relDB.RULWarningCase;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface RLUWarningCaseRepository extends JpaRepository<RLUWarningCase, Long> {
+public interface RLUWarningCaseRepository extends JpaRepository<RULWarningCase, Long> {
 
-    @Query("SELECT a FROM RLUWarningCase a WHERE a.processed = ?1")
-    List<RLUWarningCase> findAllByProcessed(Boolean processed);
+    @Query("SELECT a FROM RULWarningCase a WHERE a.processed = ?1")
+    List<RULWarningCase> findAllByProcessed(Boolean processed);
 }

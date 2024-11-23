@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class RLUWarningCase extends WarningCase{
+public class RULWarningCase extends WarningCase{
 
     @Column(name = "device_rlu", nullable = false)
     private String device_rlu;
@@ -25,7 +25,7 @@ public class RLUWarningCase extends WarningCase{
     @Column(name = "technician_rlu")
     private String technician_rlu;
 
-    public RLUWarningCase(String caseTitle, String deviceId, LocalDateTime timestamp, String level1, String level2, String level3, String device_rlu) {
+    public RULWarningCase(String caseTitle, String deviceId, LocalDateTime timestamp, String level1, String level2, String level3, String device_rlu) {
         super(caseTitle, deviceId, timestamp, level1, level2, level3);
         this.device_rlu = device_rlu;
     }

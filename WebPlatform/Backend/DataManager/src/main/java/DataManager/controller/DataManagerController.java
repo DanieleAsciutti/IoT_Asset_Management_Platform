@@ -9,7 +9,7 @@ import DataManager.dto.gateway.warnings.*;
 import DataManager.model.Role;
 import DataManager.model.graphDB.Device;
 import DataManager.model.relDB.AnomalyWarningCase;
-import DataManager.model.relDB.RLUWarningCase;
+import DataManager.model.relDB.RULWarningCase;
 import DataManager.model.relDB.User;
 import DataManager.repository.*;
 import DataManager.service.DataManagerService;
@@ -633,22 +633,27 @@ public class DataManagerController {
             return ResponseEntity.ok().build();
         }
 
-        if(deviceWarningDTO.getWarning() == Warning.RLU){
-            RLUWarningCase rluWarningCase = new RLUWarningCase(caseTitle, deviceWarningDTO.getDeviceId(), LocalDateTime.now(), levels.getString("l1"),
+        if(deviceWarningDTO.getWarning() == Warning.RUL){
+            RULWarningCase RULWarningCase = new RULWarningCase(caseTitle, deviceWarningDTO.getDeviceId(), LocalDateTime.now(), levels.getString("l1"),
                     levels.getString("l2"), levels.getString("l3"), deviceWarningDTO.getMessage());
-            rluWarningCaseRepository.save(rluWarningCase);
+            rluWarningCaseRepository.save(RULWarningCase);
             return ResponseEntity.ok().build();
         }
 
         return ResponseEntity.badRequest().build();
     }
 
+    /**
+     * This method is used to get all the warning cases that have not been processed yet.
+     *
+     * @return a WarningCasesDTO object that contains all the warning cases that have not been processed yet.
+     */
     @GetMapping(value = "/getCaseWarnings")
     public ResponseEntity<WarningCasesDTO> getCaseWarnings() {
         log.info("GetDeviceWarnings endpoint called");
 
         List<AnomalyWarningCase> anomalyWarningCases = anomalyWarningCaseRepository.findAllByProcessed(false);
-        List<RLUWarningCase> rluWarningCases = rluWarningCaseRepository.findAllByProcessed(false);
+        List<RULWarningCase> RULWarningCases = rluWarningCaseRepository.findAllByProcessed(false);
 
         List<AnomalyWarningDTO> anomalyWarningDTOS = new ArrayList<>();
         for(AnomalyWarningCase c : anomalyWarningCases){
@@ -656,21 +661,56 @@ public class DataManagerController {
                     .getJSONObject("asset")
                     .getJSONObject("properties")
                     .getString("name");
-            anomalyWarningDTOS.add(new AnomalyWarningDTO(c.getId(), c.getCaseTitle(), c.getDeviceId(), deviceName, c.getTimestamp(),
+            anomalyWarningDTOS.add(new AnomalyWarningDTO(c.getId(), c.getCaseTitle(), c.getDeviceId(), deviceName, c.getCreation_date_time(),
                     c.getLevel1(), c.getLevel2(), c.getLevel3(), c.getAssignedTo(), c.getAnomaly_description()));
         }
 
-        List<RLUWarningDTO> rluWarningDTOS = new ArrayList<>();
-        for(RLUWarningCase c : rluWarningCases){
+        List<RULWarningDTO> RULWarningDTOS = new ArrayList<>();
+        for(RULWarningCase c : RULWarningCases){
             String deviceName = new JSONObject(assetRepository.getAsset(c.getDeviceId()))
                     .getJSONObject("asset")
                     .getJSONObject("properties")
                     .getString("name");
-            rluWarningDTOS.add(new RLUWarningDTO(c.getId(), c.getCaseTitle(), c.getDeviceId(), deviceName, c.getTimestamp(),
+            RULWarningDTOS.add(new RULWarningDTO(c.getId(), c.getCaseTitle(), c.getDeviceId(), deviceName, c.getCreation_date_time(),
                     c.getLevel1(), c.getLevel2(), c.getLevel3(), c.getAssignedTo(), c.getDevice_rlu()));
         }
 
-        WarningCasesDTO warningCasesDTO = new WarningCasesDTO(anomalyWarningDTOS, rluWarningDTOS);
+        WarningCasesDTO warningCasesDTO = new WarningCasesDTO(anomalyWarningDTOS, RULWarningDTOS);
+        return ResponseEntity.ok(warningCasesDTO);
+    }
+
+    @GetMapping(value = "/getProcessedCaseWarnings")
+    public ResponseEntity<WarningCasesDTO> getProcessedCaseWarning(){
+        log.info("GetProcessedCaseWarnings endpoint called");
+
+        List<AnomalyWarningCase> anomalyWarningCases = anomalyWarningCaseRepository.findAllByProcessed(true);
+        List<RULWarningCase> RULWarningCases = rluWarningCaseRepository.findAllByProcessed(true);
+
+        List<ProcessedAnomalyWarningDTO> processedAnomalyWarningDTOS = new ArrayList<>();
+        for(AnomalyWarningCase c : anomalyWarningCases){
+            String deviceName = new JSONObject(assetRepository.getAsset(c.getDeviceId()))
+                    .getJSONObject("asset")
+                    .getJSONObject("properties")
+                    .getString("name");
+            processedAnomalyWarningDTOS.add(new ProcessedAnomalyWarningDTO(c.getId(), c.getCaseTitle(), c.getDeviceId(), deviceName,
+                    c.getCreation_date_time(), c.getLevel1(), c.getLevel2(), c.getLevel3(), c.getAssignedTo(),
+                    c.getAnomaly_description(), c.getProcessed_date_time(), c.getProcessed(), c.getNote(),
+                    c.getIs_anomaly_correct(), c.getTechnician_anomaly()));
+        }
+
+        List<ProcessedRULWarningDTO> processedRULWarningDTOS = new ArrayList<>();
+        for(RULWarningCase c : RULWarningCases){
+            String deviceName = new JSONObject(assetRepository.getAsset(c.getDeviceId()))
+                    .getJSONObject("asset")
+                    .getJSONObject("properties")
+                    .getString("name");
+            processedRULWarningDTOS.add(new ProcessedRULWarningDTO(c.getId(), c.getCaseTitle(), c.getDeviceId(), deviceName,
+                    c.getCreation_date_time(), c.getLevel1(), c.getLevel2(), c.getLevel3(), c.getAssignedTo(),
+                    c.getDevice_rlu(), c.getProcessed_date_time(), c.getProcessed(), c.getNote(), c.getIs_rlu_correct(),
+                    c.getTechnician_rlu()));
+        }
+
+        WarningCasesDTO warningCasesDTO = new WarningCasesDTO(processedAnomalyWarningDTOS, processedRULWarningDTOS);
         return ResponseEntity.ok(warningCasesDTO);
     }
 
@@ -689,8 +729,8 @@ public class DataManagerController {
             return ResponseEntity.ok().build();
         }
 
-        if(assignCaseDTO.getWarning() == Warning.RLU){
-            Optional<RLUWarningCase> rluWarningCase = rluWarningCaseRepository.findById(assignCaseDTO.getId());
+        if(assignCaseDTO.getWarning() == Warning.RUL){
+            Optional<RULWarningCase> rluWarningCase = rluWarningCaseRepository.findById(assignCaseDTO.getId());
             if(rluWarningCase.isEmpty()){
                 return ResponseEntity.notFound().build();
             }
@@ -724,12 +764,13 @@ public class DataManagerController {
             }
             anomalyWarningCase.get().setNote(processCaseDTO.getNote());
             anomalyWarningCase.get().setProcessed(true);
+            anomalyWarningCase.get().setProcessed_date_time(LocalDateTime.now());
             anomalyWarningCaseRepository.save(anomalyWarningCase.get());
             return ResponseEntity.ok().build();
         }
 
-        if(processCaseDTO.getWarning() == Warning.RLU){
-            Optional<RLUWarningCase> rluWarningCase = rluWarningCaseRepository.findById(processCaseDTO.getId());
+        if(processCaseDTO.getWarning() == Warning.RUL){
+            Optional<RULWarningCase> rluWarningCase = rluWarningCaseRepository.findById(processCaseDTO.getId());
 
             if(rluWarningCase.isEmpty()){
                 return ResponseEntity.notFound().build();
@@ -745,6 +786,7 @@ public class DataManagerController {
             }
             rluWarningCase.get().setNote(processCaseDTO.getNote());
             rluWarningCase.get().setProcessed(true);
+            rluWarningCase.get().setProcessed_date_time(LocalDateTime.now());
             rluWarningCaseRepository.save(rluWarningCase.get());
             return ResponseEntity.ok().build();
         }

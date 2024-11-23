@@ -19,7 +19,7 @@ public class AnomalyWarningDTO{
 
     private String deviceName;
 
-    private LocalDateTime timestamp;
+    private LocalDateTime creationDateTime;
 
     private String level1;
 
