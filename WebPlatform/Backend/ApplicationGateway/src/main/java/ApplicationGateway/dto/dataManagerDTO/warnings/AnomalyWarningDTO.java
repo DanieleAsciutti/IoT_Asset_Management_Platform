@@ -31,8 +31,4 @@ public class AnomalyWarningDTO{
 
     private String anomaly_description;
 
-//    public AnomalyWarningDTO(Long id, String caseTitle, String deviceId, String deviceName, LocalDateTime timestamp, String level1, String level2, String level3, String anomaly_description) {
-//        super(id, caseTitle, deviceId, deviceName, timestamp, level1, level2, level3, null);
-//        this.anomaly_description = anomaly_description;
-//    }
 }

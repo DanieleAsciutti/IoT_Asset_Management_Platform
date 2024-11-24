@@ -739,4 +739,26 @@ public class ApplicationGatewayController {
         return applicationGatewayService.updateUserRole(id, Role.valueOf(role));
     }
 
+
+    //------------ API CALLABLE FROM OUTSIDE ------------//
+
+    @GetMapping(value = "/getCases")
+    public ResponseEntity<WarnCasesDTO> outsideGetDeviceWarnings(){
+        log.info("Outside getCases endpoint called");
+        return ResponseEntity.ok(applicationGatewayService.getCaseWarnings());
+    }
+
+    @PostMapping(value = "/assignCase")
+    public ResponseEntity<Void> outsideAssignWarningCase(@RequestBody AssignCaseDTO assignCaseDTO){
+        log.info("Outside AssignCase endpoint called");
+        return applicationGatewayService.assignWarningCase(assignCaseDTO);
+    }
+
+    @PostMapping(value = "/processCase")
+    public ResponseEntity<Void> outsideProcessWarningCase(@RequestBody ProcessCaseDTO processCaseDTO){
+        log.info("Outside ProcessCase endpoint called");
+
+        return applicationGatewayService.processWarningCase(processCaseDTO);
+    }
+
 }
