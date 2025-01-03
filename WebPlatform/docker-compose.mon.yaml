@@ -41,6 +41,10 @@ services:
     depends_on:
       - b-datamanager
       - b-authenticationmanager
+    volumes:
+      - C:/Users/danie/IdeaProjects/IoT_Asset_Management_Platform2/WebPlatform/Backend/logs:/logs
+    environment:
+        - LOG_PATH=/logs/getLevel1_logs.csv
 
   influxdb:
     image: influxdb:2.6-alpine

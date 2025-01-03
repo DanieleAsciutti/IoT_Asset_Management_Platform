@@ -11,6 +11,7 @@ import ApplicationGateway.dto.dataManagerDTO.warnings.ProcessedWarnCasesDTO;
 import ApplicationGateway.dto.dataManagerDTO.warnings.WarnCasesDTO;
 import ApplicationGateway.dto.enums.Warning;
 import ApplicationGateway.dto.frontend.*;
+import ApplicationGateway.logging.LogExecutionTime;
 import ApplicationGateway.service.ApplicationGatewayService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -312,6 +313,7 @@ public class ApplicationGatewayController {
         return applicationGatewayService.getNetwork();
     }
 
+    @LogExecutionTime
     @GetMapping(value = "/getFilteredNetwork")
     public ResponseEntity<String> getFilteredNetwork(
             @CookieValue (value = "token", defaultValue = "") String accessToken,
@@ -567,6 +569,7 @@ public class ApplicationGatewayController {
     }
 
 
+    @LogExecutionTime
     @GetMapping(value = "/getLevel1")
     public ResponseEntity<List<String>> getLevel1(
             @CookieValue(value = "token", defaultValue = "") String accessToken){
@@ -580,6 +583,7 @@ public class ApplicationGatewayController {
 
     }
 
+    @LogExecutionTime
     @GetMapping(value = "/getLevel2")
     public ResponseEntity<List<String>> getLevel2(
             @CookieValue(value = "token", defaultValue = "") String accessToken,
