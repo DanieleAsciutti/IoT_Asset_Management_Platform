@@ -9,32 +9,61 @@ import ReportIcon from '@mui/icons-material/Summarize';
 import LayersIcon from '@mui/icons-material/Layers';
 import CodeIcon from '@mui/icons-material/Code';
 import PhonelinkRingIcon from '@mui/icons-material/PhonelinkRing';
+import { Link as RouterLink } from 'react-router-dom';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import WarningIcon from '@mui/icons-material/Warning';
+import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 
+// @ts-ignore
 export const mainListItems = (
     <React.Fragment>
-        <ListItemButton>
+        <ListItemButton component={RouterLink} to="/devices">
             <ListItemIcon>
                 <DevicesIcon/>
             </ListItemIcon>
             <ListItemText primary="Devices"/>
         </ListItemButton>
-        <ListItemButton>
+
+        <ListItemButton component={RouterLink} to="/technician">
             <ListItemIcon>
                 <PeopleIcon/>
             </ListItemIcon>
             <ListItemText primary="Technician"/>
         </ListItemButton>
-        <ListItemButton>
+
+        <ListItemButton component={RouterLink} to="/reports">
             <ListItemIcon>
                 <ReportIcon/>
             </ListItemIcon>
             <ListItemText primary="Reports"/>
         </ListItemButton>
-        <ListItemButton>
+
+        <ListItemButton component={RouterLink} to="/assets">
             <ListItemIcon>
                 <LayersIcon/>
             </ListItemIcon>
             <ListItemText primary="Assets"/>
+        </ListItemButton>
+
+        <ListItemButton component={RouterLink} to="/manageDevices">
+            <ListItemIcon>
+                <AutoAwesomeMotionIcon />
+            </ListItemIcon>
+            <ListItemText primary="Manage Devices"/>
+        </ListItemButton>
+
+        <ListItemButton component={RouterLink} to="/managelevels">
+            <ListItemIcon>
+                <FilterListIcon />
+            </ListItemIcon>
+            <ListItemText primary="Manage Levels"/>
+        </ListItemButton>
+
+        <ListItemButton component={RouterLink} to="/warningcases">
+            <ListItemIcon>
+                <WarningIcon />
+            </ListItemIcon>
+            <ListItemText primary="Warning Cases"/>
         </ListItemButton>
     </React.Fragment>
 );

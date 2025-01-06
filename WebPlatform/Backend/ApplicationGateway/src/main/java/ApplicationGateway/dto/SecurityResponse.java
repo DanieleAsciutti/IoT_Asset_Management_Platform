@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SecurityResponse {
 
-    private Role role;
-    private String username;
+        private Role role;
+        private String username;
 }

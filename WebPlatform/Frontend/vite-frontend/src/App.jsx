@@ -1,6 +1,6 @@
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Update import statement
-import SignInSide  from "./sign-in-side/SignInSide";
+import SignInSide  from "./sign-in-side/SignInSide.jsx";
 import Devices from "./devices/Devices.jsx";
 import Assets from "./assets/Assets.jsx";
 import Technician from "./technician/Technician.jsx";
@@ -26,7 +26,7 @@ function App() {
                 <Route path="/assets/:id" element={<AssetsWrapper/>}/>
                 <Route path="/managedevices" element={<ManageDevices />}/>
                 <Route path="/managelevels" element={<ManageLevels />}/>
-                <Route path="warningcases" element={<WarningCasePage />} />
+                <Route path="/warningcases" element={<WarningCasePage />} />
             </Routes>
         </Router>
     );
