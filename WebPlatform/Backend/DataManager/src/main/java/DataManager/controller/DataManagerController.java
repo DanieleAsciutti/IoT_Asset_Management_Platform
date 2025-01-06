@@ -9,6 +9,7 @@ import DataManager.dto.gateway.warnings.*;
 import DataManager.model.Role;
 import DataManager.model.graphDB.Device;
 import DataManager.model.relDB.AnomalyWarningCase;
+import DataManager.model.relDB.Filter;
 import DataManager.model.relDB.RULWarningCase;
 import DataManager.model.relDB.User;
 import DataManager.repository.*;
@@ -50,6 +51,9 @@ public class DataManagerController {
 
     @Autowired
     private final RULWarningCaseRepository rulWarningCaseRepository;
+
+    @Autowired
+    private final FilterRepository filterRepository;
 
     private final InfluxRepository influxRepository;
 
@@ -143,6 +147,9 @@ public class DataManagerController {
         assetRepository.setPendingRetrieve(assetId, false);
         assetRepository.setCurrentModel(assetId, null);
         assetRepository.setPendingModel(assetId, null);
+
+        //Creo i livelli nel db sql
+        dataManagerService.createLevelsInAddingNode(addDeviceDTO.getLevel1(), addDeviceDTO.getLevel2(), addDeviceDTO.getLevel3());
         return ResponseEntity.ok().build();
     }
 
@@ -154,6 +161,9 @@ public class DataManagerController {
         }
         String query = "CREATE (d:" + addAssetDTO.getLabel() + " {name:$name}) SET d.isRegistered = true, d.level1 = $level1, d.level2 = $level2, d.level3 = $level3";
         assetRepository.addAsset(query, addAssetDTO.getName(), addAssetDTO.getLevel1(), addAssetDTO.getLevel2(), addAssetDTO.getLevel3());
+
+        //Creo i livelli nel db sql
+        dataManagerService.createLevelsInAddingNode(addAssetDTO.getLevel1(), addAssetDTO.getLevel2(), addAssetDTO.getLevel3());
         return ResponseEntity.ok().build();
     }
 
@@ -162,8 +172,12 @@ public class DataManagerController {
     public ResponseEntity<String> deleteAsset(@RequestParam String id){
         log.info("DeleteAsset endpoint called");
         String assetLabel = assetRepository.getNodeLabelById(id);
+        JSONObject levels = new JSONObject(assetRepository.getLevels(id));
         try {
             assetRepository.deleteAsset(id);
+
+            //Elimino i livelli nel db sql
+            dataManagerService.deleteLevelsInDeleteNode(levels.getString("l1"), levels.getString("l2"), levels.getString("l3"));
         } catch (ClientException e) {
             return ResponseEntity.notFound().build();
         }
@@ -359,6 +373,7 @@ public class DataManagerController {
         }
         query += " DETACH DELETE d";
         assetRepository.deleteNodesByLevels(query);
+        dataManagerService.deleteLevels(l1, l2, l3);
         return ResponseEntity.ok().build();
     }
 
@@ -395,6 +410,7 @@ public class DataManagerController {
         }
 
         assetRepository.modifyLevels(query);
+        dataManagerService.modifyLevelsInModifyNode(modifyLevelsDTO);
         return ResponseEntity.ok().build();
 
 
@@ -563,22 +579,22 @@ public class DataManagerController {
     @GetMapping(value = "/getLevel1")
     public ResponseEntity<List<String>> getLevel1() {
         log.info("RetrieveLevel1 endpoint called");
-        return ResponseEntity.ok(assetRepository.retrieveLevel1());
+//        return ResponseEntity.ok(assetRepository.retrieveLevel1());
+        return ResponseEntity.ok(filterRepository.retrieveLevel1());
     }
 
     @GetMapping(value = "/getLevel2")
     public ResponseEntity<List<String>> getLevel2(@RequestParam String level1) {
         log.info("RetrieveLevel2 endpoint called");
-        return ResponseEntity.ok(assetRepository.retrieveLevel2(level1));
+//        return ResponseEntity.ok(assetRepository.retrieveLevel2(level1));
+        return ResponseEntity.ok(filterRepository.retrieveLevel2(level1));
     }
 
     @GetMapping(value = "/getLevel3")
     public ResponseEntity<List<String>> getLevel3(@RequestParam String level1, @RequestParam String level2) {
         log.info("RetrieveLevel3 endpoint called");
-        System.out.println(level1 + " " + level2);
-        List<String> result = assetRepository.retrieveLevel3(level1, level2);
-        System.out.println(result.toString());
-        return ResponseEntity.ok(assetRepository.retrieveLevel3(level1, level2));
+//        return ResponseEntity.ok(assetRepository.retrieveLevel3(level1, level2));
+        return ResponseEntity.ok(filterRepository.retrieveLevel3(level1, level2));
     }
 
 
@@ -876,37 +892,29 @@ public class DataManagerController {
     /**
      * TO DELETE, IT NEEDS ONLY FOR THE PYTHON SCRIPT //TODO
      */
-    @PostMapping(value = "/PythonaddAsset")
-    public ResponseEntity<String> pythonAddAsset(@RequestBody AddAssetDTO addAssetDTO) {
-        log.info("PythonInsertAsset endpoint called");
-        if (addAssetDTO.getLabel().equals("Device")) {
-            return ResponseEntity.badRequest().build();
+    @GetMapping(value = "/generateFilters")
+    public ResponseEntity<Void> pythonRetrieveAll() {
+        log.info("GenerateFilters endpoint called");
+        filterRepository.deleteAll();
+        List<String> levels1 = assetRepository.retrieveLevel1();
+        for(String l1 : levels1){
+            filterRepository.save(new Filter(l1, null, null));
+            Filter lev1 = filterRepository.findLevel1Filters(l1).get(0);
+
+            List<String> levels2 = assetRepository.retrieveLevel2(l1);
+            for(String l2 : levels2){
+                filterRepository.save(new Filter(l2, lev1, null));
+                Filter lev2 = filterRepository.findLevel2Filters(l2, l1).get(0);
+
+                List<String> levels3 = assetRepository.retrieveLevel3(l1, l2);
+                for(String l3 : levels3){
+                    filterRepository.save(new Filter(l3, lev1, lev2));
+                }
+            }
         }
 
-        if (addAssetDTO.getName() == null || addAssetDTO.getName().isEmpty() ||
-                addAssetDTO.getLabel() == null || addAssetDTO.getLabel().isEmpty() ||
-                addAssetDTO.getLevel1() == null || addAssetDTO.getLevel1().isEmpty() ||
-                addAssetDTO.getLevel2() == null || addAssetDTO.getLevel2().isEmpty() ||
-                addAssetDTO.getLevel3() == null || addAssetDTO.getLevel3().isEmpty()) {
-
-            return ResponseEntity.badRequest().body("One or more parameters are missing or empty");
-        }
-
-        String query = String.format("CREATE (d:%s {name:$name}) " +
-                "SET d.isRegistered = true, d.level1 = $level1, d.level2 = $level2, d.level3 = $level3 " +
-                "RETURN elementId(d)", addAssetDTO.getLabel());
-
-
-        List<Map<String, Object>> result = assetRepository.pythonAddAsset(query, addAssetDTO.getName(), addAssetDTO.getLevel1(), addAssetDTO.getLevel2(), addAssetDTO.getLevel3());
-        return ResponseEntity.ok(result.get(0).get("elementId(d)").toString());
+        return ResponseEntity.ok().build();
     }
 
-    /**
-     * TO DELETE, IT NEEDS ONLY FOR THE PYTHON SCRIPT //TODO
-     */
-    @GetMapping(value = "/PythonRetrieveAll")
-    public ResponseEntity<List<String>> pythonRetrieveAll() {
-        log.info("PythonRetrieveAll endpoint called");
-        return ResponseEntity.ok(assetRepository.retrieveAll());
-    }
+
 }

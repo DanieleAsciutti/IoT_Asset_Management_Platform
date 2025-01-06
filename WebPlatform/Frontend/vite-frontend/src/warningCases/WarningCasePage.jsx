@@ -17,7 +17,7 @@ const WarningCasePage = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [open, setOpen] = useState(false);
 
-    const [userRule, setUserRule] = useState(''); // [ADMIN, TECHNICIAN, USER]
+    const [userRole, setUserRole] = useState(''); // [ADMIN, TECHNICIAN, USER]
 
     const [cases, setCases] = useState({});
     const [hoveredRow, setHoveredRow] = useState(null);
@@ -62,7 +62,7 @@ const WarningCasePage = () => {
             // Redirect to sign-in page if user data is not present
             window.location.href = '/';
         }
-        setUserRule(userData.role);
+        setUserRole(userData.role);
 
         getWarnings();
         if(userData.role === 'ADMIN'){
@@ -242,13 +242,17 @@ const WarningCasePage = () => {
                     <CasesTable cases={cases} hoveredRow={hoveredRow} handleRowHover={handleRowHover}
                             handleRowLeave={handleRowLeave} handleOpenDetails={handleOpenDetails} isProcessed={false}/>
 
-                    <Typography variant="h4" sx={{ mb: 2 }} style={{marginTop:"30px"}}>
-                        Processed Cases
-                    </Typography>
+                    {userRole === 'ADMIN' && (
+                        <>
+                        <Typography variant="h4" sx={{ mb: 2 }} style={{marginTop:"30px"}}>
+                            Processed Cases
+                        </Typography>
 
-                    <CasesTable cases={processedCases} hoveredRow={procHoveredRow} handleRowHover={handleProcRowHover}
-                                handleRowLeave={handleProcRowLeave} handleOpenDetails={handleOpenProcDetails}
-                                isProcessed={true}/>
+                        <CasesTable cases={processedCases} hoveredRow={procHoveredRow} handleRowHover={handleProcRowHover}
+                                    handleRowLeave={handleProcRowLeave} handleOpenDetails={handleOpenProcDetails}
+                                    isProcessed={true}/>
+                        </>
+                    )}
 
                 </Box>
 
